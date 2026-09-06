@@ -133,11 +133,12 @@ Store + Check + Watch + Land + View
 
 No component should require the whole stack merely to be useful.
 
-## One delegated task, one worktree
+## One open attempt per worktree
 
 The intended default is:
 
-> One delegated task owns one worktree and branch for the lifetime of its active attempt.
+> At most one open Attempt owns a given Worktree (Workspace) at a time. A Task may have
+> multiple Attempts, each in its own Worktree.
 
 This creates a clean accountability boundary:
 
@@ -225,3 +226,18 @@ State and evidence come back.
 ```
 
 Tallyback does not ask you to trust the executor's final message. It keeps the return leg of delegated work visible, inspectable, and ready to reconcile.
+
+## Contract specification
+
+The v1 architecture is specified as a versioned wire-format contract. Status: **draft
+for review — documentation only**; no schema, validator, or foundation change has been
+written yet.
+
+- [Normative specification](contract/SPEC.md) — the accountability model, identity,
+  record graph, state model, Store↔Check boundary, and conformance model.
+- [Contract bundle structure](docs/contract-bundle.md)
+- [Structural schema outlines](docs/schema-outline.md)
+- [Invariant catalog outline](docs/invariants-outline.md)
+- [Fixture & conformance matrix](docs/fixture-matrix.md)
+- [Migration mapping](docs/migration.md)
+- [Implementation plan](docs/implementation-plan.md)
