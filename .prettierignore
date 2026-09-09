@@ -1,0 +1,11 @@
+# Authoritative contract bundle artifacts and the frozen spec are intentionally
+# NOT managed by Prettier — reformatting them would change their bytes and invalidate
+# the digests recorded in contract/manifest.json (and rewrite the frozen SPEC.md/docs).
+contract/
+docs/
+
+# Generated / vendored / local state.
+node_modules/
+dist/
+coverage/
+.tallyback/
