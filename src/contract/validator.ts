@@ -1538,6 +1538,10 @@ export const INVARIANT_VALIDATORS: ReadonlyMap<string, InvariantValidatorEntry> 
   ['TB-ID-003', { rule: 'TB-ID-003', validator: 'identity.id_replay_idempotent', phase: 'mutation', check: null }],
   ['TB-LC-001', { rule: 'TB-LC-001', validator: 'lifecycle.attempt_not_restarted_after_end', phase: 'mutation', check: null }],
   ['TB-LC-002', { rule: 'TB-LC-002', validator: 'lifecycle.no_duplicate_criterion', phase: 'snapshot', check: checkNoDuplicateCriterion }],
+  // No append-shape violation to check: this holds because `Store.dispatch` (src/ledger/
+  // commands.ts) never consults settlement/decision history at all, so no prior Settlement
+  // can block a new Attempt — proven by test/review-regressions-2.test.ts ("finding 4"),
+  // the same "true by absence of a blocking code path" pattern as the TB-NOP-* rules below.
   ['TB-LC-003', { rule: 'TB-LC-003', validator: 'lifecycle.retry_not_terminal', phase: 'mutation', check: null }],
   ['TB-LC-004', { rule: 'TB-LC-004', validator: 'lifecycle.workspace_exclusivity', phase: 'mutation', check: null }],
   ['TB-LC-005', { rule: 'TB-LC-005', validator: 'lifecycle.settlement_basis_matrix', phase: 'mutation', check: checkSettlementBasisMatrix }],

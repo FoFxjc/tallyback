@@ -440,6 +440,14 @@ export class Store extends LedgerStore {
 
   // -- Dispatch -------------------------------------------------------------
 
+  /**
+   * TB-LC-003 ("retry settles the Attempt but leaves the Task available, not terminal"):
+   * this method deliberately never inspects `snapshot.settlements`/`decisions` for
+   * `input.task_id`. A prior `retry` (or any other) Settlement never blocks a new Attempt —
+   * that is the entire content of the invariant, and it holds structurally, by this
+   * method's silence on settlement history, rather than by a validate_append check.
+   * Proven by `test/review-regressions-2.test.ts` ("finding 4").
+   */
   dispatch(
     input: DispatchInput,
     expectedRevision?: number,

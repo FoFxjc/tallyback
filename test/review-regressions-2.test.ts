@@ -118,3 +118,38 @@ describe('finding 3 — begin-check rejects an empty checker id/version', () => 
     expect(outcome.ok).toBe(true);
   });
 });
+
+describe('finding 4 — TB-LC-003: a retry Settlement never blocks a new Attempt on the same Task', () => {
+  it('dispatches a fresh Attempt on a Task that already has an effective retry Settlement', async () => {
+    const fixture = await buildLedger('tallyback-rr2d-');
+
+    const settled = await fixture.store.settle({
+      task_id: fixture.task_id,
+      attempt_id: fixture.attempt_id,
+      decision: 'retry',
+      decided_by: ALICE,
+      basis: { verdict_id: null, attempt_end_id: null, blocker_ids: [] },
+      rationale: 'first attempt did not pan out, try again',
+    });
+    expect(settled.ok).toBe(true);
+
+    // A fresh workspace, so this test isolates TB-LC-003 (settlement history never blocks
+    // dispatch) from TB-LC-004 (workspace exclusivity) — the original attempt is still
+    // technically open, which is a separate concern this test does not exercise.
+    const newWorkspace = await fixture.store.registerWorkspace({
+      repository_id: fixture.repository_id,
+    });
+    if (!newWorkspace.ok) throw new Error('registerWorkspace failed');
+
+    const redispatched = await fixture.store.dispatch({
+      task_id: fixture.task_id,
+      declaration_id: fixture.declaration_id,
+      repository_id: fixture.repository_id,
+      workspace_id: newWorkspace.workspace.workspace_id,
+      executor: { kind: 'executor', id: 'agent-9' },
+      dispatched_by: ALICE,
+    });
+
+    expect(redispatched.ok).toBe(true);
+  });
+});
