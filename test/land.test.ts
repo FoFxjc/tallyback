@@ -286,3 +286,154 @@ describe('createGitResolver — commits-ahead check (real git)', () => {
     if (result.status === 'ready') expect(result.files).toEqual(['g.txt']);
   });
 });
+
+describe('computeConflicts — grouping correctness', () => {
+  it('finds a conflict through a second attempt of the same task, not just its first', async () => {
+    // Task A has TWO effective land Settlements (two distinct attempts) — one candidate
+    // touches a file no one else does, the other shares a file with task B. Grouping by
+    // task_id alone marks A "visited" after its first candidate and would skip the second
+    // entirely, missing the conflict with B.
+    const a = await buildLedger('tallyback-land-multi-attempt-');
+    await settleLand(a);
+
+    const secondWorkspace = unwrap<{ workspace: { workspace_id: string } }>(
+      await a.store.registerWorkspace({ repository_id: a.repository_id, branch: 'feature/a2' }),
+    ).workspace;
+    const secondAttempt = unwrap<{ attempt: { attempt_id: string } }>(
+      await a.store.dispatch({
+        task_id: a.task_id,
+        declaration_id: a.declaration_id,
+        repository_id: a.repository_id,
+        workspace_id: secondWorkspace.workspace_id,
+        executor: { kind: 'executor', id: 'agent-8' },
+        dispatched_by: ALICE,
+      }),
+    ).attempt;
+    expect(
+      (
+        await a.store.settle({
+          task_id: a.task_id,
+          attempt_id: secondAttempt.attempt_id,
+          decision: 'land',
+          decided_by: ALICE,
+          basis: { verdict_id: null, attempt_end_id: null, blocker_ids: [] },
+          verification_exception: 'accepted by hand',
+          rationale: "task A's second attempt",
+        })
+      ).ok,
+    ).toBe(true);
+
+    const { topic } = unwrap<{ topic: { topic_id: string } }>(
+      await a.store.createTopic({ name: 't2', goal: 'g', created_by: ALICE }),
+    );
+    const { task: taskB } = unwrap<{ task: { task_id: string } }>(
+      await a.store.createTask({ topic_id: topic.topic_id, title: 'Task B', alias: 'TB' }),
+    );
+    const { declaration: declB } = unwrap<{ declaration: { declaration_id: string } }>(
+      await a.store.declare({
+        task_id: taskB.task_id,
+        objective: 'B objective.',
+        criteria: [{ code: 'cb', statement: 'B criterion.' }],
+        declared_by: ALICE,
+      }),
+    );
+    const { workspace: wsB } = unwrap<{ workspace: { workspace_id: string } }>(
+      await a.store.registerWorkspace({ repository_id: a.repository_id, branch: 'feature/b' }),
+    );
+    const { attempt: attemptB } = unwrap<{ attempt: { attempt_id: string } }>(
+      await a.store.dispatch({
+        task_id: taskB.task_id,
+        declaration_id: declB.declaration_id,
+        repository_id: a.repository_id,
+        workspace_id: wsB.workspace_id,
+        executor: { kind: 'executor', id: 'agent-9' },
+        dispatched_by: ALICE,
+      }),
+    );
+    expect(
+      (
+        await a.store.settle({
+          task_id: taskB.task_id,
+          attempt_id: attemptB.attempt_id,
+          decision: 'land',
+          decided_by: ALICE,
+          basis: { verdict_id: null, attempt_end_id: null, blocker_ids: [] },
+          verification_exception: 'accepted by hand',
+          rationale: 'task B',
+        })
+      ).ok,
+    ).toBe(true);
+
+    // First attempt of A touches only its own file; A's SECOND attempt shares a file with B.
+    const resolver: GitResolver = (input) => {
+      if (input.branch === 'main') return { status: 'ready', files: ['a1-only.ts'] };
+      if (input.branch === 'feature/a2') return { status: 'ready', files: ['shared.ts'] };
+      return { status: 'ready', files: ['shared.ts'] }; // feature/b
+    };
+    const report = await buildLandReport(a.store.currentSnapshot(), resolver, TARGET_BRANCH);
+
+    expect(report.ready).toHaveLength(3);
+    expect(report.conflicts).toHaveLength(1);
+    expect(report.conflicts[0]!.task_ids.sort()).toEqual([a.task_id, taskB.task_id].sort());
+    expect(report.conflicts[0]!.overlapping_files).toEqual(['shared.ts']);
+  });
+
+  it('does not flag the same filename in two different repositories as a conflict', async () => {
+    const root = await tempRoot('tallyback-land-cross-repo-');
+    const { Store } = await import('../src/ledger/index.js');
+    const store = await Store.init(root, {
+      repositories: [{ alias: 'repo-one' }, { alias: 'repo-two' }],
+    });
+    const [repoOne, repoTwo] = store.listRepositories();
+
+    async function settleOnRepo(repositoryId: string, alias: string) {
+      const { topic } = unwrap<{ topic: { topic_id: string } }>(
+        await store.createTopic({ name: alias, goal: 'g', created_by: ALICE }),
+      );
+      const { task } = unwrap<{ task: { task_id: string } }>(
+        await store.createTask({ topic_id: topic.topic_id, title: alias, alias }),
+      );
+      const { declaration } = unwrap<{ declaration: { declaration_id: string } }>(
+        await store.declare({
+          task_id: task.task_id,
+          objective: `${alias} objective.`,
+          criteria: [{ code: 'c', statement: 's' }],
+          declared_by: ALICE,
+        }),
+      );
+      const { workspace } = unwrap<{ workspace: { workspace_id: string } }>(
+        await store.registerWorkspace({ repository_id: repositoryId, branch: 'feature' }),
+      );
+      const { attempt } = unwrap<{ attempt: { attempt_id: string } }>(
+        await store.dispatch({
+          task_id: task.task_id,
+          declaration_id: declaration.declaration_id,
+          repository_id: repositoryId,
+          workspace_id: workspace.workspace_id,
+          executor: { kind: 'executor', id: 'agent-7' },
+          dispatched_by: ALICE,
+        }),
+      );
+      const settled = await store.settle({
+        task_id: task.task_id,
+        attempt_id: attempt.attempt_id,
+        decision: 'land',
+        decided_by: ALICE,
+        basis: { verdict_id: null, attempt_end_id: null, blocker_ids: [] },
+        verification_exception: 'accepted by hand',
+        rationale: alias,
+      });
+      expect(settled.ok).toBe(true);
+    }
+
+    await settleOnRepo(repoOne!.repository_id, 'repo-one-task');
+    await settleOnRepo(repoTwo!.repository_id, 'repo-two-task');
+
+    // Both repos independently touch a file with the SAME NAME — not the same file.
+    const resolver: GitResolver = () => ({ status: 'ready', files: ['README.md'] });
+    const report = await buildLandReport(store.currentSnapshot(), resolver, TARGET_BRANCH);
+
+    expect(report.ready).toHaveLength(2);
+    expect(report.conflicts).toHaveLength(0);
+  });
+});

@@ -188,46 +188,60 @@ async function classify(
 }
 
 /**
- * Group `git_ready` candidates that touch overlapping files into conflict sets (design
- * §5): connected components of the "shares a file" relation, not just pairwise flags, so
- * a three-way collision is reported once rather than as three overlapping pairs.
+ * A file only identifies a candidate's change when paired with the repository it was
+ * touched in — two different repos can each have their own unrelated `README.md`, and
+ * bucketing on the bare path alone would wrongly merge them into one conflict group.
  */
+function fileBucketKey(repositoryId: string | undefined, file: string): string {
+  return `${repositoryId ?? ''} ${file}`;
+}
+
 function computeConflicts(ready: LandCandidate[]): LandConflict[] {
-  // Bucket candidates by touched file, then walk the "shares a file" adjacency those
-  // buckets imply. This finds the same connected components as a union-find would — two
-  // candidates only ever need to merge because they share a file — without a manual
-  // parent map, and without the separate O(n²) pairwise overlap scan: file buckets already
-  // group everyone who overlaps with everyone else on that file.
+  // Bucket candidates by (repository, touched file), then walk the "shares a file"
+  // adjacency those buckets imply. This finds the same connected components as a
+  // union-find would — two candidates only ever need to merge because they share a file
+  // in the same repository — without a manual parent map, and without the separate O(n²)
+  // pairwise overlap scan: file buckets already group everyone who overlaps with everyone
+  // else on that file.
   const fileToCandidates = new Map<string, LandCandidate[]>();
   for (const c of ready) {
     for (const f of c.overlapping_files ?? []) {
-      const list = fileToCandidates.get(f) ?? [];
+      const key = fileBucketKey(c.repository_id, f);
+      const list = fileToCandidates.get(key) ?? [];
       list.push(c);
-      fileToCandidates.set(f, list);
+      fileToCandidates.set(key, list);
     }
   }
 
+  // Visited by `settlement_id`, not `task_id`: a task can have more than one effective
+  // land Settlement (distinct attempts, each its own LandCandidate — design §7's "one
+  // candidate per settlement"). Marking a whole task_id visited after its first candidate
+  // silently skipped every later candidate of that same task, and with it any conflict
+  // that candidate alone would have surfaced.
   const visited = new Set<string>();
   const conflicts: LandConflict[] = [];
   for (const start of ready) {
-    if (visited.has(start.task_id)) continue;
-    visited.add(start.task_id);
+    if (visited.has(start.settlement_id)) continue;
+    visited.add(start.settlement_id);
     const group: LandCandidate[] = [];
     const stack = [start];
     while (stack.length > 0) {
       const c = stack.pop()!;
       group.push(c);
       for (const f of c.overlapping_files ?? []) {
-        for (const neighbor of fileToCandidates.get(f) ?? []) {
-          if (!visited.has(neighbor.task_id)) {
-            visited.add(neighbor.task_id);
+        const key = fileBucketKey(c.repository_id, f);
+        for (const neighbor of fileToCandidates.get(key) ?? []) {
+          if (!visited.has(neighbor.settlement_id)) {
+            visited.add(neighbor.settlement_id);
             stack.push(neighbor);
           }
         }
       }
     }
     if (group.length < 2) continue;
-    const taskIds = group.map((c) => c.task_id).sort();
+    // A group can legitimately contain two candidates for the same task_id (two attempts
+    // of one task both touching the conflicting file) — de-duplicate before reporting.
+    const taskIds = [...new Set(group.map((c) => c.task_id))].sort();
     // Only files touched by MORE THAN ONE member of the group are "overlapping" — a file
     // one candidate alone touches is not part of what makes the group collide.
     const counts = new Map<string, number>();
