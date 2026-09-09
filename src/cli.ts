@@ -2,6 +2,12 @@
 /**
  * Reference CLI — thin host adapter over the deterministic core library.
  *
+ * Land and Watch resolve workspaces via `runtime/bindings.json` under THIS process's
+ * `--project-root` (`store.root`), passed explicitly as `bindingsPath` — never via
+ * `resolveWorkspace`'s default `discoverBindingsPath()`, which walks up from
+ * `process.cwd()` and has no reason to agree with `--project-root` when the two differ
+ * (the ordinary case for any caller that doesn't `cd` into the project first).
+ *
  * The mandatory machine-readable surface is the `handshake` command (SPEC §16):
  * it reports `implementation_version`, `command_api_version`,
  * `supported_contract_versions`, and feature/provider-interface identifiers so a
@@ -15,6 +21,7 @@
  * fails closed on an unsupported contract version.
  */
 
+import { join } from 'node:path';
 import { diagnoseLedger, reconcileLedger, Store } from './ledger/index.js';
 import {
   applyMigration,
@@ -666,7 +673,7 @@ async function runReconcile(projectRoot: string, args: Args): Promise<void> {
 async function runLand(store: Store, args: Args): Promise<void> {
   const targetBranch = str(args, 'target-branch', 'main');
   const snapshot = store.currentSnapshot();
-  const resolver = createGitResolver();
+  const resolver = createGitResolver({ bindingsPath: join(store.root, 'runtime', 'bindings.json') });
   const report: LandReport = await buildLandReport(snapshot, resolver, targetBranch);
   print({ target_branch: targetBranch, ...report });
   process.stderr.write(
@@ -726,7 +733,7 @@ async function runWatch(store: Store, args: Args): Promise<void> {
 
   const snapshot = store.currentSnapshot();
   const policy = { now: new Date().toISOString(), staleAfterMs };
-  const resolver = createWatchResolver();
+  const resolver = createWatchResolver({ bindingsPath: join(store.root, 'runtime', 'bindings.json') });
   const report = await buildWatchReport(snapshot, resolver, policy);
 
   print(report);
