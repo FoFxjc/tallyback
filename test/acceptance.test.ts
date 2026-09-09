@@ -450,6 +450,200 @@ storeDescribe('Store → Check ingestion (tmpdir, persisted)', () => {
     expect(snap.check_results.map((c: any) => c.check_result_id)).toContain(`ckr_${U(1)}`);
     expect(snap.verdicts.map((v: any) => v.verdict_id)).toContain(`ver_${U(1)}`);
   });
+
+  // implementation-plan.md step 10's acceptance scenario in one place: the full
+  // Declare → Dispatch → Observe → Verify → Settle cycle, including the two pieces
+  // that otherwise only exist scattered across other test files —
+  // (a) an unrelated intervening write does not invalidate the frozen evaluation
+  // (proven independently in test/check-flow.test.ts), and
+  // (b) Settlement recorded per the accept/land basis matrix, verdict_id XOR
+  // verification_exception (proven independently in test/codex-regressions-5.test.ts).
+  it('reaches a Settlement through Declare → Dispatch → Observe → Verify → Settle, surviving an unrelated intervening write', async () => {
+    const { store, root } = await buildLedger();
+    const snap0 = store.currentSnapshot();
+    const repoId = snap0.repositories[0].repository_id as string;
+    const topicId = snap0.topics[0].topic_id as string;
+
+    const taskId = `tsk_${U(2)}`;
+    const workspaceId = `wsp_${U(2)}`;
+    const criterionId = `cri_${U(2)}`;
+
+    const alice = { kind: 'human', id: 'alice' };
+    const agent = { kind: 'executor', id: 'agent-7' };
+    const checker = { kind: 'tool', id: 'tallyback-check' };
+
+    let rev = 0;
+    rev = await appendOrThrow(
+      store,
+      [{ task_id: taskId, topic_id: topicId, title: 'Implement settlement path' }],
+      rev,
+    );
+    rev = await appendOrThrow(store, [{ workspace_id: workspaceId, repository_id: repoId }], rev);
+
+    const declared = await store.declare(
+      {
+        task_id: taskId,
+        objective: 'Implement settlement path.',
+        criteria: [
+          {
+            criterion_id: criterionId,
+            code: 'invalid-record-rejected',
+            statement: 'Reject invalid records.',
+            required: true,
+          },
+        ],
+        declared_by: alice,
+      },
+      rev,
+    );
+    expect(declared.ok).toBe(true);
+    rev = declared.revision;
+
+    const dispatched = await store.dispatch(
+      {
+        task_id: taskId,
+        declaration_id: declared.declaration.declaration_id,
+        repository_id: repoId,
+        workspace_id: workspaceId,
+        executor: agent,
+        dispatched_by: alice,
+      },
+      rev,
+    );
+    expect(dispatched.ok).toBe(true);
+    rev = dispatched.revision;
+
+    const claimed = await store.observeClaim(
+      {
+        task_id: taskId,
+        attempt_id: dispatched.attempt.attempt_id,
+        declaration_id: declared.declaration.declaration_id,
+        statement: 'The settlement work is complete.',
+        evidence_ids: [],
+        claimed_by: agent,
+      },
+      rev,
+    );
+    expect(claimed.ok).toBe(true);
+    rev = claimed.revision;
+
+    const invocation = produceCheckInvocation({
+      subject: { kind: 'claim', id: claimed.claim.claim_id },
+      checker: checkerRef,
+      evaluated_snapshot: evaluated(rev),
+    });
+    const begin = await store.beginCheck(invocation, rev);
+    expect(begin.check_invocation_id).toBe(invocation.check_invocation_id);
+    const frozenRevision = rev; // the revision the invocation's evaluated_snapshot is pinned to
+    rev = rev + 1;
+
+    // An unrelated writer advances the ledger between beginCheck and recordCheckOutput.
+    const interloper = await ledgerStore!.open(root);
+    const unrelated = await interloper.createTask({
+      topic_id: topicId,
+      title: 'an unrelated task, appended mid-check',
+    });
+    expect(unrelated.ok).toBe(true);
+    const revAfterInterloper: number = unrelated.ok ? unrelated.revision : rev;
+    expect(revAfterInterloper).toBeGreaterThan(rev);
+
+    const verdictId = `ver_${U(2)}`;
+    const verdict = {
+      verdict_id: verdictId,
+      subject: { kind: 'claim', id: claimed.claim.claim_id },
+      declaration_id: declared.declaration.declaration_id,
+      scope: { evaluated_criteria: [criterionId], unevaluated_criteria: [] },
+      conclusion: 'supported',
+      finality: 'final',
+      basis: { evidence_ids: [`evi_${U(2)}`], reconciliation_ids: [`rec_${U(2)}`] },
+      findings: [
+        { criterion_id: criterionId, assessment: 'supported', summary: 'resolved', basis_refs: [] },
+      ],
+      confidence: { level: 'high', rationale: 'n/a' },
+      rationale: 'test',
+      uncertainty: [],
+      limitations: [],
+      issued_by: checker,
+      issued_at: '2026-09-02T13:00:00Z',
+      checker: checkerRef,
+    };
+    const bundle = {
+      check_result: {
+        check_result_id: `ckr_${U(2)}`,
+        check_invocation_id: invocation.check_invocation_id,
+        outcome: 'verdict_emitted',
+        produced_by: checker,
+        completed_at: '2026-09-02T13:00:00Z',
+        verdict_id: verdictId,
+        reconciliation_ids: [`rec_${U(2)}`],
+        diagnostics: [],
+      },
+      reconciliations: [
+        {
+          reconciliation_id: `rec_${U(2)}`,
+          evidence_id: `evi_${U(2)}`,
+          checked_by: checker,
+          checked_at: '2026-09-02T12:00:00Z',
+          method: { name: 'git-object-inspection', version: '1' },
+          observed_context: { repository_id: repoId },
+          checks: [
+            {
+              predicate: 'git.object.exists',
+              outcome: 'confirmed',
+              observed: { object_id: 'abc' },
+            },
+          ],
+          limitations: [],
+        },
+      ],
+      produced_evidence: [
+        {
+          evidence_id: `evi_${U(2)}`,
+          kind: 'observation',
+          submitted_by: agent,
+          submitted_at: '2026-09-02T10:00:00Z',
+          payload: { text: 'git object exists' },
+        },
+      ],
+      verdict,
+    };
+
+    // The bundle was frozen against `frozenRevision`, which the interloper's write has
+    // since passed — recordCheckOutput must retry against the advanced revision rather
+    // than silently succeeding (or re-evaluating) against stale state.
+    let recorded = await store.recordCheckOutput(bundle, frozenRevision);
+    expect(recorded.ok).toBe(false);
+    recorded = await store.recordCheckOutput(bundle, revAfterInterloper);
+    expect(recorded.ok).toBe(true);
+    rev = recorded.revision;
+    // SPEC §8.1: the recorded verdict still cites the ORIGINAL frozen evaluation input,
+    // not the revision the interloper advanced the ledger to.
+    expect(invocation.evaluated_snapshot.revision).toBe(frozenRevision);
+    expect(invocation.evaluated_snapshot.revision).toBeLessThan(revAfterInterloper);
+
+    // Settle: decision "land" with a final verdict as basis satisfies TB-LC-005
+    // (verdict_id XOR verification_exception) without needing an exception at all.
+    const settled = await store.settle(
+      {
+        task_id: taskId,
+        attempt_id: dispatched.attempt.attempt_id,
+        decision: 'land',
+        decided_by: alice,
+        basis: { verdict_id: verdictId, attempt_end_id: null, blocker_ids: [] },
+        rationale: 'Final verdict supports the declared criteria.',
+      },
+      rev,
+    );
+    expect(settled.ok).toBe(true);
+    rev = settled.revision;
+
+    const reopened = await ledgerStore!.open(root);
+    const snap = reopened.currentSnapshot();
+    expect(snap.revision).toBe(rev);
+    expect(
+      snap.settlements.find((s: any) => s.settlement_id === settled.settlement.settlement_id),
+    ).toMatchObject({ task_id: taskId, decision: 'land' });
+  });
 });
 
 if (!ledgerStore) {
