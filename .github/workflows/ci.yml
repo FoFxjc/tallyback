@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  validate-gate:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      # Exercises the `tallyback validate` gate from docs/branch-workflow.md §7 against
+      # a freshly initialized ledger, so CI proves the gate itself still runs cleanly —
+      # independent of any project's own ledger contents.
+      - run: |
+          mkdir -p /tmp/tallyback-ci-ledger
+          node dist/cli.js init --project-root /tmp/tallyback-ci-ledger
+          node dist/cli.js validate --project-root /tmp/tallyback-ci-ledger
