@@ -87,14 +87,19 @@ quality:
 
 1. Unresolved blocker exists → `"resolve blocker"` (blocking regardless of loop position;
    a task can be blocked at any stage).
-2. No effective `TaskDeclaration` → `"declare"`.
-3. No Attempt exists → `"dispatch"`.
-4. Latest Attempt has no Claim referencing it → `"observe (claim)"`.
-5. Latest Claim has no CheckInvocation over it → `"verify (begin-check)"`.
-6. Open CheckInvocation has no CheckResult → `"verify (record-check)"`.
-7. A CheckResult/Verdict exists but no effective Settlement → `"settle"`.
-8. An effective Settlement exists → `"settled: <decision>"` (echoes the recorded decision
-   verbatim — accept/retry/abandon/land — never upgrades it to "done").
+2. An effective Settlement exists → `"settled: <decision>"` (echoes the recorded decision
+   verbatim — accept/retry/abandon/land — never upgrades it to "done"). Checked here,
+   immediately after the blocker check and before declare/dispatch/observe/verify, because
+   a Settlement can rest on a `verification_exception` with no Verdict — and no
+   CheckInvocation — at all (SPEC §5.11). A settled task is a terminal resting state
+   regardless of whether the check chain ran; gating this behind steps 3-6 would leave such
+   a task permanently reporting `"verify (begin-check)"`.
+3. No effective `TaskDeclaration` → `"declare"`.
+4. No Attempt exists → `"dispatch"`.
+5. Latest Attempt has no Claim referencing it → `"observe (claim)"`.
+6. Latest Claim has no CheckInvocation over it → `"verify (begin-check)"`.
+7. Open CheckInvocation has no CheckResult → `"verify (record-check)"`.
+8. A CheckResult/Verdict exists but no effective Settlement → `"settle"`.
 
 This list is a fixed, closed set of the documented loop commands (`declare` / `dispatch` /
 `observe` / `verify` / `settle`) — nothing here is invented beyond what SPEC §7 already
@@ -104,7 +109,6 @@ names as the loop's explicit commands.
 
 ```jsonc
 {
-  "target_branch_note": null, // present only if --stale-after-ms changes the default; informational
   "generated_from_revision": 42,
   "tasks": [
     {
