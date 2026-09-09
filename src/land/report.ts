@@ -193,46 +193,39 @@ async function classify(
  * a three-way collision is reported once rather than as three overlapping pairs.
  */
 function computeConflicts(ready: LandCandidate[]): LandConflict[] {
-  const parent = new Map<string, string>();
-  const find = (id: string): string => {
-    let root = id;
-    while (parent.get(root) !== undefined && parent.get(root) !== root) root = parent.get(root)!;
-    return root;
-  };
-  const union = (a: string, b: string): void => {
-    const ra = find(a);
-    const rb = find(b);
-    if (ra !== rb) parent.set(ra, rb);
-  };
-
-  for (const c of ready) parent.set(c.task_id, c.task_id);
-
-  const fileSets = ready.map((c) => new Set(c.overlapping_files ?? []));
-  for (let i = 0; i < ready.length; i++) {
-    for (let j = i + 1; j < ready.length; j++) {
-      const a = fileSets[i]!;
-      const b = fileSets[j]!;
-      let overlaps = false;
-      for (const f of a) {
-        if (b.has(f)) {
-          overlaps = true;
-          break;
-        }
-      }
-      if (overlaps) union(ready[i]!.task_id, ready[j]!.task_id);
+  // Bucket candidates by touched file, then walk the "shares a file" adjacency those
+  // buckets imply. This finds the same connected components as a union-find would — two
+  // candidates only ever need to merge because they share a file — without a manual
+  // parent map, and without the separate O(n²) pairwise overlap scan: file buckets already
+  // group everyone who overlaps with everyone else on that file.
+  const fileToCandidates = new Map<string, LandCandidate[]>();
+  for (const c of ready) {
+    for (const f of c.overlapping_files ?? []) {
+      const list = fileToCandidates.get(f) ?? [];
+      list.push(c);
+      fileToCandidates.set(f, list);
     }
   }
 
-  const groups = new Map<string, LandCandidate[]>();
-  for (const c of ready) {
-    const root = find(c.task_id);
-    const list = groups.get(root) ?? [];
-    list.push(c);
-    groups.set(root, list);
-  }
-
+  const visited = new Set<string>();
   const conflicts: LandConflict[] = [];
-  for (const group of groups.values()) {
+  for (const start of ready) {
+    if (visited.has(start.task_id)) continue;
+    visited.add(start.task_id);
+    const group: LandCandidate[] = [];
+    const stack = [start];
+    while (stack.length > 0) {
+      const c = stack.pop()!;
+      group.push(c);
+      for (const f of c.overlapping_files ?? []) {
+        for (const neighbor of fileToCandidates.get(f) ?? []) {
+          if (!visited.has(neighbor.task_id)) {
+            visited.add(neighbor.task_id);
+            stack.push(neighbor);
+          }
+        }
+      }
+    }
     if (group.length < 2) continue;
     const taskIds = group.map((c) => c.task_id).sort();
     // Only files touched by MORE THAN ONE member of the group are "overlapping" — a file
@@ -262,13 +255,12 @@ export async function buildLandReport(
   const { ready_to_land } = computeProjectionValues(snapshot);
   const taskIds = [...ready_to_land].sort();
 
-  const candidates: LandCandidate[] = [];
-  for (const taskId of taskIds) {
-    const settlements = findEffectiveLandSettlements(snapshot, taskId);
-    for (const settlement of settlements) {
-      candidates.push(await classify(snapshot, settlement, targetBranch, resolve));
-    }
-  }
+  const settlements = taskIds.flatMap((taskId) =>
+    findEffectiveLandSettlements(snapshot, taskId),
+  );
+  const candidates = await Promise.all(
+    settlements.map((settlement) => classify(snapshot, settlement, targetBranch, resolve)),
+  );
 
   const ready = candidates
     .filter((c) => c.status === 'git_ready')

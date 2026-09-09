@@ -57,6 +57,9 @@ import type {
   Workspace,
 } from '../contract/index.js';
 
+/** Every `*_at` provenance field defaults to "now" when the caller omits it. */
+const withDefaultNow = (t?: Timestamp | null): Timestamp => (t !== undefined ? t : nowIso());
+
 export type MutationSuccess<T> = { ok: true; revision: number } & T;
 export type MutationFailure = { ok: false; code: string; message?: string };
 export type MutationOutcome<T = object> = MutationSuccess<T> | MutationFailure;
@@ -284,7 +287,7 @@ export class Store extends LedgerStore {
       name: input.name,
       goal: input.goal,
       created_by: input.created_by,
-      created_at: input.created_at !== undefined ? input.created_at : nowIso(),
+      created_at: withDefaultNow(input.created_at),
     };
     return this.submit([topic], expectedRevision, { topic });
   }
@@ -422,7 +425,7 @@ export class Store extends LedgerStore {
       declaration_id: newId('dcl_'),
       task_id: input.task_id,
       declared_by: input.declared_by,
-      declared_at: input.declared_at !== undefined ? input.declared_at : nowIso(),
+      declared_at: withDefaultNow(input.declared_at),
       objective: input.objective,
       criteria: input.criteria.map((c) => ({
         criterion_id: c.criterion_id ?? newId('cri_'),
@@ -460,7 +463,7 @@ export class Store extends LedgerStore {
       workspace_id: input.workspace_id,
       executor: input.executor,
       dispatched_by: input.dispatched_by,
-      dispatched_at: input.dispatched_at !== undefined ? input.dispatched_at : nowIso(),
+      dispatched_at: withDefaultNow(input.dispatched_at),
     };
     if (input.session_id) attempt.session_id = input.session_id;
     return this.submit([attempt], expectedRevision, { attempt });
@@ -477,7 +480,7 @@ export class Store extends LedgerStore {
       attempt_id: input.attempt_id,
       outcome: input.outcome,
       reported_by: input.reported_by,
-      ended_at: input.ended_at !== undefined ? input.ended_at : nowIso(),
+      ended_at: withDefaultNow(input.ended_at),
     };
     if (input.reason) attemptEnd.reason = input.reason;
     if (input.supersedes) attemptEnd.supersedes = input.supersedes;
@@ -496,7 +499,7 @@ export class Store extends LedgerStore {
       statement: input.statement,
       evidence_ids: input.evidence_ids ?? [],
       claimed_by: input.claimed_by,
-      claimed_at: input.claimed_at !== undefined ? input.claimed_at : nowIso(),
+      claimed_at: withDefaultNow(input.claimed_at),
     };
     canonicalizeSetArraysInRecord(claim);
     return this.submit([claim], expectedRevision, { claim });
@@ -511,7 +514,7 @@ export class Store extends LedgerStore {
     const evidence = withoutUndefined({
       ...input,
       evidence_id: newId('evi_'),
-      submitted_at: input.submitted_at !== undefined ? input.submitted_at : nowIso(),
+      submitted_at: withDefaultNow(input.submitted_at),
     }) as Evidence;
     return this.submit([evidence], expectedRevision, { evidence });
   }
@@ -525,7 +528,7 @@ export class Store extends LedgerStore {
       task_id: input.task_id,
       description: input.description,
       raised_by: input.raised_by,
-      raised_at: input.raised_at !== undefined ? input.raised_at : nowIso(),
+      raised_at: withDefaultNow(input.raised_at),
     };
     if (input.attempt_id) blocker.attempt_id = input.attempt_id;
     return this.submit([blocker], expectedRevision, { blocker });
@@ -540,7 +543,7 @@ export class Store extends LedgerStore {
       blocker_id: input.blocker_id,
       disposition: input.disposition,
       resolved_by: input.resolved_by,
-      resolved_at: input.resolved_at !== undefined ? input.resolved_at : nowIso(),
+      resolved_at: withDefaultNow(input.resolved_at),
     };
     if (input.explanation) resolution.explanation = input.explanation;
     if (input.evidence_ids) resolution.evidence_ids = input.evidence_ids;
@@ -561,7 +564,7 @@ export class Store extends LedgerStore {
       attempt_id: input.attempt_id,
       decision: input.decision,
       decided_by: input.decided_by,
-      decided_at: input.decided_at !== undefined ? input.decided_at : nowIso(),
+      decided_at: withDefaultNow(input.decided_at),
       basis: input.basis,
       rationale: input.rationale,
     };
@@ -585,7 +588,7 @@ export class Store extends LedgerStore {
       choice: input.choice,
       rationale: input.rationale,
       decided_by: input.decided_by,
-      decided_at: input.decided_at !== undefined ? input.decided_at : nowIso(),
+      decided_at: withDefaultNow(input.decided_at),
     };
     if (input.basis) decision.basis = input.basis;
     if (input.supersedes) decision.supersedes = input.supersedes;
@@ -704,7 +707,7 @@ export class Store extends LedgerStore {
       checker: input.checker,
       evaluated_snapshot,
       invoked_by: input.invoked_by ?? { kind: 'tool', id: 'tallyback-check' },
-      invoked_at: input.invoked_at !== undefined ? input.invoked_at : nowIso(),
+      invoked_at: withDefaultNow(input.invoked_at),
     };
     // Pin the append to EXACTLY `snapshot.revision` — the revision `evaluated_snapshot`
     // was hashed from. Leaving this unpinned (as `submit`'s "append at current" default
@@ -736,7 +739,7 @@ export class Store extends LedgerStore {
       check_invocation_id: input.check_invocation_id,
       outcome: input.outcome,
       produced_by: input.produced_by ?? { kind: 'tool', id: 'tallyback-check' },
-      completed_at: input.completed_at !== undefined ? input.completed_at : nowIso(),
+      completed_at: withDefaultNow(input.completed_at),
       diagnostics: input.diagnostics ?? [],
       reconciliation_ids: reconciliations.map((r) => r.reconciliation_id),
       verdict_id: verdict ? verdict.verdict_id : null,

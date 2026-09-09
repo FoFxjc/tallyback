@@ -196,11 +196,45 @@ export function isTaskStale(snapshot: Snapshot, taskId: string, policy: StalePol
   return age > policy.staleAfterMs;
 }
 
+/**
+ * `lastActivityAt` for every task in one pass over the snapshot's record arrays, instead
+ * of `staleTaskIds` rescanning all records once per task (O(tasks * total_records)) plus
+ * rebuilding the `attemptTasks`/`blockerTasks` maps on every call.
+ */
+function lastActivityAtAll(snapshot: Snapshot): Map<string, string> {
+  const latest = new Map<string, string>();
+  const bump = (taskId: string | undefined, ts: string | null | undefined): void => {
+    if (taskId === undefined) return;
+    latest.set(taskId, maxIso(latest.get(taskId), ts ?? null));
+  };
+
+  for (const decl of snapshot.declarations) bump(decl.task_id, decl.declared_at);
+  for (const attempt of snapshot.attempts) bump(attempt.task_id, attempt.dispatched_at);
+  const attemptTasks = new Map(snapshot.attempts.map((a) => [a.attempt_id, a.task_id]));
+  for (const end of snapshot.attempt_ends) bump(attemptTasks.get(end.attempt_id), end.ended_at);
+  for (const claim of snapshot.claims) bump(claim.task_id, claim.claimed_at);
+  for (const settlement of snapshot.settlements) bump(settlement.task_id, settlement.decided_at);
+  for (const blocker of snapshot.blockers) bump(blocker.task_id, blocker.raised_at);
+  const blockerTasks = new Map(snapshot.blockers.map((b) => [b.blocker_id, b.task_id]));
+  for (const resolution of snapshot.blocker_resolutions) {
+    bump(blockerTasks.get(resolution.blocker_id), resolution.resolved_at);
+  }
+  for (const decision of snapshot.decisions) {
+    if (decision.subject.kind === 'task') bump(decision.subject.id, decision.decided_at);
+  }
+
+  return latest;
+}
+
 /** Task ids considered stale under the given time/policy window. */
 export function staleTaskIds(snapshot: Snapshot, policy: StalePolicy): string[] {
+  const activity = lastActivityAtAll(snapshot);
+  const now = new Date(policy.now).getTime();
   const out: string[] = [];
   for (const task of snapshot.tasks) {
-    if (isTaskStale(snapshot, task.task_id, policy)) out.push(task.task_id);
+    const latest = activity.get(task.task_id);
+    const stale = !latest || now - new Date(latest).getTime() > policy.staleAfterMs;
+    if (stale) out.push(task.task_id);
   }
   return out;
 }

@@ -198,10 +198,9 @@ export async function buildWatchReport(
   const staleTaskIds = new Set(stale ?? []);
 
   const attempts = openAttempts(snapshot);
-  const findings: WatchFinding[] = [];
-  for (const attempt of attempts) {
-    findings.push(...(await classify(snapshot, attempt, staleTaskIds, resolve)));
-  }
+  const findings = (
+    await Promise.all(attempts.map((attempt) => classify(snapshot, attempt, staleTaskIds, resolve)))
+  ).flat();
 
   const summary: WatchSummary = {
     open_attempts: attempts.length,
