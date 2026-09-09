@@ -9,20 +9,31 @@
  */
 
 import { execFile } from 'node:child_process';
+import { writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
 import { describe, expect, it } from 'vitest';
 
+import { createGitResolver } from '../src/land/git.js';
 import { buildLandReport, type GitResolver } from '../src/land/report.js';
-import { ALICE, buildLedger, type LedgerFixture } from './helpers/ledger.js';
+import { ALICE, buildLedger, tempRoot, type LedgerFixture } from './helpers/ledger.js';
 
 const execFileAsync = promisify(execFile);
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
 const TSX = join(ROOT, 'node_modules', '.bin', 'tsx');
 const CLI = join(ROOT, 'src', 'cli.ts');
+
+async function initGitRepo(root: string): Promise<void> {
+  await execFileAsync('git', ['-C', root, 'init', '-q', '-b', 'main']);
+  await execFileAsync('git', ['-C', root, 'config', 'user.email', 'a@b.c']);
+  await execFileAsync('git', ['-C', root, 'config', 'user.name', 'x']);
+  await writeFile(join(root, 'f.txt'), 'x', 'utf8');
+  await execFileAsync('git', ['-C', root, 'add', '.']);
+  await execFileAsync('git', ['-C', root, 'commit', '-q', '-m', 'init']);
+}
 
 /** Settle `fixture`'s attempt as `land`, via a verification_exception basis (TB-LC-005). */
 async function settleLand(fixture: LedgerFixture): Promise<void> {
@@ -203,7 +214,6 @@ async function runRaw(projectRoot: string, args: string[]): Promise<CliRun> {
 
 describe('tallyback land (CLI)', () => {
   it('runs against an open ledger and returns valid JSON, read-only', async () => {
-    const { tempRoot } = await import('./helpers/ledger.js');
     const root = await tempRoot('tallyback-land-cli-');
 
     const initRun = await runRaw(root, ['init', '--repository', 'main']);
@@ -226,4 +236,53 @@ describe('tallyback land (CLI)', () => {
     expect(parsed.unresolved).toEqual([]);
     expect(parsed.conflicts).toEqual([]);
   }, 30_000);
+});
+
+describe('createGitResolver — commits-ahead check (real git)', () => {
+  const REPO_ID = 'repo_0190b1c0-0000-7000-8000-000000000001';
+  const WSP_ID = 'wsp_0190b1c0-0000-7000-8000-000000000001';
+
+  function bindingsFor(root: string) {
+    return {
+      bindings: {
+        repositories: { [REPO_ID]: { workspaces: { [WSP_ID]: { root } } } },
+      },
+    };
+  }
+
+  it('classifies a branch identical to target as git_behind, not git_ready', async () => {
+    const root = await tempRoot('tallyback-land-git-');
+    await initGitRepo(root);
+    // "feature" points at the exact same commit as "main" — an ancestor of itself, but
+    // with nothing new to land.
+    await execFileAsync('git', ['-C', root, 'branch', 'feature']);
+
+    const resolve = createGitResolver(bindingsFor(root));
+    const result = await resolve({
+      repository_id: REPO_ID,
+      workspace_id: WSP_ID,
+      branch: 'feature',
+      target_branch: 'main',
+    });
+    expect(result.status).toBe('behind');
+  });
+
+  it('classifies a branch with a new commit ahead of target as ready', async () => {
+    const root = await tempRoot('tallyback-land-git-');
+    await initGitRepo(root);
+    await execFileAsync('git', ['-C', root, 'checkout', '-q', '-b', 'feature']);
+    await writeFile(join(root, 'g.txt'), 'y', 'utf8');
+    await execFileAsync('git', ['-C', root, 'add', '.']);
+    await execFileAsync('git', ['-C', root, 'commit', '-q', '-m', 'feature work']);
+
+    const resolve = createGitResolver(bindingsFor(root));
+    const result = await resolve({
+      repository_id: REPO_ID,
+      workspace_id: WSP_ID,
+      branch: 'feature',
+      target_branch: 'main',
+    });
+    expect(result.status).toBe('ready');
+    if (result.status === 'ready') expect(result.files).toEqual(['g.txt']);
+  });
 });

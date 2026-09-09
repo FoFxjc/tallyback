@@ -29,6 +29,19 @@ async function isAncestor(root: string, target: string, branch: string): Promise
   return false;
 }
 
+/**
+ * `is-ancestor` alone is not enough: a commit is its own ancestor, so a `branch` sitting
+ * on the exact same commit as `target` (nothing to land) would otherwise pass the
+ * ancestor check and read as `ready`. Count commits `target` doesn't have; zero means
+ * "nothing new," regardless of ancestry.
+ */
+async function commitsAhead(root: string, target: string, branch: string): Promise<number | null> {
+  const result = await runGit(root, ['rev-list', '--count', `${target}..${branch}`]);
+  if (!result.ok) return result.code === 'environment_unavailable' ? null : 0;
+  const count = Number.parseInt(result.stdout, 10);
+  return Number.isFinite(count) ? count : 0;
+}
+
 /** Build the real Git-backed resolver, resolving worktrees via `runtime/bindings.json`. */
 export function createGitResolver(options: ResolveOptions = {}): GitResolver {
   return async (input: GitResolveInput): Promise<GitResolveResult> => {
@@ -65,6 +78,18 @@ export function createGitResolver(options: ResolveOptions = {}): GitResolver {
       };
     }
     if (!ancestor) {
+      return { status: 'behind' };
+    }
+
+    const ahead = await commitsAhead(root, input.target_branch, input.branch);
+    if (ahead === null) {
+      return {
+        status: 'unresolved',
+        code: 'environment_unavailable',
+        reason: 'git executable not found on PATH',
+      };
+    }
+    if (ahead === 0) {
       return { status: 'behind' };
     }
 
