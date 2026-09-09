@@ -22,6 +22,7 @@ import {
   readLegacySource,
   type MigrationOutcome,
 } from './check/migration-workflow.js';
+import { buildLandReport, createGitResolver, type LandReport } from './land/index.js';
 import { canMutateContractVersion, handshake } from './version.js';
 import type {
   Actor,
@@ -317,6 +318,11 @@ async function run(): Promise<void> {
     return;
   }
 
+  if (command === 'land') {
+    await runLand(store, args);
+    return;
+  }
+
   // Mutating commands: preflight the capability handshake against the ledger.
   preflight(store.currentSnapshot().schema_version);
 
@@ -543,7 +549,7 @@ async function dispatch(store: Store, command: string, args: Args): Promise<unkn
     default:
       throw new CliError(
         `unknown command "${command}". Available: handshake, version, init, migrate, ` +
-          `validate, reconcile, show, list, bindings, topic, task, workspace, bind, ` +
+          `validate, reconcile, show, list, bindings, land, topic, task, workspace, bind, ` +
           `declare, dispatch, end, claim, evidence, begin-check, record-check, block, ` +
           `resolve, settle, decision`,
       );
@@ -625,6 +631,28 @@ async function runReconcile(projectRoot: string, args: Args): Promise<void> {
     revision: outcome.plan.snapshot.revision,
     rewrites: outcome.plan.rewrites,
   });
+}
+
+// ---------------------------------------------------------------------------
+// Land (read-only, advisory Git-reality cross-check — docs/land-design.md)
+// ---------------------------------------------------------------------------
+
+/**
+ * `tallyback land [--target-branch main]` — cross-checks the ledger's `ready_to_land`
+ * projection against live Git state. Read-only and advisory: it never merges, rebases,
+ * pushes, or writes to the ledger (design §2). Worktrees are resolved the same way Check
+ * resolves them, via `runtime/bindings.json`.
+ */
+async function runLand(store: Store, args: Args): Promise<void> {
+  const targetBranch = str(args, 'target-branch', 'main');
+  const snapshot = store.currentSnapshot();
+  const resolver = createGitResolver();
+  const report: LandReport = await buildLandReport(snapshot, resolver, targetBranch);
+  print({ target_branch: targetBranch, ...report });
+  process.stderr.write(
+    `land: ${report.ready.length} ready, ${report.unresolved.length} unresolved, ` +
+      `${report.conflicts.length} conflict group(s) against "${targetBranch}"\n`,
+  );
 }
 
 // ---------------------------------------------------------------------------
