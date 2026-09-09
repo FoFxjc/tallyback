@@ -41,13 +41,13 @@ Tallyback externalizes the small amount of structured state needed to answer:
 Declare → Dispatch → Observe → Verify → Settle
 ```
 
-| Stage | Question |
-| --- | --- |
-| **Declare** | What is the task, and what would count as done? |
+| Stage        | Question                                                       |
+| ------------ | -------------------------------------------------------------- |
+| **Declare**  | What is the task, and what would count as done?                |
 | **Dispatch** | Which attempt, executor, session, worktree, and branch own it? |
-| **Observe** | What progress, claims, blockers, and evidence came back? |
-| **Verify** | Do repository reality, tests, and Git support those claims? |
-| **Settle** | Should the result be accepted, retried, abandoned, or landed? |
+| **Observe**  | What progress, claims, blockers, and evidence came back?       |
+| **Verify**   | Do repository reality, tests, and Git support those claims?    |
+| **Settle**   | Should the result be accepted, retried, abandoned, or landed?  |
 
 A task does not become complete merely because an executor stops, edits files, creates a commit, or reports success. Completion is an explicit judgment made after reconciliation.
 
@@ -68,17 +68,17 @@ Topic
     └── Settlement
 ```
 
-| Object | Meaning |
-| --- | --- |
-| **Topic** | A durable stream or area of work |
-| **Task** | The stable unit of responsibility |
-| **Attempt** | One execution of the task |
-| **Executor** | A replaceable agent, subagent, external process, or human |
-| **Workspace** | The worktree and branch owned by an attempt |
-| **Claim** | A statement made about progress or completion |
-| **Evidence** | A pointer to repository state, tests, commits, artifacts, or observations |
-| **Verdict** | A verification result, including uncertainty and limitations |
-| **Settlement** | The decision to accept, retry, abandon, or land the work |
+| Object         | Meaning                                                                   |
+| -------------- | ------------------------------------------------------------------------- |
+| **Topic**      | A durable stream or area of work                                          |
+| **Task**       | The stable unit of responsibility                                         |
+| **Attempt**    | One execution of the task                                                 |
+| **Executor**   | A replaceable agent, subagent, external process, or human                 |
+| **Workspace**  | The worktree and branch owned by an attempt                               |
+| **Claim**      | A statement made about progress or completion                             |
+| **Evidence**   | A pointer to repository state, tests, commits, artifacts, or observations |
+| **Verdict**    | A verification result, including uncertainty and limitations              |
+| **Settlement** | The decision to accept, retry, abandon, or land the work                  |
 
 A **tallyback** is the compact structured return from delegated work: current state, claims, evidence references, blockers, next action, verification status, and integration readiness. It is not a transcript and does not duplicate the repository.
 
@@ -109,14 +109,14 @@ Core rules:
 
 Tallyback is modular. Users should be able to adopt only the parts they need.
 
-| Component | Responsibility | Status |
-| --- | --- | --- |
-| **Tallyback Store** | Tasks, attempts, checkpoints, decisions, blockers, and compact resume context | Existing foundation in [claude-task-store](https://github.com/FoFxjc/claude-task-store) |
-| **Tallyback Check** | Semantic verification of implementation and merge-readiness claims | Existing foundation in [done-or-not](https://github.com/FoFxjc/done-or-not) |
-| **Tallyback Watch** | Optional external detection of stale, lost, or inconsistent execution | Planned |
-| **Tallyback Land** | Integration readiness, ordering, conflict awareness, and merge settlement | Planned |
-| **Tallyback View** | Local project status, reports, evidence trails, and visualization | Planned |
-| **Tallyback Bridge** | Adapters for agent hosts, stores, and worktree managers | Planned |
+| Component            | Responsibility                                                                | Status                                                                                  |
+| -------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| **Tallyback Store**  | Tasks, attempts, checkpoints, decisions, blockers, and compact resume context | Existing foundation in [claude-task-store](https://github.com/FoFxjc/claude-task-store) |
+| **Tallyback Check**  | Semantic verification of implementation and merge-readiness claims            | Existing foundation in [done-or-not](https://github.com/FoFxjc/done-or-not)             |
+| **Tallyback Watch**  | Optional external detection of stale, lost, or inconsistent execution         | Planned                                                                                 |
+| **Tallyback Land**   | Integration readiness, ordering, conflict awareness, and merge settlement     | Planned                                                                                 |
+| **Tallyback View**   | Local project status, reports, evidence trails, and visualization             | Planned                                                                                 |
+| **Tallyback Bridge** | Adapters for agent hosts, stores, and worktree managers                       | Planned                                                                                 |
 
 Possible adoption levels:
 
@@ -216,7 +216,7 @@ Watchdog behavior, visualization, and third-party adapters should build on that 
 
 ## Name
 
-In control systems, a *tally-back* signal reports the observed state following a remote command.
+In control systems, a _tally-back_ signal reports the observed state following a remote command.
 
 That is the product idea:
 

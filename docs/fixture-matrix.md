@@ -34,6 +34,7 @@ contract/fixtures/
 | `decision-next-action` | Decision `role: next_action` with `supersedes` |
 | `isolated-projections` | `projections` section present; discardable, not part of the graph |
 | `evidence-observation-legacy` | Legacy Store evidence string migrated to `observation` |
+| `superseding-declaration-retains-criterion` | A superseding `dcl_` retains the same `criterion_id`; the historical Verdict against the superseded declaration stays valid (SPEC §5.4) |
 
 ### Invalid (negative) — must be rejected
 
@@ -50,6 +51,18 @@ contract/fixtures/
 | `verdict-supersedes` | `invariant.supersession_unsupported` (Verdict is not supersession-capable) |
 | `settlement-basis-missing` | `invariant.settlement_basis_matrix` (accept without verdict_id XOR verification_exception) |
 | `transcript-body-embedded` | `schema.unknown_property` (evidence payload must be a pointer, not a blob) |
+| `checkresult-emitted-null-verdict` | `invariant.check_result_outcome_mismatch` (`verdict_emitted` with `verdict_id: null`, and nonexistent `reconciliation_ids`) |
+| `checkresult-withheld-with-verdict` | `invariant.check_result_outcome_mismatch` (`verdict_withheld` must carry no Verdict) |
+| `checkresult-missing-reconciliation` | `invariant.check_result_reference_unresolved` (a cited `rec_` does not resolve) |
+| `checkresult-foreign-verdict` | `invariant.check_result_invocation_mismatch` (the Verdict judges a Claim the invocation did not name) |
+| `reference-wrong-lineage` | `invariant.reference_unresolved` (a Workspace naming a Repository that does not exist) |
+| `attempt-workspace-foreign-repository` | `invariant.reference_inconsistent` (every id resolves, but the Workspace belongs to another Repository) |
+| `claim-unresolved-attempt` | `invariant.attempt_unresolved` (a Claim citing an Attempt that does not resolve) |
+| `claim-foreign-attempt` | `invariant.reference_inconsistent` (the Attempt resolves but belongs to another Task) |
+| `set-array-unsorted` | `schema.set_array_unsorted` (`claim.evidence_ids` out of comparator order) |
+| `set-array-duplicate` | `schema.set_array_duplicate` (`claim.evidence_ids` repeats an id) |
+| `absolute-path-in-evidence` | `invariant.absolute_path_in_portable_file` (schema-valid Evidence whose `payload.path` is machine-local; the closed schema cannot catch this one, so it is what actually exercises TB-REF-016) |
+| `concurrent-declaration-heads` | `invariant.supersession_conflict` (two unsuperseded declarations for one Task; Store never picks one by timestamp — TB-SUP-005) |
 
 ## 3. Mutation vectors
 
@@ -83,6 +96,8 @@ Shape:
 | `reject-foreign-criterion` | `invariant.verdict_foreign_criterion` |
 | `reject-checkresult-without-invocation` | `invariant.check_result_invocation_mismatch` |
 | `reject-second-checkresult` | `invariant.check_result_already_recorded` |
+| `reject-bundle-foreign-records` | `invariant.check_result_invocation_mismatch` (a Reconciliation appended alongside a CheckResult that no result cites) |
+| `reject-duplicate-claim-evidence` | `schema.set_array_duplicate` (a `set` array is rejected on the way in, never silently de-duplicated) |
 | `reject-unsupported-contract-major` | capability preflight fails closed; no mutation |
 | `reject-malformed-provider-output` | typed decoding fails; no partial ingestion or execution |
 | `reject-evidence-locator-as-command` | locator remains inert data; no execution or replay |
@@ -106,6 +121,19 @@ Every mutation vector must additionally assert, as observable behavior:
 - same ID with different content is rejected;
 - no derived status changes unless explicitly recomputed as a discardable projection;
 - no semantic record is created merely because time passed or another record appeared.
+
+## 3.1 Canonical `set`-array coverage
+
+`contract/canonicalization.json` is wired directly into `validate_snapshot` /
+`validate_append` (`src/contract/canonical-arrays.ts` reads the frozen registry rather
+than restating it). Every path registered as `semantics: "set"` — the top-level record
+collections, `project.repositories`, `declaration.criteria`, `claim.evidence_ids`,
+`check_result.reconciliation_ids`, `verdict.scope.*`, `verdict.basis.*`,
+`verdict.findings[].basis_refs`, `settlement.basis.blocker_ids` and
+`blocker_resolution.evidence_ids` — must arrive sorted by its declared comparator/key and
+duplicate-free. A non-canonical set array is **rejected** (`schema.set_array_unsorted` /
+`schema.set_array_duplicate`), never normalized during validation; the reference
+implementation's own producers emit canonical arrays before submission.
 
 ## 4. Store → Check acceptance scenario
 
