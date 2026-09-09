@@ -1,0 +1,79 @@
+{
+  "name": "accept-idempotent-replay",
+  "before": {
+    "schema_version": "1.0.0",
+    "revision": 1,
+    "included_through": 1,
+    "project": {
+      "project_id": "prj_0190b1c0-0000-7000-8000-000000000001",
+      "repositories": [
+        {
+          "repository_id": "repo_0190b1c0-0000-7000-8000-000000000001",
+          "alias": "main"
+        }
+      ]
+    },
+    "repositories": [
+      {
+        "repository_id": "repo_0190b1c0-0000-7000-8000-000000000001",
+        "alias": "main"
+      }
+    ],
+    "workspaces": [],
+    "topics": [
+      {
+        "topic_id": "top_0190b1c0-0000-7000-8000-000000000001",
+        "project_id": "prj_0190b1c0-0000-7000-8000-000000000001",
+        "name": "release-readiness",
+        "goal": "Prepare the project for its first public release.",
+        "created_by": {
+          "kind": "human",
+          "id": "alice"
+        },
+        "created_at": "2026-09-01T09:00:00Z"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "tsk_0190b1c0-0000-7000-8000-000000000001",
+        "topic_id": "top_0190b1c0-0000-7000-8000-000000000001",
+        "title": "Implement validation"
+      }
+    ],
+    "declarations": [],
+    "attempts": [],
+    "attempt_ends": [],
+    "claims": [],
+    "evidence": [],
+    "reconciliations": [],
+    "check_invocations": [],
+    "check_results": [],
+    "verdicts": [],
+    "settlements": [],
+    "blockers": [],
+    "blocker_resolutions": [],
+    "decisions": []
+  },
+  "operation": {
+    "kind": "append_records",
+    "expected_revision": 1,
+    "records": [
+      {
+        "task_id": "tsk_0190b1c0-0000-7000-8000-000000000001",
+        "topic_id": "top_0190b1c0-0000-7000-8000-000000000001",
+        "title": "Implement validation"
+      }
+    ],
+    "provenance": {
+      "submitted_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      }
+    }
+  },
+  "expected": {
+    "accepted": true,
+    "revision": 1,
+    "replayed": true
+  }
+}

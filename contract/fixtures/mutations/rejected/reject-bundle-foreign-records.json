@@ -1,0 +1,281 @@
+{
+  "name": "reject-bundle-foreign-records",
+  "before": {
+    "schema_version": "1.0.0",
+    "revision": 4,
+    "included_through": 4,
+    "project": {
+      "project_id": "prj_0190b1c0-0000-7000-8000-000000000001",
+      "repositories": [
+        {
+          "repository_id": "repo_0190b1c0-0000-7000-8000-000000000001",
+          "alias": "main"
+        }
+      ]
+    },
+    "repositories": [
+      {
+        "repository_id": "repo_0190b1c0-0000-7000-8000-000000000001",
+        "alias": "main"
+      }
+    ],
+    "workspaces": [
+      {
+        "workspace_id": "wsp_0190b1c0-0000-7000-8000-000000000001",
+        "repository_id": "repo_0190b1c0-0000-7000-8000-000000000001"
+      }
+    ],
+    "topics": [
+      {
+        "topic_id": "top_0190b1c0-0000-7000-8000-000000000001",
+        "project_id": "prj_0190b1c0-0000-7000-8000-000000000001",
+        "name": "release-readiness",
+        "goal": "Prepare the project for its first public release.",
+        "created_by": {
+          "kind": "human",
+          "id": "alice"
+        },
+        "created_at": "2026-09-01T09:00:00Z"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "tsk_0190b1c0-0000-7000-8000-000000000001",
+        "topic_id": "top_0190b1c0-0000-7000-8000-000000000001",
+        "title": "Implement validation"
+      }
+    ],
+    "declarations": [
+      {
+        "declaration_id": "dcl_0190b1c0-0000-7000-8000-000000000001",
+        "task_id": "tsk_0190b1c0-0000-7000-8000-000000000001",
+        "declared_by": {
+          "kind": "human",
+          "id": "alice"
+        },
+        "declared_at": "2026-09-01T09:05:00Z",
+        "objective": "Implement validation.",
+        "criteria": [
+          {
+            "criterion_id": "cri_0190b1c0-0000-7000-8000-000000000001",
+            "code": "invalid-record-rejected",
+            "statement": "Criterion invalid-record-rejected.",
+            "required": true
+          }
+        ]
+      }
+    ],
+    "attempts": [
+      {
+        "attempt_id": "att_0190b1c0-0000-7000-8000-000000000001",
+        "task_id": "tsk_0190b1c0-0000-7000-8000-000000000001",
+        "declaration_id": "dcl_0190b1c0-0000-7000-8000-000000000001",
+        "repository_id": "repo_0190b1c0-0000-7000-8000-000000000001",
+        "workspace_id": "wsp_0190b1c0-0000-7000-8000-000000000001",
+        "executor": {
+          "kind": "executor",
+          "id": "agent-7"
+        },
+        "dispatched_by": {
+          "kind": "human",
+          "id": "alice"
+        },
+        "dispatched_at": "2026-09-01T10:00:00Z"
+      }
+    ],
+    "attempt_ends": [],
+    "claims": [
+      {
+        "claim_id": "clm_0190b1c0-0000-7000-8000-000000000001",
+        "task_id": "tsk_0190b1c0-0000-7000-8000-000000000001",
+        "attempt_id": "att_0190b1c0-0000-7000-8000-000000000001",
+        "declaration_id": "dcl_0190b1c0-0000-7000-8000-000000000001",
+        "statement": "The declared validation work is complete.",
+        "evidence_ids": [],
+        "claimed_by": {
+          "kind": "executor",
+          "id": "agent-7"
+        },
+        "claimed_at": "2026-09-02T11:00:00Z"
+      }
+    ],
+    "evidence": [],
+    "reconciliations": [],
+    "check_invocations": [
+      {
+        "check_invocation_id": "chk_0190b1c0-0000-7000-8000-000000000001",
+        "subject": {
+          "kind": "claim",
+          "id": "clm_0190b1c0-0000-7000-8000-000000000001"
+        },
+        "checker": {
+          "id": "done-or-not",
+          "version": "1"
+        },
+        "evaluated_snapshot": {
+          "project_id": "prj_0190b1c0-0000-7000-8000-000000000001",
+          "revision": 4,
+          "digest": {
+            "algorithm": "sha-256",
+            "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        },
+        "invoked_by": {
+          "kind": "tool",
+          "id": "tallyback-check"
+        },
+        "invoked_at": "2026-09-02T12:30:00Z"
+      }
+    ],
+    "check_results": [],
+    "verdicts": [],
+    "settlements": [],
+    "blockers": [],
+    "blocker_resolutions": [],
+    "decisions": []
+  },
+  "operation": {
+    "kind": "append_records",
+    "expected_revision": 4,
+    "records": [
+      {
+        "check_result_id": "ckr_0190b1c0-0000-7000-8000-000000000002",
+        "check_invocation_id": "chk_0190b1c0-0000-7000-8000-000000000001",
+        "outcome": "verdict_emitted",
+        "produced_by": {
+          "kind": "tool",
+          "id": "tallyback-check"
+        },
+        "completed_at": "2026-09-02T13:00:00Z",
+        "verdict_id": "ver_0190b1c0-0000-7000-8000-000000000001",
+        "reconciliation_ids": [
+          "rec_0190b1c0-0000-7000-8000-000000000001"
+        ]
+      },
+      {
+        "evidence_id": "evi_0190b1c0-0000-7000-8000-000000000001",
+        "kind": "observation",
+        "submitted_by": {
+          "kind": "executor",
+          "id": "agent-7"
+        },
+        "submitted_at": "2026-09-02T10:00:00Z",
+        "payload": {
+          "text": "git object exists"
+        }
+      },
+      {
+        "reconciliation_id": "rec_0190b1c0-0000-7000-8000-000000000001",
+        "evidence_id": "evi_0190b1c0-0000-7000-8000-000000000001",
+        "checked_by": {
+          "kind": "tool",
+          "id": "tallyback-check"
+        },
+        "checked_at": "2026-09-02T12:00:00Z",
+        "method": {
+          "name": "git-object-inspection",
+          "version": "1"
+        },
+        "observed_context": {
+          "repository_id": "repo_0190b1c0-0000-7000-8000-000000000001"
+        },
+        "checks": [
+          {
+            "predicate": "git.object.exists",
+            "outcome": "confirmed",
+            "observed": {
+              "object_id": "abc"
+            }
+          }
+        ],
+        "limitations": []
+      },
+      {
+        "verdict_id": "ver_0190b1c0-0000-7000-8000-000000000001",
+        "subject": {
+          "kind": "claim",
+          "id": "clm_0190b1c0-0000-7000-8000-000000000001"
+        },
+        "declaration_id": "dcl_0190b1c0-0000-7000-8000-000000000001",
+        "scope": {
+          "evaluated_criteria": [
+            "cri_0190b1c0-0000-7000-8000-000000000001"
+          ],
+          "unevaluated_criteria": []
+        },
+        "conclusion": "supported",
+        "finality": "final",
+        "basis": {
+          "evidence_ids": [
+            "evi_0190b1c0-0000-7000-8000-000000000001"
+          ],
+          "reconciliation_ids": [
+            "rec_0190b1c0-0000-7000-8000-000000000001"
+          ]
+        },
+        "findings": [
+          {
+            "criterion_id": "cri_0190b1c0-0000-7000-8000-000000000001",
+            "assessment": "supported",
+            "summary": "Criterion resolved.",
+            "basis_refs": []
+          }
+        ],
+        "confidence": {
+          "level": "high",
+          "rationale": "n/a"
+        },
+        "rationale": "test",
+        "uncertainty": [],
+        "limitations": [],
+        "issued_by": {
+          "kind": "tool",
+          "id": "tallyback-check"
+        },
+        "issued_at": "2026-09-02T13:00:00Z",
+        "checker": {
+          "id": "done-or-not",
+          "version": "1"
+        }
+      },
+      {
+        "reconciliation_id": "rec_0190b1c0-0000-7000-8000-000000000002",
+        "evidence_id": "evi_0190b1c0-0000-7000-8000-000000000001",
+        "checked_by": {
+          "kind": "tool",
+          "id": "tallyback-check"
+        },
+        "checked_at": "2026-09-02T12:00:00Z",
+        "method": {
+          "name": "git-object-inspection",
+          "version": "1"
+        },
+        "observed_context": {
+          "repository_id": "repo_0190b1c0-0000-7000-8000-000000000001"
+        },
+        "checks": [
+          {
+            "predicate": "git.object.exists",
+            "outcome": "confirmed",
+            "observed": {
+              "object_id": "abc"
+            }
+          }
+        ],
+        "limitations": []
+      }
+    ],
+    "provenance": {
+      "submitted_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      }
+    }
+  },
+  "expected": {
+    "accepted": false,
+    "code": "invariant.check_result_invocation_mismatch",
+    "revision": 4,
+    "state_unchanged": true
+  }
+}

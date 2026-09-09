@@ -1,0 +1,111 @@
+{
+  "contract": "tallyback",
+  "bundle_format_version": "1",
+  "version": "1.0.0",
+  "tree": {
+    "algorithm": "sha-256",
+    "value": "c201d1a3657168f49632cc204335f8540b3d58a0a74979ab24865af6bb7bd02f"
+  },
+  "artifacts": {
+    "spec": {
+      "path": "SPEC.md",
+      "role": "normative",
+      "digest": {
+        "algorithm": "sha-256",
+        "value": "dfb8bb6f6450f4b14cebe075c20c0b7a0511414ff6f52691fa489a3a78f1482a"
+      }
+    },
+    "records_schema": {
+      "path": "schemas/records.schema.json",
+      "role": "normative",
+      "digest": {
+        "algorithm": "sha-256",
+        "value": "2ff57f74c78e6b79ab4924a0598bb774ec553bcb266c7cd556ca81f2e1918bdc"
+      }
+    },
+    "snapshot_schema": {
+      "path": "schemas/snapshot.schema.json",
+      "role": "normative",
+      "digest": {
+        "algorithm": "sha-256",
+        "value": "831babbebbdc6231ed0f32d7af71b467da04ec0c37d78d25884bbb461456733b"
+      }
+    },
+    "append_schema": {
+      "path": "schemas/append-operation.schema.json",
+      "role": "normative",
+      "digest": {
+        "algorithm": "sha-256",
+        "value": "6dce2a5270419c16727c87396fce7e39dec552a8d6f46ba43b1d419a9281698a"
+      }
+    },
+    "project_schema": {
+      "path": "schemas/project.schema.json",
+      "role": "normative",
+      "digest": {
+        "algorithm": "sha-256",
+        "value": "a80c2e62b1fc231a23640b2736cc0f0c331e8360b6359ea11aaf6e4802ba70ee"
+      }
+    },
+    "bindings_schema": {
+      "path": "schemas/bindings.schema.json",
+      "role": "normative",
+      "digest": {
+        "algorithm": "sha-256",
+        "value": "937895fc545b639cd0297232790d63a71d724066c4c18c2efe3950bd988b89fc"
+      }
+    },
+    "migration_report": {
+      "path": "schemas/migration-report.schema.json",
+      "role": "normative",
+      "digest": {
+        "algorithm": "sha-256",
+        "value": "7bc85613c7ce713796a0c063b46ee7c3c65c57ba3991d0313b7e7b196d89eb38"
+      }
+    },
+    "manifest_schema": {
+      "path": "schemas/manifest.schema.json",
+      "role": "normative",
+      "digest": {
+        "algorithm": "sha-256",
+        "value": "cc105464aa92e1b3af1b2366628f41a4c62cd916ff47989176954a387851e388"
+      }
+    },
+    "canonicalization": {
+      "path": "canonicalization.json",
+      "role": "normative",
+      "digest": {
+        "algorithm": "sha-256",
+        "value": "395f524e3187f108c419eb394c7b4e1bf3e569af93f9b80f1182c82705c6880b"
+      }
+    },
+    "invariants": {
+      "path": "invariants.json",
+      "role": "normative",
+      "digest": {
+        "algorithm": "sha-256",
+        "value": "6334eb5685ee432573bbd7c089e0667392e5fec2303b29955ea3c6f188dce4df"
+      }
+    },
+    "fixtures": {
+      "path": "fixtures/",
+      "role": "normative",
+      "digest": {
+        "algorithm": "sha-256",
+        "value": "9d1266924422fdb80dbfbeb80514b500919b9a20abd61a81a9b6875693baba8d"
+      }
+    },
+    "validator": {
+      "path": "validator/",
+      "role": "reference",
+      "digest": {
+        "algorithm": "sha-256",
+        "value": "8eb5ee657998fed81e448ca64b3869f7ba78161596de7baa0db2dab75d052baf"
+      }
+    }
+  },
+  "self_digest": {
+    "algorithm": "sha-256",
+    "value": "c12ecdcad125e7b2c40b698c50d506ce2835046b8f64327bdcc2aa7e1f34814e"
+  }
+}

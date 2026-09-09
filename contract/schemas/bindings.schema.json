@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tallyback:contract:v1:bindings.schema.json",
+  "title": "Tallyback machine-local bindings (runtime/bindings.json)",
+  "description": "Machine-local repository/workspace bindings. Absolute paths live only here — never in a committable file. This file is always ignored by Git.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["repositories"],
+  "properties": {
+    "repositories": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^repo_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["workspaces"],
+          "properties": {
+            "workspaces": {
+              "type": "object",
+              "additionalProperties": false,
+              "patternProperties": {
+                "^wsp_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["root"],
+                  "properties": {
+                    "root": { "type": "string", "minLength": 1 }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

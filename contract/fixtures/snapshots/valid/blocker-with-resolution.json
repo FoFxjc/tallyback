@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 6,
+  "included_through": 6,
+  "repositories": [],
+  "workspaces": [],
+  "topics": [
+    {
+      "topic_id": "top_0190b1c0-0000-7000-8000-000000000001",
+      "project_id": "prj_0190b1c0-0000-7000-8000-000000000001",
+      "name": "release-readiness",
+      "goal": "Prepare the project for its first public release.",
+      "created_by": {
+        "kind": "human",
+        "id": "alice"
+      },
+      "created_at": "2026-09-01T09:00:00Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_0190b1c0-0000-7000-8000-000000000001",
+      "topic_id": "top_0190b1c0-0000-7000-8000-000000000001",
+      "title": "Implement validation for imported records"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_0190b1c0-0000-7000-8000-000000000001",
+      "task_id": "tsk_0190b1c0-0000-7000-8000-000000000001",
+      "declared_by": {
+        "kind": "human",
+        "id": "alice"
+      },
+      "declared_at": "2026-09-01T09:05:00Z",
+      "objective": "Implement validation for imported records.",
+      "criteria": [
+        {
+          "criterion_id": "cri_0190b1c0-0000-7000-8000-000000000001",
+          "code": "invalid-record-rejected",
+          "statement": "An imported record that violates the schema is rejected without partially mutating the store.",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "attempts": [],
+  "attempt_ends": [],
+  "claims": [],
+  "evidence": [],
+  "reconciliations": [],
+  "check_invocations": [],
+  "check_results": [],
+  "verdicts": [],
+  "settlements": [],
+  "blockers": [
+    {
+      "blocker_id": "blk_0190b1c0-0000-7000-8000-000000000001",
+      "task_id": "tsk_0190b1c0-0000-7000-8000-000000000001",
+      "description": "Required validation fixture is unavailable.",
+      "raised_by": {
+        "kind": "executor",
+        "id": "agent-7"
+      },
+      "raised_at": "2026-09-02T09:00:00Z"
+    }
+  ],
+  "blocker_resolutions": [
+    {
+      "blocker_resolution_id": "brs_0190b1c0-0000-7000-8000-000000000001",
+      "blocker_id": "blk_0190b1c0-0000-7000-8000-000000000001",
+      "disposition": "resolved",
+      "resolved_by": {
+        "kind": "human",
+        "id": "alice"
+      },
+      "resolved_at": "2026-09-02T10:00:00Z",
+      "explanation": "The fixture was added in commit 3f2c9b1.",
+      "evidence_ids": []
+    }
+  ],
+  "decisions": [],
+  "project": {
+    "project_id": "prj_0190b1c0-0000-7000-8000-000000000001",
+    "repositories": []
+  }
+}

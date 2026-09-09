@@ -1,0 +1,672 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "TB-REF-001",
+      "category": "REF",
+      "phase": "snapshot",
+      "applies_to": [
+        "Verdict"
+      ],
+      "validator": "referential.verdict_scope_resolves",
+      "violation_code": "invariant.verdict_scope_unresolved",
+      "summary": "A Verdict's declaration_id and every criterion reference resolve within the snapshot.",
+      "spec_anchor": "verdict-reference-integrity",
+      "conformance_cases": [
+        "snapshot/verdict-valid-scope",
+        "snapshot/verdict-missing-declaration"
+      ]
+    },
+    {
+      "id": "TB-REF-002",
+      "category": "REF",
+      "phase": "snapshot",
+      "applies_to": [
+        "Verdict"
+      ],
+      "validator": "referential.verdict_declaration_consistent",
+      "violation_code": "invariant.verdict_declaration_conflict",
+      "summary": "A Verdict's declaration_id is consistent with its Claim's declaration_id.",
+      "spec_anchor": "verdict-declaration-consistency",
+      "conformance_cases": [
+        "snapshot/verdict-declaration-conflict"
+      ]
+    },
+    {
+      "id": "TB-REF-003",
+      "category": "REF",
+      "phase": "snapshot",
+      "applies_to": [
+        "Verdict"
+      ],
+      "validator": "referential.verdict_criteria_belong_to_declaration",
+      "violation_code": "invariant.verdict_foreign_criterion",
+      "summary": "Criteria referenced by a Verdict belong to that declaration.",
+      "spec_anchor": "verdict-foreign-criterion",
+      "conformance_cases": [
+        "snapshot/verdict-foreign-criterion"
+      ]
+    },
+    {
+      "id": "TB-REF-004",
+      "category": "REF",
+      "phase": "snapshot",
+      "applies_to": [
+        "Attempt",
+        "Claim"
+      ],
+      "validator": "referential.attempt_claim_resolve",
+      "violation_code": "invariant.attempt_unresolved",
+      "summary": "An Attempt or Claim resolves its Task, Declaration, Repository, Workspace, Attempt and Evidence references to records of the expected type.",
+      "spec_anchor": "attempt-claim-references",
+      "conformance_cases": [
+        "snapshot/claim-unresolved-attempt"
+      ]
+    },
+    {
+      "id": "TB-REF-005",
+      "category": "REF",
+      "phase": "snapshot",
+      "applies_to": [
+        "TaskDeclaration",
+        "AttemptEnd",
+        "Reconciliation",
+        "Settlement",
+        "BlockerResolution",
+        "Decision"
+      ],
+      "validator": "referential.supersedes_target_present",
+      "violation_code": "invariant.dangling_supersession",
+      "summary": "Every supersedes target body is present in the snapshot.",
+      "spec_anchor": "dangling-supersession",
+      "conformance_cases": [
+        "snapshot/dangling-supersession"
+      ]
+    },
+    {
+      "id": "TB-REF-006",
+      "category": "REF",
+      "phase": "snapshot",
+      "applies_to": [
+        "Settlement"
+      ],
+      "validator": "referential.settlement_basis_resolves",
+      "violation_code": "invariant.settlement_basis_unresolved",
+      "summary": "Settlement basis references (verdict_id / attempt_end_id / blocker_ids) resolve.",
+      "spec_anchor": "settlement-basis-references",
+      "conformance_cases": []
+    },
+    {
+      "id": "TB-REF-007",
+      "category": "REF",
+      "phase": "snapshot",
+      "applies_to": [
+        "Evidence"
+      ],
+      "validator": "referential.evidence_references_resolve",
+      "violation_code": "invariant.evidence_reference_unresolved",
+      "summary": "Evidence payload repository_id / workspace_id references resolve where present.",
+      "spec_anchor": "evidence-references",
+      "conformance_cases": []
+    },
+    {
+      "id": "TB-REF-008",
+      "category": "REF",
+      "phase": "snapshot",
+      "applies_to": [
+        "Decision"
+      ],
+      "validator": "referential.decision_subject_resolves",
+      "violation_code": "invariant.decision_subject_unresolved",
+      "summary": "A Decision subject resolves and is Project/Topic/Task/Attempt-scoped.",
+      "spec_anchor": "decision-subject",
+      "conformance_cases": []
+    },
+    {
+      "id": "TB-REF-009",
+      "category": "REF",
+      "phase": "snapshot",
+      "applies_to": [
+        "Project"
+      ],
+      "validator": "referential.project_identity_matches",
+      "violation_code": "invariant.project_identity_mismatch",
+      "summary": "project.json identity matches state.json's Project record; a mismatch fails closed.",
+      "spec_anchor": "project-identity",
+      "conformance_cases": []
+    },
+    {
+      "id": "TB-REF-010",
+      "category": "REF",
+      "phase": "snapshot",
+      "applies_to": [
+        "CheckResult"
+      ],
+      "validator": "referential.check_result_invocation_consistent",
+      "violation_code": "invariant.check_result_invocation_mismatch",
+      "summary": "A CheckResult references an existing CheckInvocation, carries at most one result body per invocation, and every record in its bundle is consistent with that invocation's subject and checker context.",
+      "spec_anchor": "check-result-invocation",
+      "conformance_cases": [
+        "mutation/reject-checkresult-without-invocation",
+        "snapshot/checkresult-foreign-verdict",
+        "mutation/reject-bundle-foreign-records"
+      ]
+    },
+    {
+      "id": "TB-REF-011",
+      "category": "REF",
+      "phase": "snapshot",
+      "applies_to": [
+        "CheckResult"
+      ],
+      "validator": "referential.check_result_references_resolve",
+      "violation_code": "invariant.check_result_reference_unresolved",
+      "summary": "Every CheckResult reconciliation_id resolves to a Reconciliation and a non-null verdict_id resolves to a Verdict.",
+      "spec_anchor": "check-result-invocation",
+      "conformance_cases": [
+        "snapshot/checkresult-missing-reconciliation"
+      ]
+    },
+    {
+      "id": "TB-REF-012",
+      "category": "REF",
+      "phase": "snapshot",
+      "applies_to": [
+        "CheckResult"
+      ],
+      "validator": "referential.check_result_outcome_consistent",
+      "violation_code": "invariant.check_result_outcome_mismatch",
+      "summary": "verdict_emitted requires exactly one resolved Verdict; verdict_withheld and check_failed require verdict_id null.",
+      "spec_anchor": "check-result-invocation",
+      "conformance_cases": [
+        "snapshot/checkresult-emitted-null-verdict",
+        "snapshot/checkresult-withheld-with-verdict"
+      ]
+    },
+    {
+      "id": "TB-REF-013",
+      "category": "REF",
+      "phase": "snapshot",
+      "applies_to": [
+        "all"
+      ],
+      "validator": "referential.canonical_references_resolve",
+      "violation_code": "invariant.reference_unresolved",
+      "summary": "Every canonical reference resolves to an entity of the record type that field declares (Project/Repository, Topic/Project, Task/Topic, Declaration/Task, Workspace/Repository, AttemptEnd/Attempt, Reconciliation/Evidence and observed context, CheckInvocation/Claim and evaluated Project, Verdict basis and finding basis refs, Settlement/Task/Attempt, Blocker/Task/Attempt, BlockerResolution/Blocker/Evidence, Decision basis).",
+      "spec_anchor": "reference-integrity",
+      "conformance_cases": [
+        "snapshot/reference-wrong-lineage"
+      ]
+    },
+    {
+      "id": "TB-REF-014",
+      "category": "REF",
+      "phase": "snapshot",
+      "applies_to": [
+        "Project",
+        "Attempt",
+        "Claim",
+        "Reconciliation",
+        "Settlement",
+        "Blocker",
+        "CheckInvocation"
+      ],
+      "validator": "referential.canonical_references_consistent",
+      "violation_code": "invariant.reference_inconsistent",
+      "summary": "A reference that resolves must also agree on lineage: an Attempt\u2019s Declaration declares its Task and its Workspace belongs to its Repository; a Claim sits on an Attempt of the same Task and Declaration; a Settlement/Blocker cites an Attempt of its own Task; a Project repository ref matches the Repository record; a CheckInvocation never evaluates a revision ahead of the snapshot.",
+      "spec_anchor": "reference-integrity",
+      "conformance_cases": [
+        "snapshot/attempt-workspace-foreign-repository",
+        "snapshot/claim-foreign-attempt"
+      ]
+    },
+    {
+      "id": "TB-REF-015",
+      "category": "REF",
+      "phase": "snapshot",
+      "applies_to": [
+        "Project",
+        "Repository"
+      ],
+      "validator": "referential.project_repositories_match",
+      "violation_code": "invariant.project_repositories_mismatch",
+      "summary": "The Repository declarations in project.json match the state.json Project record; a contradiction fails closed rather than letting one file silently win.",
+      "spec_anchor": "project-identity",
+      "conformance_cases": []
+    },
+    {
+      "id": "TB-REF-016",
+      "category": "REF",
+      "phase": "snapshot",
+      "applies_to": [
+        "all"
+      ],
+      "validator": "referential.no_absolute_path_in_portable_file",
+      "violation_code": "invariant.absolute_path_in_portable_file",
+      "summary": "A portable file (project.json / state.json) never carries a machine-local absolute path; absolute paths live only in runtime/bindings.json.",
+      "spec_anchor": "portable-paths",
+      "conformance_cases": [
+        "snapshot/absolute-path-in-evidence"
+      ]
+    },
+    {
+      "id": "TB-ID-001",
+      "category": "ID",
+      "phase": "mutation",
+      "applies_to": [
+        "all"
+      ],
+      "validator": "identity.id_immutable",
+      "violation_code": "invariant.id_mutation",
+      "summary": "Entity IDs are immutable (an append cannot change an existing record's ID).",
+      "spec_anchor": "id-immutability",
+      "conformance_cases": []
+    },
+    {
+      "id": "TB-ID-002",
+      "category": "ID",
+      "phase": "mutation",
+      "applies_to": [
+        "all"
+      ],
+      "validator": "identity.id_collision_rejected",
+      "violation_code": "invariant.id_collision",
+      "summary": "A canonical top-level record ID with canonically different content is rejected (top-level records only; nested criterion definitions are not compared).",
+      "spec_anchor": "id-collision",
+      "conformance_cases": [
+        "mutation/reject-id-collision"
+      ]
+    },
+    {
+      "id": "TB-ID-003",
+      "category": "ID",
+      "phase": "mutation",
+      "applies_to": [
+        "all"
+      ],
+      "validator": "identity.id_replay_idempotent",
+      "violation_code": "invariant.id_replay_duplicate",
+      "summary": "Same ID with canonically identical content is an idempotent no-op (no duplicate record).",
+      "spec_anchor": "id-replay",
+      "conformance_cases": [
+        "mutation/accept-idempotent-replay"
+      ]
+    },
+    {
+      "id": "TB-LC-001",
+      "category": "LC",
+      "phase": "mutation",
+      "applies_to": [
+        "Attempt"
+      ],
+      "validator": "lifecycle.attempt_not_restarted_after_end",
+      "violation_code": "invariant.attempt_already_ended",
+      "summary": "An Attempt with an effective AttemptEnd cannot be restarted under the same attempt_id.",
+      "spec_anchor": "attempt-already-ended",
+      "conformance_cases": [
+        "mutation/reject-restarting-ended-attempt"
+      ]
+    },
+    {
+      "id": "TB-LC-002",
+      "category": "LC",
+      "phase": "snapshot",
+      "applies_to": [
+        "TaskDeclaration"
+      ],
+      "validator": "lifecycle.no_duplicate_criterion",
+      "violation_code": "invariant.duplicate_criterion",
+      "summary": "No duplicate criterion_id within one declaration.",
+      "spec_anchor": "duplicate-criterion",
+      "conformance_cases": [
+        "snapshot/duplicate-criterion"
+      ]
+    },
+    {
+      "id": "TB-LC-003",
+      "category": "LC",
+      "phase": "mutation",
+      "applies_to": [
+        "Settlement"
+      ],
+      "validator": "lifecycle.retry_not_terminal",
+      "violation_code": "invariant.retry_not_terminal",
+      "summary": "Settlement retry settles the Attempt but leaves the Task available (not terminal).",
+      "spec_anchor": "retry-not-terminal",
+      "conformance_cases": []
+    },
+    {
+      "id": "TB-LC-004",
+      "category": "LC",
+      "phase": "mutation",
+      "applies_to": [
+        "Attempt"
+      ],
+      "validator": "lifecycle.workspace_exclusivity",
+      "violation_code": "invariant.workspace_exclusivity",
+      "summary": "At most one open Attempt owns the same Workspace.",
+      "spec_anchor": "workspace-exclusivity",
+      "conformance_cases": []
+    },
+    {
+      "id": "TB-LC-005",
+      "category": "LC",
+      "phase": "mutation",
+      "applies_to": [
+        "Settlement"
+      ],
+      "validator": "lifecycle.settlement_basis_matrix",
+      "violation_code": "invariant.settlement_basis_matrix",
+      "summary": "Settlement basis satisfies the per-action matrix (accept/land require verdict_id XOR verification_exception).",
+      "spec_anchor": "settlement-basis-matrix",
+      "conformance_cases": [
+        "snapshot/settlement-basis-missing"
+      ]
+    },
+    {
+      "id": "TB-LC-006",
+      "category": "LC",
+      "phase": "mutation",
+      "applies_to": [
+        "CheckResult"
+      ],
+      "validator": "lifecycle.one_check_result_per_invocation",
+      "violation_code": "invariant.check_result_already_recorded",
+      "summary": "A CheckInvocation has at most one CheckResult.",
+      "spec_anchor": "check-result-uniqueness",
+      "conformance_cases": [
+        "mutation/reject-second-checkresult"
+      ]
+    },
+    {
+      "id": "TB-LC-007",
+      "category": "LC",
+      "phase": "mutation",
+      "applies_to": [
+        "Project"
+      ],
+      "validator": "lifecycle.no_singleton_records_in_append",
+      "violation_code": "invariant.non_appendable_record",
+      "summary": "The Project singleton cannot be submitted through append_records; it is created once at init and has no collection to append into.",
+      "spec_anchor": "append-envelope",
+      "conformance_cases": [
+        "mutation/reject-project-record-in-append"
+      ]
+    },
+    {
+      "id": "TB-SUP-001",
+      "category": "SUP",
+      "phase": "snapshot",
+      "applies_to": [
+        "TaskDeclaration",
+        "AttemptEnd",
+        "Reconciliation",
+        "Settlement",
+        "BlockerResolution",
+        "Decision"
+      ],
+      "validator": "supersession.same_type",
+      "violation_code": "invariant.supersession_type",
+      "summary": "supersedes targets a record of the same supersession-capable type.",
+      "spec_anchor": "supersession-type",
+      "conformance_cases": []
+    },
+    {
+      "id": "TB-SUP-002",
+      "category": "SUP",
+      "phase": "snapshot",
+      "applies_to": [
+        "TaskDeclaration",
+        "AttemptEnd",
+        "Reconciliation",
+        "Settlement",
+        "BlockerResolution",
+        "Decision"
+      ],
+      "validator": "supersession.same_subject",
+      "violation_code": "invariant.supersession_subject",
+      "summary": "supersedes targets the same logical subject (same lineage).",
+      "spec_anchor": "supersession-subject",
+      "conformance_cases": []
+    },
+    {
+      "id": "TB-SUP-003",
+      "category": "SUP",
+      "phase": "snapshot",
+      "applies_to": [
+        "TaskDeclaration",
+        "AttemptEnd",
+        "Reconciliation",
+        "Settlement",
+        "BlockerResolution",
+        "Decision"
+      ],
+      "validator": "supersession.acyclic",
+      "violation_code": "invariant.supersession_cycle",
+      "summary": "The supersession graph is acyclic (no supersession cycle).",
+      "spec_anchor": "supersession-cycle",
+      "conformance_cases": []
+    },
+    {
+      "id": "TB-SUP-004",
+      "category": "SUP",
+      "phase": "snapshot",
+      "applies_to": [
+        "all"
+      ],
+      "validator": "supersession.only_capable_records",
+      "violation_code": "invariant.supersession_unsupported",
+      "summary": "Only supersession-capable records (dcl_, set_, ate_, rec_, brs_, dec_) carry supersedes; all others are immutable anchors.",
+      "spec_anchor": "supersession-unsupported",
+      "conformance_cases": [
+        "snapshot/verdict-supersedes"
+      ]
+    },
+    {
+      "id": "TB-SUP-005",
+      "category": "SUP",
+      "phase": "snapshot",
+      "applies_to": [
+        "TaskDeclaration",
+        "AttemptEnd",
+        "Reconciliation",
+        "Settlement",
+        "BlockerResolution",
+        "Decision"
+      ],
+      "validator": "supersession.no_concurrent_heads_selection",
+      "violation_code": "invariant.supersession_conflict",
+      "summary": "Multiple concurrent unsuperseded heads are a conflict; Store never selects one by timestamp.",
+      "spec_anchor": "supersession-conflict",
+      "conformance_cases": [
+        "snapshot/concurrent-declaration-heads"
+      ]
+    },
+    {
+      "id": "TB-CAN-001",
+      "category": "CAN",
+      "phase": "snapshot",
+      "applies_to": [
+        "all"
+      ],
+      "validator": "canonicalization.set_array_sorted",
+      "violation_code": "schema.set_array_unsorted",
+      "summary": "Every array registered as semantics \"set\" in contract/canonicalization.json arrives sorted by its declared comparator/key; a non-canonical set array is rejected, never silently normalized.",
+      "spec_anchor": "canonical-serialization",
+      "conformance_cases": [
+        "snapshot/set-array-unsorted"
+      ]
+    },
+    {
+      "id": "TB-CAN-002",
+      "category": "CAN",
+      "phase": "snapshot",
+      "applies_to": [
+        "all"
+      ],
+      "validator": "canonicalization.set_array_duplicate_free",
+      "violation_code": "schema.set_array_duplicate",
+      "summary": "Every array registered as semantics \"set\" is duplicate-free under its declared comparator/key.",
+      "spec_anchor": "canonical-serialization",
+      "conformance_cases": [
+        "snapshot/set-array-duplicate",
+        "mutation/reject-duplicate-claim-evidence"
+      ]
+    },
+    {
+      "id": "TB-ATOM-001",
+      "category": "ATOM",
+      "phase": "mutation",
+      "applies_to": [
+        "all"
+      ],
+      "validator": "atomicity.no_partial_mutation",
+      "violation_code": "mutation.partial_ingestion",
+      "summary": "A rejected operation produces no partial mutation (state unchanged, bytes unchanged).",
+      "spec_anchor": "partial-ingestion",
+      "conformance_cases": []
+    },
+    {
+      "id": "TB-ATOM-002",
+      "category": "ATOM",
+      "phase": "mutation",
+      "applies_to": [
+        "all"
+      ],
+      "validator": "atomicity.all_or_nothing",
+      "violation_code": "mutation.non_atomic_ingestion",
+      "summary": "An accepted bundle is all-or-nothing; revision increments exactly once.",
+      "spec_anchor": "all-or-nothing",
+      "conformance_cases": [
+        "mutation/accept-atomic-check-result-bundle"
+      ]
+    },
+    {
+      "id": "TB-ATOM-003",
+      "category": "ATOM",
+      "phase": "mutation",
+      "applies_to": [
+        "all"
+      ],
+      "validator": "atomicity.optimistic_revision",
+      "violation_code": "mutation.revision_conflict",
+      "summary": "Optimistic revision check: expected revision must match current before append.",
+      "spec_anchor": "revision-conflict",
+      "conformance_cases": [
+        "mutation/reject-revision-conflict"
+      ]
+    },
+    {
+      "id": "TB-ATOM-004",
+      "category": "ATOM",
+      "phase": "mutation",
+      "applies_to": [
+        "all"
+      ],
+      "validator": "atomicity.single_writer_lock",
+      "violation_code": "mutation.lock_unavailable",
+      "summary": "Store is the single writer: an append acquires a filesystem-backed exclusive lock, re-reads the authoritative snapshot under it, and validates expected_revision against that on-disk snapshot, so a concurrent writer at the same starting revision is rejected with mutation.revision_conflict and never overwrites a committed append.",
+      "spec_anchor": "optimistic-concurrency",
+      "conformance_cases": [
+        "mutation/reject-revision-conflict"
+      ]
+    },
+    {
+      "id": "TB-ATOM-005",
+      "category": "ATOM",
+      "phase": "mutation",
+      "applies_to": [
+        "all"
+      ],
+      "validator": "atomicity.persist_before_commit",
+      "violation_code": "mutation.persist_failed",
+      "summary": "The in-memory canonical state advances only after state.json is durably replaced: a failed snapshot write leaves the Store unchanged and reports the append as rejected, while a journal failure after a committed state write never downgrades a committed mutation to an uncommitted one (history.jsonl is non-authoritative, SPEC \u00a76.1).",
+      "spec_anchor": "partial-ingestion",
+      "conformance_cases": []
+    },
+    {
+      "id": "TB-NOP-001",
+      "category": "NOP",
+      "phase": "mutation",
+      "applies_to": [
+        "Evidence"
+      ],
+      "validator": "nop.evidence_creates_no_verdict",
+      "violation_code": null,
+      "summary": "Adding evidence does not create a Verdict.",
+      "spec_anchor": "nop-evidence-no-verdict",
+      "conformance_cases": [],
+      "assertion": "no record change"
+    },
+    {
+      "id": "TB-NOP-002",
+      "category": "NOP",
+      "phase": "mutation",
+      "applies_to": [
+        "AttemptEnd"
+      ],
+      "validator": "nop.attempt_end_declares_no_completion",
+      "violation_code": null,
+      "summary": "Ending an Attempt does not declare the Task complete.",
+      "spec_anchor": "nop-attempt-end-no-completion",
+      "conformance_cases": [],
+      "assertion": "no record change"
+    },
+    {
+      "id": "TB-NOP-003",
+      "category": "NOP",
+      "phase": "mutation",
+      "applies_to": [
+        "Evidence"
+      ],
+      "validator": "nop.passing_test_accepts_no_task",
+      "violation_code": null,
+      "summary": "A passing test does not automatically accept the Task.",
+      "spec_anchor": "nop-test-no-accept",
+      "conformance_cases": [],
+      "assertion": "no record change"
+    },
+    {
+      "id": "TB-NOP-004",
+      "category": "NOP",
+      "phase": "mutation",
+      "applies_to": [
+        "all"
+      ],
+      "validator": "nop.elapsed_time_mutates_nothing",
+      "violation_code": null,
+      "summary": "Elapsed time does not mutate anything to stale.",
+      "spec_anchor": "nop-time-no-stale",
+      "conformance_cases": [],
+      "assertion": "no record change"
+    },
+    {
+      "id": "TB-NOP-005",
+      "category": "NOP",
+      "phase": "mutation",
+      "applies_to": [
+        "Verdict"
+      ],
+      "validator": "nop.positive_verdict_authorizes_no_landing",
+      "violation_code": null,
+      "summary": "A positive Verdict does not automatically authorize landing.",
+      "spec_anchor": "nop-verdict-no-landing",
+      "conformance_cases": [],
+      "assertion": "no record change"
+    },
+    {
+      "id": "TB-NOP-006",
+      "category": "NOP",
+      "phase": "mutation",
+      "applies_to": [
+        "all"
+      ],
+      "validator": "nop.no_derived_status_change",
+      "violation_code": null,
+      "summary": "No derived status changes unless explicitly recomputed as a discardable projection.",
+      "spec_anchor": "nop-derived-status",
+      "conformance_cases": [],
+      "assertion": "projections isolated"
+    }
+  ]
+}

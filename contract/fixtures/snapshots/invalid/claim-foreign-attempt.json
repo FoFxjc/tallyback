@@ -1,0 +1,276 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 12,
+  "included_through": 12,
+  "repositories": [
+    {
+      "repository_id": "repo_0190b1c0-0000-7000-8000-000000000001",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_0190b1c0-0000-7000-8000-000000000001",
+      "repository_id": "repo_0190b1c0-0000-7000-8000-000000000001"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_0190b1c0-0000-7000-8000-000000000001",
+      "project_id": "prj_0190b1c0-0000-7000-8000-000000000001",
+      "name": "release-readiness",
+      "goal": "Prepare the project for its first public release.",
+      "created_by": {
+        "kind": "human",
+        "id": "alice"
+      },
+      "created_at": "2026-09-01T09:00:00Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_0190b1c0-0000-7000-8000-000000000001",
+      "topic_id": "top_0190b1c0-0000-7000-8000-000000000001",
+      "title": "Implement validation for imported records"
+    },
+    {
+      "task_id": "tsk_0190b1c0-0000-7000-8000-000000000002",
+      "topic_id": "top_0190b1c0-0000-7000-8000-000000000001",
+      "title": "A different task"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_0190b1c0-0000-7000-8000-000000000001",
+      "task_id": "tsk_0190b1c0-0000-7000-8000-000000000001",
+      "declared_by": {
+        "kind": "human",
+        "id": "alice"
+      },
+      "declared_at": "2026-09-01T09:05:00Z",
+      "objective": "Implement validation for imported records.",
+      "criteria": [
+        {
+          "criterion_id": "cri_0190b1c0-0000-7000-8000-000000000001",
+          "code": "invalid-record-rejected",
+          "statement": "An imported record that violates the schema is rejected without partially mutating the store.",
+          "required": true
+        }
+      ]
+    },
+    {
+      "declaration_id": "dcl_0190b1c0-0000-7000-8000-000000000002",
+      "task_id": "tsk_0190b1c0-0000-7000-8000-000000000002",
+      "declared_by": {
+        "kind": "human",
+        "id": "alice"
+      },
+      "declared_at": "2026-09-01T09:05:00Z",
+      "objective": "Another objective.",
+      "criteria": [
+        {
+          "criterion_id": "cri_0190b1c0-0000-7000-8000-000000000002",
+          "code": "other",
+          "statement": "A criterion of the other declaration.",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_0190b1c0-0000-7000-8000-000000000001",
+      "task_id": "tsk_0190b1c0-0000-7000-8000-000000000001",
+      "declaration_id": "dcl_0190b1c0-0000-7000-8000-000000000001",
+      "repository_id": "repo_0190b1c0-0000-7000-8000-000000000001",
+      "workspace_id": "wsp_0190b1c0-0000-7000-8000-000000000001",
+      "executor": {
+        "kind": "subagent",
+        "id": "agent-7"
+      },
+      "session_id": "sess-0190b1c0",
+      "dispatched_by": {
+        "kind": "human",
+        "id": "alice"
+      },
+      "dispatched_at": "2026-09-01T10:00:00Z"
+    },
+    {
+      "attempt_id": "att_0190b1c0-0000-7000-8000-000000000002",
+      "task_id": "tsk_0190b1c0-0000-7000-8000-000000000002",
+      "declaration_id": "dcl_0190b1c0-0000-7000-8000-000000000002",
+      "repository_id": "repo_0190b1c0-0000-7000-8000-000000000001",
+      "workspace_id": "wsp_0190b1c0-0000-7000-8000-000000000001",
+      "executor": {
+        "kind": "subagent",
+        "id": "agent-7"
+      },
+      "session_id": "sess-0190b1c0",
+      "dispatched_by": {
+        "kind": "human",
+        "id": "alice"
+      },
+      "dispatched_at": "2026-09-01T10:00:00Z"
+    }
+  ],
+  "attempt_ends": [],
+  "claims": [
+    {
+      "claim_id": "clm_0190b1c0-0000-7000-8000-000000000001",
+      "task_id": "tsk_0190b1c0-0000-7000-8000-000000000001",
+      "attempt_id": "att_0190b1c0-0000-7000-8000-000000000002",
+      "declaration_id": "dcl_0190b1c0-0000-7000-8000-000000000001",
+      "statement": "The declared validation work is complete.",
+      "evidence_ids": [
+        "evi_0190b1c0-0000-7000-8000-000000000001"
+      ],
+      "claimed_by": {
+        "kind": "executor",
+        "id": "agent-7"
+      },
+      "claimed_at": "2026-09-02T11:00:00Z"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "evi_0190b1c0-0000-7000-8000-000000000001",
+      "kind": "git_commit",
+      "submitted_by": {
+        "kind": "executor",
+        "id": "agent-7"
+      },
+      "submitted_at": "2026-09-02T10:00:00Z",
+      "payload": {
+        "repository_id": "repo_0190b1c0-0000-7000-8000-000000000001",
+        "object_id": "3f2c9b1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b",
+        "object_format": "sha1"
+      },
+      "note": "This commit implements the requested validation."
+    }
+  ],
+  "reconciliations": [
+    {
+      "reconciliation_id": "rec_0190b1c0-0000-7000-8000-000000000001",
+      "evidence_id": "evi_0190b1c0-0000-7000-8000-000000000001",
+      "checked_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "checked_at": "2026-09-02T12:00:00Z",
+      "method": {
+        "name": "git-object-inspection",
+        "version": "1"
+      },
+      "observed_context": {
+        "repository_id": "repo_0190b1c0-0000-7000-8000-000000000001",
+        "workspace_id": "wsp_0190b1c0-0000-7000-8000-000000000001",
+        "head_oid": "3f2c9b1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b",
+        "tree_oid": "9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b",
+        "working_tree": "dirty"
+      },
+      "checks": [
+        {
+          "predicate": "git.object.exists",
+          "outcome": "confirmed",
+          "observed": {
+            "object_id": "3f2c9b1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b",
+            "object_type": "commit"
+          }
+        }
+      ],
+      "limitations": []
+    }
+  ],
+  "check_invocations": [],
+  "check_results": [],
+  "verdicts": [
+    {
+      "verdict_id": "ver_0190b1c0-0000-7000-8000-000000000001",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_0190b1c0-0000-7000-8000-000000000001"
+      },
+      "declaration_id": "dcl_0190b1c0-0000-7000-8000-000000000001",
+      "scope": {
+        "evaluated_criteria": [
+          "cri_0190b1c0-0000-7000-8000-000000000001"
+        ],
+        "unevaluated_criteria": []
+      },
+      "conclusion": "supported",
+      "finality": "final",
+      "basis": {
+        "evidence_ids": [
+          "evi_0190b1c0-0000-7000-8000-000000000001"
+        ],
+        "reconciliation_ids": [
+          "rec_0190b1c0-0000-7000-8000-000000000001"
+        ]
+      },
+      "findings": [
+        {
+          "criterion_id": "cri_0190b1c0-0000-7000-8000-000000000001",
+          "assessment": "supported",
+          "summary": "The validation logic is present and rejects invalid records.",
+          "basis_refs": [
+            "evi_0190b1c0-0000-7000-8000-000000000001",
+            "rec_0190b1c0-0000-7000-8000-000000000001"
+          ]
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "The commit is confirmed to exist and the criterion is directly satisfied."
+      },
+      "rationale": "The declared criterion is satisfied by the confirmed commit.",
+      "uncertainty": [],
+      "limitations": [],
+      "issued_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "issued_at": "2026-09-02T13:00:00Z",
+      "checker": {
+        "id": "done-or-not",
+        "version": "1"
+      },
+      "native_judgment": {
+        "namespace": "done-or-not",
+        "schema_version": "1",
+        "payload": {}
+      }
+    }
+  ],
+  "settlements": [
+    {
+      "settlement_id": "set_0190b1c0-0000-7000-8000-000000000001",
+      "task_id": "tsk_0190b1c0-0000-7000-8000-000000000001",
+      "attempt_id": "att_0190b1c0-0000-7000-8000-000000000001",
+      "decision": "accept",
+      "decided_by": {
+        "kind": "human",
+        "id": "alice"
+      },
+      "decided_at": "2026-09-02T14:00:00Z",
+      "basis": {
+        "verdict_id": "ver_0190b1c0-0000-7000-8000-000000000001",
+        "attempt_end_id": null,
+        "blocker_ids": []
+      },
+      "verification_exception": null,
+      "rationale": "Accepted on the recorded verdict."
+    }
+  ],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": [],
+  "project": {
+    "project_id": "prj_0190b1c0-0000-7000-8000-000000000001",
+    "repositories": [
+      {
+        "repository_id": "repo_0190b1c0-0000-7000-8000-000000000001",
+        "alias": "main"
+      }
+    ]
+  }
+}

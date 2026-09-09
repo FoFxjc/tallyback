@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 4,
+  "included_through": 4,
+  "repositories": [],
+  "workspaces": [],
+  "topics": [
+    {
+      "topic_id": "top_0190b1c0-0000-7000-8000-000000000001",
+      "project_id": "prj_0190b1c0-0000-7000-8000-000000000001",
+      "name": "release-readiness",
+      "goal": "Prepare the project for its first public release.",
+      "created_by": {
+        "kind": "human",
+        "id": "alice"
+      },
+      "created_at": "2026-09-01T09:00:00Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_0190b1c0-0000-7000-8000-000000000001",
+      "topic_id": "top_0190b1c0-0000-7000-8000-000000000001",
+      "title": "Implement validation for imported records"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_0190b1c0-0000-7000-8000-000000000001",
+      "task_id": "tsk_0190b1c0-0000-7000-8000-000000000001",
+      "declared_by": {
+        "kind": "human",
+        "id": "alice"
+      },
+      "declared_at": "2026-09-01T09:05:00Z",
+      "objective": "Implement validation for imported records.",
+      "criteria": [
+        {
+          "criterion_id": "cri_0190b1c0-0000-7000-8000-000000000001",
+          "code": "invalid-record-rejected",
+          "statement": "An imported record that violates the schema is rejected without partially mutating the store.",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "attempts": [],
+  "attempt_ends": [],
+  "claims": [],
+  "evidence": [],
+  "reconciliations": [],
+  "check_invocations": [],
+  "check_results": [],
+  "verdicts": [],
+  "settlements": [],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": [],
+  "projections": {
+    "computed_from_revision": 4,
+    "policy_id": "default-v1",
+    "values": {
+      "tasks": [
+        {
+          "task_id": "tsk_0190b1c0-0000-7000-8000-000000000001",
+          "status": "declared"
+        }
+      ]
+    }
+  },
+  "project": {
+    "project_id": "prj_0190b1c0-0000-7000-8000-000000000001",
+    "repositories": []
+  }
+}

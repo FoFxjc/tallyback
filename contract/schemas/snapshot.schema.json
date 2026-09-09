@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tallyback:contract:v1:snapshot.schema.json",
+  "title": "Tallyback portable snapshot (state.json)",
+  "description": "The envelope of the portable canonical semantic snapshot. It carries the complete referenced record graph (including superseded bodies) in top-level collections, plus an isolated, discardable projections section that is excluded from the semantic digest.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "revision",
+    "included_through",
+    "project",
+    "repositories",
+    "workspaces",
+    "topics",
+    "tasks",
+    "declarations",
+    "attempts",
+    "attempt_ends",
+    "claims",
+    "evidence",
+    "reconciliations",
+    "check_invocations",
+    "check_results",
+    "verdicts",
+    "settlements",
+    "blockers",
+    "blocker_resolutions",
+    "decisions"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "revision": { "type": "integer", "minimum": 0 },
+    "included_through": { "type": "integer", "minimum": 0 },
+    "project": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/Project" },
+    "repositories": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/Repository" }
+    },
+    "workspaces": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/Workspace" }
+    },
+    "topics": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/Topic" }
+    },
+    "tasks": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/Task" }
+    },
+    "declarations": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/TaskDeclaration" }
+    },
+    "attempts": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/Attempt" }
+    },
+    "attempt_ends": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/AttemptEnd" }
+    },
+    "claims": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/Claim" }
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/Evidence" }
+    },
+    "reconciliations": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/Reconciliation" }
+    },
+    "check_invocations": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/CheckInvocation" }
+    },
+    "check_results": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/CheckResult" }
+    },
+    "verdicts": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/Verdict" }
+    },
+    "settlements": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/Settlement" }
+    },
+    "blockers": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/Blocker" }
+    },
+    "blocker_resolutions": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/BlockerResolution" }
+    },
+    "decisions": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/Decision" }
+    },
+    "projections": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["computed_from_revision", "policy_id", "values"],
+      "properties": {
+        "computed_from_revision": { "type": "integer", "minimum": 0 },
+        "policy_id": { "type": "string" },
+        "values": { "type": "object" }
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tallyback:contract:v1:append-operation.schema.json",
+  "title": "Tallyback append operation",
+  "description": "The shape of a single mutation submitted to `validate_append` / `record_check_output`. Operations may bundle multiple records atomically; partial ingestion is forbidden and the candidate graph is validated as a whole before any of it is committed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "expected_revision", "records", "provenance"],
+  "properties": {
+    "kind": { "const": "append_records" },
+    "expected_revision": { "type": "integer", "minimum": 0 },
+    "records": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/AnyRecord"
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["submitted_by"],
+      "properties": {
+        "submitted_by": {
+          "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/actor"
+        }
+      }
+    }
+  }
+}

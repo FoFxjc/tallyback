@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tallyback:contract:v1:manifest.schema.json",
+  "title": "Tallyback contract bundle manifest",
+  "description": "Single contract version and role-classified inventory of every bundle artifact, each carrying a digest over its exact bytes. `bundle_format_version` and `version` (contract SemVer) are independent. `self_digest` is JCS over the manifest with only `self_digest` omitted; `tree` is a domain-separated digest over the artifact tree.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "bundle_format_version",
+    "version",
+    "self_digest",
+    "tree",
+    "artifacts"
+  ],
+  "properties": {
+    "contract": { "const": "tallyback" },
+    "bundle_format_version": { "const": "1" },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$" },
+    "self_digest": { "$ref": "#/$defs/digest" },
+    "tree": { "$ref": "#/$defs/digest" },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "spec",
+        "records_schema",
+        "snapshot_schema",
+        "append_schema",
+        "project_schema",
+        "bindings_schema",
+        "migration_report",
+        "manifest_schema",
+        "canonicalization",
+        "invariants",
+        "fixtures",
+        "validator"
+      ],
+      "properties": {
+        "spec": { "$ref": "#/$defs/artifact" },
+        "records_schema": { "$ref": "#/$defs/artifact" },
+        "snapshot_schema": { "$ref": "#/$defs/artifact" },
+        "append_schema": { "$ref": "#/$defs/artifact" },
+        "project_schema": { "$ref": "#/$defs/artifact" },
+        "bindings_schema": { "$ref": "#/$defs/artifact" },
+        "migration_report": { "$ref": "#/$defs/artifact" },
+        "manifest_schema": { "$ref": "#/$defs/artifact" },
+        "canonicalization": { "$ref": "#/$defs/artifact" },
+        "invariants": { "$ref": "#/$defs/artifact" },
+        "fixtures": { "$ref": "#/$defs/artifact" },
+        "validator": { "$ref": "#/$defs/artifact" }
+      }
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "value"],
+      "properties": {
+        "algorithm": { "const": "sha-256" },
+        "value": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "role", "digest"],
+      "properties": {
+        "path": { "type": "string" },
+        "role": { "enum": ["normative", "reference", "derived"] },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    }
+  }
+}

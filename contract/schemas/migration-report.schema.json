@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tallyback:contract:v1:migration-report.schema.json",
+  "title": "Tallyback migration report",
+  "description": "Audit artifact produced by the one-time, atomic legacy Store migration. Records the source store, the legacy-to-canonical ID/alias mapping, diagnostics, and — for an applied migration — the resulting snapshot identity. Migration is never an implicit compatibility fallback: a preview (with validation) precedes any replacement of the portable state.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "report_id",
+    "kind",
+    "status",
+    "created_at",
+    "created_by",
+    "source",
+    "diagnostics",
+    "mapping",
+    "counts"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "report_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "kind": { "enum": ["preview", "applied"] },
+    "status": { "enum": ["ok", "requires_reconciliation", "failed"] },
+    "created_at": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/timestamp" },
+    "created_by": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/actor" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["store"],
+      "properties": {
+        "store": { "type": "string" },
+        "legacy_schema_version": { "type": "string" }
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/diagnostic" }
+    },
+    "mapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["topics", "tasks", "evidence"],
+      "properties": {
+        "topics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["legacy_name", "topic_id"],
+            "properties": {
+              "legacy_name": { "type": "string" },
+              "topic_id": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/top_id" }
+            }
+          }
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["legacy_alias", "task_id"],
+            "properties": {
+              "legacy_alias": { "type": "string" },
+              "task_id": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/tsk_id" }
+            }
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["legacy_index", "evidence_id"],
+            "properties": {
+              "legacy_index": { "type": "integer", "minimum": 0 },
+              "evidence_id": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/evi_id" }
+            }
+          }
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["topics", "tasks", "evidence"],
+      "properties": {
+        "topics": { "type": "integer", "minimum": 0 },
+        "tasks": { "type": "integer", "minimum": 0 },
+        "evidence": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["revision", "digest"],
+      "properties": {
+        "revision": { "type": "integer", "minimum": 0 },
+        "digest": { "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/digest" }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "kind": { "const": "applied" } },
+        "required": ["kind"]
+      },
+      "then": { "required": ["snapshot"] }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tallyback:contract:v1:project.schema.json",
+  "title": "Tallyback project manifest (project.json)",
+  "description": "Portable project identity — a bootstrap + validated header. `state.json` remains the authoritative source of identity; a mismatch between the two fails closed (`invariant.project_identity_mismatch`). This is the same closed shape as the Project record.",
+  "$ref": "urn:tallyback:contract:v1:records.schema.json#/$defs/Project"
+}

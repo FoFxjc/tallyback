@@ -1,0 +1,829 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tallyback:contract:v1:records.schema.json",
+  "title": "Tallyback canonical records",
+  "description": "Closed wire shapes for the 18 top-level canonical record types plus shared value definitions (IDs, provenance, digest, timestamp). Each record is a closed object (additionalProperties: false). IDs are `<prefix>_<UUIDv7>`; the pattern enforces the prefix and the UUIDv7 version/variant shape and does not rely on bare `format: uuid`.",
+  "$defs": {
+    "timestamp": {
+      "type": ["string", "null"],
+      "description": "ISO-8601 timestamp. Nullable only for the legacy provenance variant produced by migration (actor kind `unknown`); canonical records carry a non-null value."
+    },
+    "digest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "value"],
+      "properties": {
+        "algorithm": { "const": "sha-256" },
+        "value": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": {
+          "enum": ["human", "subagent", "executor", "tool", "unknown", "migrated"]
+        },
+        "id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "criterion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["criterion_id", "code", "statement", "required"],
+      "properties": {
+        "criterion_id": { "$ref": "#/$defs/cri_id" },
+        "code": { "type": "string" },
+        "statement": { "type": "string" },
+        "required": { "type": "boolean" }
+      }
+    },
+    "claim_subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": { "const": "claim" },
+        "id": { "$ref": "#/$defs/clm_id" }
+      }
+    },
+    "decision_subject": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "id"],
+          "properties": {
+            "kind": { "const": "project" },
+            "id": { "$ref": "#/$defs/prj_id" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "id"],
+          "properties": {
+            "kind": { "const": "topic" },
+            "id": { "$ref": "#/$defs/top_id" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "id"],
+          "properties": {
+            "kind": { "const": "task" },
+            "id": { "$ref": "#/$defs/tsk_id" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "id"],
+          "properties": {
+            "kind": { "const": "attempt" },
+            "id": { "$ref": "#/$defs/att_id" }
+          }
+        }
+      ]
+    },
+    "checker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": { "type": "string" },
+        "version": { "type": "string" }
+      }
+    },
+    "native_judgment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["namespace", "schema_version", "payload"],
+      "properties": {
+        "namespace": { "type": "string" },
+        "schema_version": { "type": "string" },
+        "payload": { "type": "object" }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "string" },
+        "message": { "type": "string" }
+      }
+    },
+    "evidence_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_id"],
+      "properties": {
+        "evidence_id": { "$ref": "#/$defs/evi_id" }
+      }
+    },
+    "repository_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository_id", "alias"],
+      "properties": {
+        "repository_id": { "$ref": "#/$defs/repo_id" },
+        "alias": { "type": "string" }
+      }
+    },
+    "evaluated_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_id", "revision", "digest"],
+      "properties": {
+        "project_id": { "$ref": "#/$defs/prj_id" },
+        "revision": { "type": "integer", "minimum": 0 },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "method": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" }
+      }
+    },
+    "working_tree": { "enum": ["clean", "dirty"] },
+    "observed_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository_id"],
+      "properties": {
+        "repository_id": { "$ref": "#/$defs/repo_id" },
+        "workspace_id": { "$ref": "#/$defs/wsp_id" },
+        "head_oid": { "type": "string" },
+        "tree_oid": { "type": "string" },
+        "index_oid": { "type": "string" },
+        "working_tree": { "$ref": "#/$defs/working_tree" },
+        "worktree_fingerprint": { "type": "string" }
+      }
+    },
+    "reconciliation_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["predicate", "outcome"],
+      "properties": {
+        "predicate": { "type": "string" },
+        "outcome": { "enum": ["confirmed", "mismatch", "unresolved"] },
+        "observed": { "type": "object" },
+        "reason": { "type": "string" }
+      }
+    },
+    "confidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "rationale"],
+      "properties": {
+        "level": { "enum": ["low", "medium", "high"] },
+        "rationale": { "type": "string" }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["criterion_id", "assessment", "summary", "basis_refs"],
+      "properties": {
+        "criterion_id": { "$ref": "#/$defs/cri_id" },
+        "assessment": {
+          "enum": ["supported", "partially_supported", "unsupported", "contradicted"]
+        },
+        "code": {
+          "enum": [
+            "insufficient_evidence",
+            "scope_gap",
+            "missing_implementation",
+            "non_operational",
+            "drift",
+            "conflicting_evidence"
+          ]
+        },
+        "summary": { "type": "string" },
+        "basis_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evi_or_rec_id" }
+        }
+      }
+    },
+    "evidence_kind": {
+      "enum": [
+        "git_commit",
+        "git_diff",
+        "file_snapshot",
+        "command_run",
+        "test_run",
+        "artifact",
+        "observation",
+        "extension"
+      ]
+    },
+    "payload_git_commit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository_id", "object_id", "object_format"],
+      "properties": {
+        "repository_id": { "$ref": "#/$defs/repo_id" },
+        "object_id": { "type": "string" },
+        "object_format": { "enum": ["sha1", "sha256"] }
+      }
+    },
+    "payload_git_diff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository_id"],
+      "properties": {
+        "repository_id": { "$ref": "#/$defs/repo_id" },
+        "base_object_id": { "type": "string" },
+        "head_object_id": { "type": "string" },
+        "path": { "type": "string" },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "payload_file_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository_id", "path"],
+      "properties": {
+        "repository_id": { "$ref": "#/$defs/repo_id" },
+        "object_id": { "type": "string" },
+        "path": { "type": "string" },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "payload_command_run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "exit_code"],
+      "properties": {
+        "command": { "type": "string" },
+        "exit_code": { "type": "integer" },
+        "started_at": { "$ref": "#/$defs/timestamp" },
+        "finished_at": { "$ref": "#/$defs/timestamp" },
+        "repository_id": { "$ref": "#/$defs/repo_id" },
+        "workspace_id": { "$ref": "#/$defs/wsp_id" },
+        "working_tree": { "$ref": "#/$defs/working_tree" },
+        "output_digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "payload_test_run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exit_code"],
+      "properties": {
+        "command": { "type": "string" },
+        "exit_code": { "type": "integer" },
+        "started_at": { "$ref": "#/$defs/timestamp" },
+        "finished_at": { "$ref": "#/$defs/timestamp" },
+        "repository_id": { "$ref": "#/$defs/repo_id" },
+        "workspace_id": { "$ref": "#/$defs/wsp_id" },
+        "working_tree": { "$ref": "#/$defs/working_tree" },
+        "output_digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "payload_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "locator": { "type": "string" },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "payload_observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text"],
+      "properties": {
+        "observer": { "$ref": "#/$defs/actor" },
+        "observed_at": { "$ref": "#/$defs/timestamp" },
+        "text": { "type": "string" }
+      }
+    },
+    "payload_extension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["namespace", "extension_kind", "ref"],
+      "properties": {
+        "namespace": { "type": "string" },
+        "extension_kind": { "type": "string" },
+        "ref": { "$ref": "#/$defs/evidence_ref" }
+      }
+    },
+    "prj_id": { "type": "string", "pattern": "^prj_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "top_id": { "type": "string", "pattern": "^top_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "tsk_id": { "type": "string", "pattern": "^tsk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "dcl_id": { "type": "string", "pattern": "^dcl_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "att_id": { "type": "string", "pattern": "^att_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "ate_id": { "type": "string", "pattern": "^ate_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "clm_id": { "type": "string", "pattern": "^clm_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "evi_id": { "type": "string", "pattern": "^evi_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "rec_id": { "type": "string", "pattern": "^rec_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "chk_id": { "type": "string", "pattern": "^chk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "ckr_id": { "type": "string", "pattern": "^ckr_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "ver_id": { "type": "string", "pattern": "^ver_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "set_id": { "type": "string", "pattern": "^set_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "repo_id": { "type": "string", "pattern": "^repo_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "wsp_id": { "type": "string", "pattern": "^wsp_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "blk_id": { "type": "string", "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "brs_id": { "type": "string", "pattern": "^brs_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "dec_id": { "type": "string", "pattern": "^dec_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "cri_id": { "type": "string", "pattern": "^cri_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "evi_or_rec_id": { "type": "string", "pattern": "^(evi|rec)_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "ver_id_or_null": { "type": ["string", "null"], "pattern": "^ver_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "ate_id_or_null": { "type": ["string", "null"], "pattern": "^ate_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "Project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_id", "repositories"],
+      "properties": {
+        "project_id": { "$ref": "#/$defs/prj_id" },
+        "repositories": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/repository_ref" }
+        }
+      }
+    },
+    "Repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository_id", "alias"],
+      "properties": {
+        "repository_id": { "$ref": "#/$defs/repo_id" },
+        "alias": { "type": "string" }
+      }
+    },
+    "Workspace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workspace_id", "repository_id"],
+      "properties": {
+        "workspace_id": { "$ref": "#/$defs/wsp_id" },
+        "repository_id": { "$ref": "#/$defs/repo_id" },
+        "branch": { "type": "string" },
+        "ref": { "type": "string" }
+      }
+    },
+    "Topic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["topic_id", "project_id", "name", "goal", "created_by", "created_at"],
+      "properties": {
+        "topic_id": { "$ref": "#/$defs/top_id" },
+        "project_id": { "$ref": "#/$defs/prj_id" },
+        "name": { "type": "string" },
+        "goal": { "type": "string" },
+        "created_by": { "$ref": "#/$defs/actor" },
+        "created_at": { "$ref": "#/$defs/timestamp" }
+      }
+    },
+    "Task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["task_id", "topic_id", "title"],
+      "properties": {
+        "task_id": { "$ref": "#/$defs/tsk_id" },
+        "topic_id": { "$ref": "#/$defs/top_id" },
+        "title": { "type": "string" },
+        "alias": { "type": "string" }
+      }
+    },
+    "TaskDeclaration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "declaration_id",
+        "task_id",
+        "declared_by",
+        "declared_at",
+        "objective",
+        "criteria"
+      ],
+      "properties": {
+        "declaration_id": { "$ref": "#/$defs/dcl_id" },
+        "task_id": { "$ref": "#/$defs/tsk_id" },
+        "declared_by": { "$ref": "#/$defs/actor" },
+        "declared_at": { "$ref": "#/$defs/timestamp" },
+        "objective": { "type": "string" },
+        "criteria": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/criterion" }
+        },
+        "supersedes": { "$ref": "#/$defs/dcl_id" }
+      }
+    },
+    "Attempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attempt_id",
+        "task_id",
+        "declaration_id",
+        "repository_id",
+        "workspace_id",
+        "executor",
+        "dispatched_by",
+        "dispatched_at"
+      ],
+      "properties": {
+        "attempt_id": { "$ref": "#/$defs/att_id" },
+        "task_id": { "$ref": "#/$defs/tsk_id" },
+        "declaration_id": { "$ref": "#/$defs/dcl_id" },
+        "repository_id": { "$ref": "#/$defs/repo_id" },
+        "workspace_id": { "$ref": "#/$defs/wsp_id" },
+        "executor": { "$ref": "#/$defs/actor" },
+        "dispatched_by": { "$ref": "#/$defs/actor" },
+        "dispatched_at": { "$ref": "#/$defs/timestamp" },
+        "session_id": { "type": "string" }
+      }
+    },
+    "AttemptEnd": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attempt_end_id", "attempt_id", "outcome", "reported_by", "ended_at"],
+      "properties": {
+        "attempt_end_id": { "$ref": "#/$defs/ate_id" },
+        "attempt_id": { "$ref": "#/$defs/att_id" },
+        "outcome": { "enum": ["returned", "failed", "cancelled"] },
+        "reported_by": { "$ref": "#/$defs/actor" },
+        "ended_at": { "$ref": "#/$defs/timestamp" },
+        "reason": { "type": "string" },
+        "supersedes": { "$ref": "#/$defs/ate_id" }
+      }
+    },
+    "Claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_id",
+        "task_id",
+        "attempt_id",
+        "declaration_id",
+        "statement",
+        "evidence_ids",
+        "claimed_by",
+        "claimed_at"
+      ],
+      "properties": {
+        "claim_id": { "$ref": "#/$defs/clm_id" },
+        "task_id": { "$ref": "#/$defs/tsk_id" },
+        "attempt_id": { "$ref": "#/$defs/att_id" },
+        "declaration_id": { "$ref": "#/$defs/dcl_id" },
+        "statement": { "type": "string" },
+        "evidence_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evi_id" }
+        },
+        "claimed_by": { "$ref": "#/$defs/actor" },
+        "claimed_at": { "$ref": "#/$defs/timestamp" }
+      }
+    },
+    "Evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_id", "kind", "submitted_by", "submitted_at", "payload"],
+      "properties": {
+        "evidence_id": { "$ref": "#/$defs/evi_id" },
+        "kind": { "$ref": "#/$defs/evidence_kind" },
+        "submitted_by": { "$ref": "#/$defs/actor" },
+        "submitted_at": { "$ref": "#/$defs/timestamp" },
+        "payload": { "type": "object" },
+        "note": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "kind": { "const": "git_commit" } },
+            "required": ["kind"]
+          },
+          "then": { "properties": { "payload": { "$ref": "#/$defs/payload_git_commit" } } }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "git_diff" } },
+            "required": ["kind"]
+          },
+          "then": { "properties": { "payload": { "$ref": "#/$defs/payload_git_diff" } } }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "file_snapshot" } },
+            "required": ["kind"]
+          },
+          "then": { "properties": { "payload": { "$ref": "#/$defs/payload_file_snapshot" } } }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "command_run" } },
+            "required": ["kind"]
+          },
+          "then": { "properties": { "payload": { "$ref": "#/$defs/payload_command_run" } } }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "test_run" } },
+            "required": ["kind"]
+          },
+          "then": { "properties": { "payload": { "$ref": "#/$defs/payload_test_run" } } }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "artifact" } },
+            "required": ["kind"]
+          },
+          "then": { "properties": { "payload": { "$ref": "#/$defs/payload_artifact" } } }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "observation" } },
+            "required": ["kind"]
+          },
+          "then": { "properties": { "payload": { "$ref": "#/$defs/payload_observation" } } }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "extension" } },
+            "required": ["kind"]
+          },
+          "then": { "properties": { "payload": { "$ref": "#/$defs/payload_extension" } } }
+        }
+      ]
+    },
+    "Reconciliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reconciliation_id",
+        "evidence_id",
+        "checked_by",
+        "checked_at",
+        "method",
+        "observed_context",
+        "checks",
+        "limitations"
+      ],
+      "properties": {
+        "reconciliation_id": { "$ref": "#/$defs/rec_id" },
+        "evidence_id": { "$ref": "#/$defs/evi_id" },
+        "checked_by": { "$ref": "#/$defs/actor" },
+        "checked_at": { "$ref": "#/$defs/timestamp" },
+        "method": { "$ref": "#/$defs/method" },
+        "observed_context": { "$ref": "#/$defs/observed_context" },
+        "checks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/reconciliation_check" }
+        },
+        "limitations": { "type": "array", "items": { "type": "string" } },
+        "supersedes": { "$ref": "#/$defs/rec_id" }
+      }
+    },
+    "CheckInvocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "check_invocation_id",
+        "subject",
+        "checker",
+        "evaluated_snapshot",
+        "invoked_by",
+        "invoked_at"
+      ],
+      "properties": {
+        "check_invocation_id": { "$ref": "#/$defs/chk_id" },
+        "subject": { "$ref": "#/$defs/claim_subject" },
+        "checker": { "$ref": "#/$defs/checker" },
+        "evaluated_snapshot": { "$ref": "#/$defs/evaluated_snapshot" },
+        "invoked_by": { "$ref": "#/$defs/actor" },
+        "invoked_at": { "$ref": "#/$defs/timestamp" }
+      }
+    },
+    "CheckResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "check_result_id",
+        "check_invocation_id",
+        "outcome",
+        "produced_by",
+        "completed_at"
+      ],
+      "properties": {
+        "check_result_id": { "$ref": "#/$defs/ckr_id" },
+        "check_invocation_id": { "$ref": "#/$defs/chk_id" },
+        "outcome": { "enum": ["verdict_emitted", "verdict_withheld", "check_failed"] },
+        "produced_by": { "$ref": "#/$defs/actor" },
+        "completed_at": { "$ref": "#/$defs/timestamp" },
+        "diagnostics": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/diagnostic" }
+        },
+        "reconciliation_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/rec_id" }
+        },
+        "verdict_id": { "$ref": "#/$defs/ver_id_or_null" }
+      }
+    },
+    "Verdict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verdict_id",
+        "subject",
+        "declaration_id",
+        "scope",
+        "conclusion",
+        "finality",
+        "basis",
+        "findings",
+        "confidence",
+        "rationale",
+        "uncertainty",
+        "limitations",
+        "issued_by",
+        "issued_at"
+      ],
+      "properties": {
+        "verdict_id": { "$ref": "#/$defs/ver_id" },
+        "subject": { "$ref": "#/$defs/claim_subject" },
+        "declaration_id": { "$ref": "#/$defs/dcl_id" },
+        "scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["evaluated_criteria", "unevaluated_criteria"],
+          "properties": {
+            "evaluated_criteria": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/cri_id" }
+            },
+            "unevaluated_criteria": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/cri_id" }
+            }
+          }
+        },
+        "conclusion": {
+          "enum": ["supported", "partially_supported", "unsupported", "contradicted"]
+        },
+        "finality": { "enum": ["preliminary", "final"] },
+        "basis": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["evidence_ids", "reconciliation_ids"],
+          "properties": {
+            "evidence_ids": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/evi_id" }
+            },
+            "reconciliation_ids": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/rec_id" }
+            }
+          }
+        },
+        "findings": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "rationale": { "type": "string" },
+        "uncertainty": { "type": "array", "items": { "type": "string" } },
+        "limitations": { "type": "array", "items": { "type": "string" } },
+        "issued_by": { "$ref": "#/$defs/actor" },
+        "issued_at": { "$ref": "#/$defs/timestamp" },
+        "checker": { "$ref": "#/$defs/checker" },
+        "native_judgment": { "$ref": "#/$defs/native_judgment" }
+      }
+    },
+    "Settlement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "settlement_id",
+        "task_id",
+        "attempt_id",
+        "decision",
+        "decided_by",
+        "decided_at",
+        "basis",
+        "rationale"
+      ],
+      "properties": {
+        "settlement_id": { "$ref": "#/$defs/set_id" },
+        "task_id": { "$ref": "#/$defs/tsk_id" },
+        "attempt_id": { "$ref": "#/$defs/att_id" },
+        "decision": { "enum": ["accept", "retry", "abandon", "land"] },
+        "decided_by": { "$ref": "#/$defs/actor" },
+        "decided_at": { "$ref": "#/$defs/timestamp" },
+        "basis": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "verdict_id": { "$ref": "#/$defs/ver_id_or_null" },
+            "attempt_end_id": { "$ref": "#/$defs/ate_id_or_null" },
+            "blocker_ids": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/blk_id" }
+            }
+          }
+        },
+        "verification_exception": { "type": ["string", "null"] },
+        "rationale": { "type": "string" },
+        "supersedes": { "$ref": "#/$defs/set_id" }
+      }
+    },
+    "Blocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["blocker_id", "task_id", "description", "raised_by", "raised_at"],
+      "properties": {
+        "blocker_id": { "$ref": "#/$defs/blk_id" },
+        "task_id": { "$ref": "#/$defs/tsk_id" },
+        "attempt_id": { "$ref": "#/$defs/att_id" },
+        "description": { "type": "string" },
+        "raised_by": { "$ref": "#/$defs/actor" },
+        "raised_at": { "$ref": "#/$defs/timestamp" }
+      }
+    },
+    "BlockerResolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "blocker_resolution_id",
+        "blocker_id",
+        "disposition",
+        "resolved_by",
+        "resolved_at"
+      ],
+      "properties": {
+        "blocker_resolution_id": { "$ref": "#/$defs/brs_id" },
+        "blocker_id": { "$ref": "#/$defs/blk_id" },
+        "disposition": { "enum": ["resolved", "withdrawn"] },
+        "resolved_by": { "$ref": "#/$defs/actor" },
+        "resolved_at": { "$ref": "#/$defs/timestamp" },
+        "explanation": { "type": "string" },
+        "evidence_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evi_id" }
+        },
+        "supersedes": { "$ref": "#/$defs/brs_id" }
+      }
+    },
+    "Decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision_id",
+        "subject",
+        "role",
+        "question",
+        "choice",
+        "rationale",
+        "decided_by",
+        "decided_at"
+      ],
+      "properties": {
+        "decision_id": { "$ref": "#/$defs/dec_id" },
+        "subject": { "$ref": "#/$defs/decision_subject" },
+        "role": { "enum": ["execution_choice", "next_action"] },
+        "question": { "type": "string" },
+        "choice": { "type": "string" },
+        "rationale": { "type": "string" },
+        "decided_by": { "$ref": "#/$defs/actor" },
+        "decided_at": { "$ref": "#/$defs/timestamp" },
+        "basis": { "type": "array", "items": { "type": "string" } },
+        "supersedes": { "$ref": "#/$defs/dec_id" }
+      }
+    },
+    "AnyRecord": {
+      "oneOf": [
+        { "$ref": "#/$defs/Project" },
+        { "$ref": "#/$defs/Repository" },
+        { "$ref": "#/$defs/Workspace" },
+        { "$ref": "#/$defs/Topic" },
+        { "$ref": "#/$defs/Task" },
+        { "$ref": "#/$defs/TaskDeclaration" },
+        { "$ref": "#/$defs/Attempt" },
+        { "$ref": "#/$defs/AttemptEnd" },
+        { "$ref": "#/$defs/Claim" },
+        { "$ref": "#/$defs/Evidence" },
+        { "$ref": "#/$defs/Reconciliation" },
+        { "$ref": "#/$defs/CheckInvocation" },
+        { "$ref": "#/$defs/CheckResult" },
+        { "$ref": "#/$defs/Verdict" },
+        { "$ref": "#/$defs/Settlement" },
+        { "$ref": "#/$defs/Blocker" },
+        { "$ref": "#/$defs/BlockerResolution" },
+        { "$ref": "#/$defs/Decision" }
+      ]
+    }
+  },
+  "$ref": "#/$defs/AnyRecord"
+}
