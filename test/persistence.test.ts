@@ -162,4 +162,21 @@ describe('journal persistence failure', () => {
     const after = await reopened.createTask({ topic_id, title: 'after journal loss' });
     expect(after.ok).toBe(true);
   });
+
+  it('keeps state.json accessible when the journal contains a malformed entry (SPEC §6.1)', async () => {
+    const { root, topic_id } = await buildLedger('tallyback-persist-');
+
+    const { appendFile } = await import('node:fs/promises');
+    // Valid JSON, wrong shape: a bare `null` line is exactly the kind of forensic-journal
+    // corruption the governing invariant says must not disable canonical-state access.
+    await appendFile(join(root, '.tallyback', 'history.jsonl'), 'null\n', 'utf8');
+
+    const reopened = await Store.open(root);
+    expect(reopened.validate_snapshot().ok).toBe(true);
+
+    // The next mutation computes its journal seq from the (now malformed) history without
+    // throwing.
+    const after = await reopened.createTask({ topic_id, title: 'after malformed journal line' });
+    expect(after.ok).toBe(true);
+  });
 });

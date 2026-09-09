@@ -238,6 +238,22 @@ describe('codex-5 finding 5 — a missing bindings file is repository_unbound', 
     if (!result.ok) expect(result.code).toBe('environment_unavailable');
   });
 
+  it('reports environment_unavailable, not an unhandled throw, for syntactically valid JSON of the wrong shape', async () => {
+    const root = await tempRoot('tallyback-c5e-');
+    const path = join(root, 'runtime', 'bindings.json');
+    await mkdir(join(root, 'runtime'), { recursive: true });
+    // `null` parses fine but is not a bindings object -- `resolveWorkspace` must not let
+    // `bindings.repositories` throw on the way to a structured ResolutionResult.
+    await writeFile(path, 'null', 'utf8');
+    const result = await resolveWorkspace(
+      'repo_0190b1c0-0000-7000-8000-000000000001',
+      'wsp_0190b1c0-0000-7000-8000-000000000001',
+      { bindingsPath: path },
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.code).toBe('environment_unavailable');
+  });
+
   it('still resolves when a well-formed bindings file is provided', async () => {
     const root = await tempRoot('tallyback-c5e-');
     await initGitRepo(root);

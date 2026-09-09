@@ -14,8 +14,8 @@
  * `git`; `src/land/git.ts` supplies the real, Git-backed implementation.
  */
 
-import type { Attempt, Settlement, Snapshot, Workspace } from '../contract/index.js';
-import { computeProjectionValues } from '../ledger/projections.js';
+import type { Attempt, Settlement, Snapshot, Verdict, Workspace } from '../contract/index.js';
+import { computeProjectionValues, isLandSettlementVerificationReady } from '../ledger/projections.js';
 import { effectiveRecords } from '../ledger/supersession.js';
 
 /** Why a candidate could not be classified `git_ready` (design §4). */
@@ -90,9 +90,26 @@ const LAND_CODES = {
   WORKSPACE_BRANCH_MISSING: 'land.workspace_branch_missing',
 } as const;
 
-function findEffectiveLandSettlements(snapshot: Snapshot, taskId: string): Settlement[] {
+/**
+ * A task's effective `land` Settlements that individually clear the verification bar
+ * (`isLandSettlementVerificationReady`) — the same per-settlement check
+ * `computeProjectionValues` used to decide the task belongs in `ready_to_land` at all.
+ * A task can have more than one effective `land` Settlement (distinct attempts); being in
+ * `ready_to_land` only promises ONE of them is ready, so this must not return every
+ * settlement of the task — that would let a still-`preliminary`-verdict settlement of a
+ * second attempt ride along as `git_ready` merely because a *different* attempt's
+ * settlement was what made the task qualify.
+ */
+function findEffectiveLandSettlements(
+  snapshot: Snapshot,
+  taskId: string,
+  verdictById: ReadonlyMap<string, Verdict>,
+): Settlement[] {
   return effectiveRecords(snapshot.settlements).filter(
-    (s) => s.task_id === taskId && s.decision === 'land',
+    (s) =>
+      s.task_id === taskId &&
+      s.decision === 'land' &&
+      isLandSettlementVerificationReady(s, verdictById),
   );
 }
 
@@ -268,9 +285,10 @@ export async function buildLandReport(
 ): Promise<LandReport> {
   const { ready_to_land } = computeProjectionValues(snapshot);
   const taskIds = [...ready_to_land].sort();
+  const verdictById = new Map(snapshot.verdicts.map((v) => [v.verdict_id, v]));
 
   const settlements = taskIds.flatMap((taskId) =>
-    findEffectiveLandSettlements(snapshot, taskId),
+    findEffectiveLandSettlements(snapshot, taskId, verdictById),
   );
   const candidates = await Promise.all(
     settlements.map((settlement) => classify(snapshot, settlement, targetBranch, resolve)),

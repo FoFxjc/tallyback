@@ -436,4 +436,89 @@ describe('computeConflicts — grouping correctness', () => {
     expect(report.ready).toHaveLength(2);
     expect(report.conflicts).toHaveLength(0);
   });
+
+  it("does not admit a task's preliminary-verdict land Settlement just because another attempt's Settlement made the task ready_to_land", async () => {
+    // Task A: attempt 1 settles `land` citing a *preliminary* Verdict (ready_to_land's own
+    // per-settlement rule says this one is NOT individually ready), attempt 2 settles
+    // `land` via a verification_exception (this one IS ready). Both are effective
+    // Settlements of the same task, so the task appears in `ready_to_land` -- but only
+    // attempt 2's settlement should ever reach `git_ready`.
+    const a = await buildLedger('tallyback-land-preliminary-');
+
+    const verdictId = 'ver_0190b1c0-0000-7000-8000-0000000000aa';
+    const appended = await a.store.append({
+      kind: 'append_records',
+      expected_revision: a.store.currentRevision(),
+      records: [
+        {
+          verdict_id: verdictId,
+          subject: { kind: 'claim', id: a.claim_id },
+          declaration_id: a.declaration_id,
+          scope: { evaluated_criteria: [a.criterion_id], unevaluated_criteria: [] },
+          conclusion: 'supported',
+          finality: 'preliminary',
+          basis: { evidence_ids: [a.evidence_id], reconciliation_ids: [] },
+          findings: [
+            {
+              criterion_id: a.criterion_id,
+              assessment: 'supported',
+              summary: 'still checking',
+              basis_refs: [],
+            },
+          ],
+          confidence: { level: 'low', rationale: 'preliminary pass' },
+          rationale: 'not final yet',
+          uncertainty: [],
+          limitations: [],
+          issued_by: { kind: 'tool', id: 'tallyback-check' },
+          issued_at: null,
+        },
+      ],
+      provenance: { submitted_by: { kind: 'tool', id: 'tallyback' } },
+    });
+    expect(appended.ok).toBe(true);
+
+    const preliminarySettled = await a.store.settle({
+      task_id: a.task_id,
+      attempt_id: a.attempt_id,
+      decision: 'land',
+      decided_by: ALICE,
+      basis: { verdict_id: verdictId, attempt_end_id: null, blocker_ids: [] },
+      rationale: 'citing a still-preliminary verdict',
+    });
+    expect(preliminarySettled.ok).toBe(true);
+
+    const secondWorkspace = unwrap<{ workspace: { workspace_id: string } }>(
+      await a.store.registerWorkspace({ repository_id: a.repository_id, branch: 'feature/ready' }),
+    ).workspace;
+    const secondAttempt = unwrap<{ attempt: { attempt_id: string } }>(
+      await a.store.dispatch({
+        task_id: a.task_id,
+        declaration_id: a.declaration_id,
+        repository_id: a.repository_id,
+        workspace_id: secondWorkspace.workspace_id,
+        executor: { kind: 'executor', id: 'agent-8' },
+        dispatched_by: ALICE,
+      }),
+    ).attempt;
+    const exceptionSettled = await a.store.settle({
+      task_id: a.task_id,
+      attempt_id: secondAttempt.attempt_id,
+      decision: 'land',
+      decided_by: ALICE,
+      basis: { verdict_id: null, attempt_end_id: null, blocker_ids: [] },
+      verification_exception: 'accepted by hand',
+      rationale: "the task's other attempt is ready",
+    });
+    expect(exceptionSettled.ok).toBe(true);
+
+    const snapshot = a.store.currentSnapshot();
+    expect(snapshot.tasks.some((t) => t.task_id === a.task_id)).toBe(true);
+
+    const resolver: GitResolver = () => ({ status: 'ready', files: ['x.ts'] });
+    const report = await buildLandReport(snapshot, resolver, TARGET_BRANCH);
+
+    expect(report.ready).toHaveLength(1);
+    expect(report.ready[0]!.attempt_id).toBe(secondAttempt.attempt_id);
+  });
 });

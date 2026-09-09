@@ -47,6 +47,7 @@ export type { AppendFailure, AppendResult, AppendSuccess } from './append.js';
 export {
   computeProjections,
   computeProjectionValues,
+  isLandSettlementVerificationReady,
   isTaskStale,
   lastActivityAt,
   staleTaskIds,

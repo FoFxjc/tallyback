@@ -598,7 +598,14 @@ export class LedgerStore {
   private async nextHistorySeq(): Promise<number> {
     const entries = await readHistory(this.root);
     if (entries.length === 0) return 1;
-    const max = entries.reduce((acc, e) => Math.max(acc, typeof e.seq === 'number' ? e.seq : 0), 0);
+    // `history.jsonl` is non-authoritative forensic data (SPEC §6.1 / CLAUDE.md): a
+    // malformed line (e.g. the valid-JSON-but-wrong-shape `null`) must not disable access
+    // to the canonical `state.json` it merely journals, so a non-object entry contributes
+    // 0 to the max rather than throwing on `e.seq`.
+    const max = entries.reduce((acc, e) => {
+      const seq = e !== null && typeof e === 'object' && typeof e.seq === 'number' ? e.seq : 0;
+      return Math.max(acc, seq);
+    }, 0);
     return max + 1;
   }
 }

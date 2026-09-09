@@ -20,7 +20,7 @@ import { readFile } from 'node:fs/promises';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import { validate_project_manifest } from '../contract/index.js';
+import { validate_bindings, validate_project_manifest } from '../contract/index.js';
 import type { ObservedContext } from '../contract/index.js';
 
 export type { ObservedContext, WorkingTreeState } from '../contract/index.js';
@@ -110,7 +110,18 @@ export async function loadBindings(path?: string): Promise<BindingsFile> {
     throw new Error('resolution.repository_unbound: no runtime/bindings.json found');
   }
   const raw = await readFile(resolved, 'utf8');
-  return JSON.parse(raw) as BindingsFile;
+  const parsed: unknown = JSON.parse(raw);
+  // A syntactically valid JSON value that is not a valid bindings shape (e.g. a bare
+  // `null`) must fail here, inside the caller's try/catch, rather than as an unhandled
+  // exception the first time a caller reads `.repositories` off it — the same
+  // schema-validated path `src/ledger/snapshot.ts`'s `readBindings` already uses.
+  const validation = validate_bindings(parsed);
+  if (!validation.ok) {
+    throw new Error(
+      `resolution.environment_unavailable: ${resolved} does not satisfy bindings.schema.json (${validation.message ?? validation.code})`,
+    );
+  }
+  return parsed as BindingsFile;
 }
 
 interface GitSuccess {

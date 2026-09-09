@@ -8,7 +8,7 @@
  * the canonical section of `state.json` (only into the discardable `projections` slot).
  */
 
-import type { Projections, Snapshot } from '../contract/index.js';
+import type { Projections, Settlement, Snapshot, Verdict } from '../contract/index.js';
 import { DEFAULT_PROJECTION_POLICY } from './snapshot.js';
 import { effectiveRecords } from './supersession.js';
 
@@ -42,6 +42,25 @@ function claimToTask(snapshot: Snapshot): Map<string, string> {
   const map = new Map<string, string>();
   for (const claim of snapshot.claims) map.set(claim.claim_id, claim.task_id);
   return map;
+}
+
+/**
+ * Whether a single `land` Settlement's own basis clears the verification bar (SPEC §5.10 /
+ * §5.11) — a final Verdict, or an explicit `verification_exception` when there is no
+ * Verdict at all. Exported so a host layer classifying individual land candidates (Land,
+ * `src/land/report.ts`) applies the identical per-settlement rule this projection uses to
+ * decide `ready_to_land` at the task level — a task can have more than one effective
+ * `land` Settlement (distinct attempts), and only the ones that individually clear this
+ * bar are actually ready, not every settlement of a task that has at least one that is.
+ */
+export function isLandSettlementVerificationReady(
+  settlement: Settlement,
+  verdictById: ReadonlyMap<string, Verdict>,
+): boolean {
+  const verdictId = settlement.basis.verdict_id;
+  return verdictId !== null && verdictId !== undefined
+    ? verdictById.get(verdictId)?.finality === 'final'
+    : settlement.verification_exception !== null && settlement.verification_exception !== undefined;
 }
 
 export function computeProjectionValues(snapshot: Snapshot, stale?: StalePolicy): ProjectionValues {
@@ -87,13 +106,10 @@ export function computeProjectionValues(snapshot: Snapshot, stale?: StalePolicy)
   for (const settlement of effectiveRecords(snapshot.settlements)) {
     pushInto(settled, settlement.task_id, settlement.settlement_id);
     if (settlement.decision !== 'land') continue;
-    const verdictId = settlement.basis.verdict_id;
-    const verificationReady =
-      verdictId !== null && verdictId !== undefined
-        ? verdictById.get(verdictId)?.finality === 'final'
-        : settlement.verification_exception !== null &&
-          settlement.verification_exception !== undefined;
-    if (verificationReady && !ready_to_land.includes(settlement.task_id)) {
+    if (
+      isLandSettlementVerificationReady(settlement, verdictById) &&
+      !ready_to_land.includes(settlement.task_id)
+    ) {
       ready_to_land.push(settlement.task_id);
     }
   }
