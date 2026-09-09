@@ -17,7 +17,7 @@ export const CONTRACT_NAME = 'tallyback';
 export const SUPPORTED_CONTRACT_VERSIONS = ['1.0.0'];
 
 /** Stable feature / provider-interface identifiers exposed by this implementation. */
-export const FEATURE_INTERFACES = ['store', 'check', 'migration'] as const;
+export const FEATURE_INTERFACES = ['store', 'check', 'migration', 'land', 'view', 'watch'] as const;
 
 export interface CapabilityHandshake {
   contract: string;

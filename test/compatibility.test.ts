@@ -19,7 +19,7 @@ describe('capability handshake', () => {
     expect(h.implementation_version).toBe(IMPLEMENTATION_VERSION);
     expect(h.command_api_version).toBe(COMMAND_API_VERSION);
     expect(h.supported_contract_versions).toEqual(['1.0.0']);
-    expect(h.features).toEqual(['store', 'check', 'migration']);
+    expect(h.features).toEqual(['store', 'check', 'migration', 'land', 'view', 'watch']);
   });
 
   it('returns a defensive copy (mutating the result does not leak state)', () => {

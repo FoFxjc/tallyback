@@ -1,0 +1,5 @@
+{
+  "name": "tallyback",
+  "description": "Skill for driving a Tallyback-tracked task through declare/dispatch/observe/verify/settle, plus the land/view/watch read-only reports.",
+  "version": "0.1.0"
+}
