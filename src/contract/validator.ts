@@ -1035,8 +1035,17 @@ function checkSettlementBasisMatrix(ctx: GraphContext): ValidationResult | null 
         );
       }
     } else if (decision === 'retry' || decision === 'abandon') {
+      // SPEC §5 (per-action matrix): verification_exception is documented as "the
+      // exceptional accept/land override" — it has no meaning for retry/abandon, so it is
+      // forbidden here exactly like verdict_id, not merely left unchecked.
       if (hasVerdict) {
         return failResult('invariant.settlement_basis_matrix', `${decision} must not cite a verdict`);
+      }
+      if (hasException) {
+        return failResult(
+          'invariant.settlement_basis_matrix',
+          `${decision} must not cite a verification_exception (accept/land only)`,
+        );
       }
     }
   }
@@ -1261,6 +1270,15 @@ function checkOneCheckResultPerInvocation(current: Snapshot, newRecords: AnyReco
 /** TB-LC-004 — at most one open (un-ended) Attempt owns the same Workspace. */
 function checkWorkspaceExclusivity(current: Snapshot, newRecords: AnyRecord[]): ValidationResult | null {
   const ended = existingAttemptEnds(current);
+  // An attempt_end appended in THIS same operation ends its attempt too — otherwise a
+  // legitimate single-operation "end attempt A, dispatch attempt B to the same workspace"
+  // append is rejected: A would still read as open below purely because its end hasn't
+  // reached `current` yet.
+  for (const rec of newRecords) {
+    if (recordTypeOf(rec)?.type !== 'attempt_end') continue;
+    const attemptId = strField(rec, 'attempt_id');
+    if (attemptId !== null) ended.add(attemptId);
+  }
   const openByWorkspace = new Map<string, string>();
   for (const rec of allRecords(current)) {
     if (recordTypeOf(rec)?.type !== 'attempt') continue;

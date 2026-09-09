@@ -662,6 +662,19 @@ export class Store extends LedgerStore {
         message: `no Claim ${input.claim_id} in this ledger`,
       };
     }
+    // The records.schema.json CheckerMeta shape has no minLength on id/version, so an
+    // empty string is schema-valid — this guard is the only thing standing between an
+    // empty checker identity and a recorded CheckInvocation. `produceCheckInvocation`
+    // (src/check/invocation.ts) enforces the same rule for its own callers; without this,
+    // the CLI's `begin-check` command could record what `produceCheckInvocation`'s callers
+    // never could.
+    if (!input.checker.id || !input.checker.version) {
+      return {
+        ok: false,
+        code: 'check_error',
+        message: 'CheckInvocation requires a non-empty checker id and version',
+      };
+    }
     // A caller-supplied `expected_revision` is a pre-flight assertion ("I read the ledger
     // at revision X"), checked against the snapshot this method is about to hash. It is
     // NEVER passed through to the append as the revision to submit at — see below.
