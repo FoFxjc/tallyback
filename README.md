@@ -115,7 +115,7 @@ Tallyback is modular. Users should be able to adopt only the parts they need.
 | **Tallyback Check**  | Semantic verification of implementation and merge-readiness claims            | Existing foundation in [done-or-not](https://github.com/FoFxjc/done-or-not)             |
 | **Tallyback Watch**  | Optional external detection of stale, lost, or inconsistent execution         | Planned                                                                                 |
 | **Tallyback Land**   | Integration readiness, ordering, conflict awareness, and merge settlement     | v1 implemented — read-only readiness/conflict report over `ready_to_land` (`src/land/`) |
-| **Tallyback View**   | Local project status, reports, evidence trails, and visualization             | Planned                                                                                 |
+| **Tallyback View**   | Local project status, reports, evidence trails, and visualization             | v1 implemented — one compact per-task report (`src/view/`)                             |
 | **Tallyback Bridge** | Adapters for agent hosts, stores, and worktree managers                       | Planned                                                                                 |
 
 Possible adoption levels:

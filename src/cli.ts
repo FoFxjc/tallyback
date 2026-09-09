@@ -23,6 +23,7 @@ import {
   type MigrationOutcome,
 } from './check/migration-workflow.js';
 import { buildLandReport, createGitResolver, type LandReport } from './land/index.js';
+import { buildTaskViews, DEFAULT_STALE_AFTER_MS, summarizeTaskViews } from './view/index.js';
 import { canMutateContractVersion, handshake } from './version.js';
 import type {
   Actor,
@@ -171,8 +172,7 @@ function diagnostics(args: Args, key: string): Diagnostic[] {
  * SPEC §4.2 — the alias is a local display affordance. It is resolved here, at the host
  * edge, and only the canonical id is ever placed in a wire reference.
  */
-function taskRef(store: Store, args: Args, key = 'task-id'): string {
-  const raw = str(args, key);
+function resolveTaskRefValue(store: Store, raw: string, key: string): string {
   const resolved = store.resolveTaskRef(raw);
   if (resolved === null) {
     throw new CliError(
@@ -180,6 +180,15 @@ function taskRef(store: Store, args: Args, key = 'task-id'): string {
     );
   }
   return resolved;
+}
+
+function taskRef(store: Store, args: Args, key = 'task-id'): string {
+  return resolveTaskRefValue(store, str(args, key), key);
+}
+
+/** Resolve a repeatable `--task-id` into canonical ids (design: backs View's narrowing). */
+function taskRefs(store: Store, args: Args, key = 'task-id'): string[] {
+  return strArray(args, key).map((raw) => resolveTaskRefValue(store, raw, key));
 }
 
 class CliError extends Error {}
@@ -320,6 +329,11 @@ async function run(): Promise<void> {
 
   if (command === 'land') {
     await runLand(store, args);
+    return;
+  }
+
+  if (command === 'view') {
+    await runView(store, args);
     return;
   }
 
@@ -549,8 +563,8 @@ async function dispatch(store: Store, command: string, args: Args): Promise<unkn
     default:
       throw new CliError(
         `unknown command "${command}". Available: handshake, version, init, migrate, ` +
-          `validate, reconcile, show, list, bindings, land, topic, task, workspace, bind, ` +
-          `declare, dispatch, end, claim, evidence, begin-check, record-check, block, ` +
+          `validate, reconcile, show, list, bindings, land, view, topic, task, workspace, ` +
+          `bind, declare, dispatch, end, claim, evidence, begin-check, record-check, block, ` +
           `resolve, settle, decision`,
       );
   }
@@ -652,6 +666,36 @@ async function runLand(store: Store, args: Args): Promise<void> {
   process.stderr.write(
     `land: ${report.ready.length} ready, ${report.unresolved.length} unresolved, ` +
       `${report.conflicts.length} conflict group(s) against "${targetBranch}"\n`,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// View (read-only, compact per-task tallyback projection — docs/view-design.md)
+// ---------------------------------------------------------------------------
+
+/**
+ * `tallyback view [--task-id <id>]... [--stale-after-ms <n>]` — assembles the compact
+ * per-task shape SPEC §6 calls a "tallyback": declaration, attempts, claims, evidence
+ * pointers, blockers, verification, settlement, status, and next_action. Read-only; never
+ * writes to the ledger (design §2).
+ */
+async function runView(store: Store, args: Args): Promise<void> {
+  const taskIds = taskRefs(store, args);
+  const staleAfterMsRaw = optionalStr(args, 'stale-after-ms');
+  const staleAfterMs = staleAfterMsRaw !== undefined ? Number(staleAfterMsRaw) : DEFAULT_STALE_AFTER_MS;
+  if (!Number.isFinite(staleAfterMs) || staleAfterMs < 0) {
+    throw new CliError('--stale-after-ms must be a non-negative finite number');
+  }
+
+  const snapshot = store.currentSnapshot();
+  const policy = { now: new Date().toISOString(), staleAfterMs };
+  const views = buildTaskViews(snapshot, taskIds.length > 0 ? taskIds : undefined, policy);
+  const summary = summarizeTaskViews(views);
+
+  print({ generated_from_revision: snapshot.revision, tasks: views, summary });
+  process.stderr.write(
+    `view: ${summary.task_count} task(s), ${summary.blocked} blocked, ` +
+      `${summary.ready_to_land} ready_to_land, ${summary.stale} stale, ${summary.settled} settled\n`,
   );
 }
 
