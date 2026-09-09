@@ -24,6 +24,7 @@ import {
 } from './check/migration-workflow.js';
 import { buildLandReport, createGitResolver, type LandReport } from './land/index.js';
 import { buildTaskViews, DEFAULT_STALE_AFTER_MS, summarizeTaskViews } from './view/index.js';
+import { buildWatchReport, createWatchResolver } from './watch/index.js';
 import { canMutateContractVersion, handshake } from './version.js';
 import type {
   Actor,
@@ -337,6 +338,11 @@ async function run(): Promise<void> {
     return;
   }
 
+  if (command === 'watch') {
+    await runWatch(store, args);
+    return;
+  }
+
   // Mutating commands: preflight the capability handshake against the ledger.
   preflight(store.currentSnapshot().schema_version);
 
@@ -563,7 +569,7 @@ async function dispatch(store: Store, command: string, args: Args): Promise<unkn
     default:
       throw new CliError(
         `unknown command "${command}". Available: handshake, version, init, migrate, ` +
-          `validate, reconcile, show, list, bindings, land, view, topic, task, workspace, ` +
+          `validate, reconcile, show, list, bindings, land, view, watch, topic, task, workspace, ` +
           `bind, declare, dispatch, end, claim, evidence, begin-check, record-check, block, ` +
           `resolve, settle, decision`,
       );
@@ -696,6 +702,38 @@ async function runView(store: Store, args: Args): Promise<void> {
   process.stderr.write(
     `view: ${summary.task_count} task(s), ${summary.blocked} blocked, ` +
       `${summary.ready_to_land} ready_to_land, ${summary.stale} stale, ${summary.settled} settled\n`,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Watch (read-only, on-demand lost/inconsistent detection — docs/watch-design.md)
+// ---------------------------------------------------------------------------
+
+/**
+ * `tallyback watch [--stale-after-ms <n>]` — cross-checks every open Attempt (no
+ * `AttemptEnd`, no effective Settlement) against live workspace/Git state: `lost` when the
+ * bound workspace no longer resolves, `inconsistent` when a Claim exists but the branch
+ * shows no commits since dispatch, `unresolved` when there is no branch to check, plus the
+ * ledger's own `stale` projection. Read-only and advisory only: no Blocker is raised, no
+ * ledger write (design §2).
+ */
+async function runWatch(store: Store, args: Args): Promise<void> {
+  const staleAfterMsRaw = optionalStr(args, 'stale-after-ms');
+  const staleAfterMs = staleAfterMsRaw !== undefined ? Number(staleAfterMsRaw) : DEFAULT_STALE_AFTER_MS;
+  if (!Number.isFinite(staleAfterMs) || staleAfterMs < 0) {
+    throw new CliError('--stale-after-ms must be a non-negative finite number');
+  }
+
+  const snapshot = store.currentSnapshot();
+  const policy = { now: new Date().toISOString(), staleAfterMs };
+  const resolver = createWatchResolver();
+  const report = await buildWatchReport(snapshot, resolver, policy);
+
+  print(report);
+  process.stderr.write(
+    `watch: ${report.summary.open_attempts} open attempt(s), ${report.summary.stale} stale, ` +
+      `${report.summary.lost} lost, ${report.summary.inconsistent} inconsistent, ` +
+      `${report.summary.unresolved} unresolved\n`,
   );
 }
 
