@@ -26,9 +26,11 @@ for the normative wire-format contract this implementation exists to satisfy.
   (`npm run manifest:regen`) after any change to a normative contract artifact.
 - `test/` — vitest suite, including targeted regression tests per review round
   (`codex-regressions-*.test.ts`, `review-regressions.test.ts`).
-- `docs/` — planning/design docs (`implementation-plan.md`, `contract-bundle.md`,
-  `schema-outline.md`, `invariants-outline.md`, `fixture-matrix.md`, `migration.md`,
-  `branch-workflow.md`).
+- `docs/` — planning/process docs (`implementation-plan.md`, `contract-bundle.md`,
+  `migration.md`, `branch-workflow.md`). `schema-outline.md`, `invariants-outline.md`,
+  and `fixture-matrix.md` were pre-implementation planning docs, since superseded by the
+  real `contract/schemas/`, `contract/invariants.json`, and `contract/fixtures/` — they
+  were removed rather than left to drift.
 
 ## Commands
 

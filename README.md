@@ -229,15 +229,18 @@ Tallyback does not ask you to trust the executor's final message. It keeps the r
 
 ## Contract specification
 
-The v1 architecture is specified as a versioned wire-format contract. Status: **draft
-for review — documentation only**; no schema, validator, or foundation change has been
-written yet.
+The v1 architecture is specified as a versioned wire-format contract. Status: **frozen
+and implemented** — the schemas, invariant catalog, fixtures, reference validator, Store,
+and Check boundary described below all exist and pass 300+ tests.
 
 - [Normative specification](contract/SPEC.md) — the accountability model, identity,
   record graph, state model, Store↔Check boundary, and conformance model.
 - [Contract bundle structure](docs/contract-bundle.md)
-- [Structural schema outlines](docs/schema-outline.md)
-- [Invariant catalog outline](docs/invariants-outline.md)
-- [Fixture & conformance matrix](docs/fixture-matrix.md)
+- [`contract/schemas/`](contract/schemas/) — the structural JSON Schemas (superseded
+  `docs/schema-outline.md`)
+- [`contract/invariants.json`](contract/invariants.json) — the invariant catalog
+  (superseded `docs/invariants-outline.md`)
+- [`contract/fixtures/`](contract/fixtures/) — the fixture & conformance vectors
+  (superseded `docs/fixture-matrix.md`)
 - [Migration mapping](docs/migration.md)
 - [Implementation plan](docs/implementation-plan.md)
