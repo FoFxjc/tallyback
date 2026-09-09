@@ -8,29 +8,11 @@
 
 import { v7 as uuidv7 } from 'uuid';
 
-export const CANONICAL_PREFIXES = [
-  'prj_',
-  'top_',
-  'tsk_',
-  'dcl_',
-  'att_',
-  'ate_',
-  'clm_',
-  'evi_',
-  'rec_',
-  'chk_',
-  'ckr_',
-  'ver_',
-  'set_',
-  'repo_',
-  'wsp_',
-  'blk_',
-  'brs_',
-  'dec_',
-  'cri_',
-] as const;
+import { PREFIXES, type Prefix } from '../contract/ids.js';
 
-export type CanonicalPrefix = (typeof CANONICAL_PREFIXES)[number];
+export const CANONICAL_PREFIXES = PREFIXES;
+
+export type CanonicalPrefix = Prefix;
 
 const PREFIX_SET: ReadonlySet<string> = new Set<string>(CANONICAL_PREFIXES);
 

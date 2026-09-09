@@ -17,6 +17,7 @@
  * see `ledger/reconcile.ts`.
  */
 
+import { compareByCodeUnit } from './jcs.js';
 import { recordTypeOf } from './record-types.js';
 import type { AnyRecord } from './types.js';
 
@@ -106,7 +107,7 @@ export function supersessionLineages(records: readonly AnyRecord[]): Supersessio
     byKey.set(key, lineage);
   }
 
-  const sort = (xs: string[]): string[] => xs.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  const sort = (xs: string[]): string[] => xs.sort(compareByCodeUnit);
   return [...byKey.values()].map((l) => ({
     ...l,
     members: sort(l.members),

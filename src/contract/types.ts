@@ -10,7 +10,8 @@
 /** ISO-8601 timestamp. Nullable only for the legacy provenance variant (actor `unknown`). */
 export type Timestamp = string | null;
 
-export type ActorKind = 'human' | 'subagent' | 'executor' | 'tool' | 'unknown' | 'migrated';
+export const ACTOR_KINDS = ['human', 'subagent', 'executor', 'tool', 'unknown', 'migrated'] as const;
+export type ActorKind = (typeof ACTOR_KINDS)[number];
 
 /** Shared provenance shape: `{ kind, id }`. */
 export interface Actor {
@@ -54,7 +55,8 @@ export interface ClaimSubject {
   id: string;
 }
 
-export type DecisionSubjectKind = 'project' | 'topic' | 'task' | 'attempt';
+export const DECISION_SUBJECT_KINDS = ['project', 'topic', 'task', 'attempt'] as const;
+export type DecisionSubjectKind = (typeof DECISION_SUBJECT_KINDS)[number];
 
 export interface DecisionSubject {
   kind: DecisionSubjectKind;
@@ -123,7 +125,8 @@ export interface Attempt {
   session_id?: string;
 }
 
-export type AttemptEndOutcome = 'returned' | 'failed' | 'cancelled';
+export const ATTEMPT_END_OUTCOMES = ['returned', 'failed', 'cancelled'] as const;
+export type AttemptEndOutcome = (typeof ATTEMPT_END_OUTCOMES)[number];
 
 export interface AttemptEnd {
   attempt_end_id: string;
@@ -291,7 +294,8 @@ export interface CheckInvocation {
   invoked_at: Timestamp;
 }
 
-export type CheckResultOutcome = 'verdict_emitted' | 'verdict_withheld' | 'check_failed';
+export const CHECK_RESULT_OUTCOMES = ['verdict_emitted', 'verdict_withheld', 'check_failed'] as const;
+export type CheckResultOutcome = (typeof CHECK_RESULT_OUTCOMES)[number];
 
 export interface CheckResult {
   check_result_id: string;
@@ -357,7 +361,8 @@ export interface Verdict {
   native_judgment?: NativeJudgment;
 }
 
-export type SettlementDecision = 'accept' | 'retry' | 'abandon' | 'land';
+export const SETTLEMENT_DECISIONS = ['accept', 'retry', 'abandon', 'land'] as const;
+export type SettlementDecision = (typeof SETTLEMENT_DECISIONS)[number];
 
 export interface SettlementBasis {
   verdict_id?: string | null;
@@ -387,7 +392,8 @@ export interface Blocker {
   raised_at: Timestamp;
 }
 
-export type Disposition = 'resolved' | 'withdrawn';
+export const DISPOSITIONS = ['resolved', 'withdrawn'] as const;
+export type Disposition = (typeof DISPOSITIONS)[number];
 
 export interface BlockerResolution {
   blocker_resolution_id: string;
@@ -400,7 +406,8 @@ export interface BlockerResolution {
   supersedes?: string;
 }
 
-export type DecisionRole = 'execution_choice' | 'next_action';
+export const DECISION_ROLES = ['execution_choice', 'next_action'] as const;
+export type DecisionRole = (typeof DECISION_ROLES)[number];
 
 export interface Decision {
   decision_id: string;

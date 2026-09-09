@@ -30,7 +30,7 @@ import {
   checkSnapshotSetArrays,
   findAbsolutePath,
 } from './canonical-arrays.js';
-import { findSupersessionConflicts } from './supersession.js';
+import { findSupersessionConflicts, supersessionSubjectKey } from './supersession.js';
 import { canonicalizeJson } from './jcs.js';
 import { isValidId } from './ids.js';
 import {
@@ -1002,20 +1002,7 @@ function checkNoDuplicateCriterionIn(records: readonly AnyRecord[]): ValidationR
 }
 
 function checkNoDuplicateCriterion(ctx: GraphContext): ValidationResult | null {
-  for (const rec of recordsOfType(ctx, 'declaration')) {
-    const criteria = field(rec, 'criteria');
-    if (!Array.isArray(criteria)) continue;
-    const seen = new Set<string>();
-    for (const c of criteria) {
-      const cid = strField(c, 'criterion_id');
-      if (cid === null) continue;
-      if (seen.has(cid)) {
-        return failResult('invariant.duplicate_criterion', `duplicate criterion_id ${cid}`);
-      }
-      seen.add(cid);
-    }
-  }
-  return null;
+  return checkNoDuplicateCriterionIn(ctx.records);
 }
 
 /** TB-LC-005 — Settlement basis satisfies the per-action matrix. */
@@ -1069,7 +1056,6 @@ function checkSupersessionSameType(ctx: GraphContext): ValidationResult | null {
 
 /** TB-SUP-002 — `supersedes` targets the same logical subject (lineage). */
 function checkSupersessionSameSubject(ctx: GraphContext): ValidationResult | null {
-  const scalarSubjectKeys = ['task_id', 'attempt_id', 'evidence_id', 'blocker_id'];
   for (const rec of ctx.records) {
     const info = recordTypeOf(rec);
     if (info?.supersessionCapable !== true) continue;
@@ -1077,33 +1063,7 @@ function checkSupersessionSameSubject(ctx: GraphContext): ValidationResult | nul
     if (target === null) continue;
     const targetRec = ctx.byId.get(target);
     if (!targetRec) continue;
-    let mismatch = false;
-    for (const key of scalarSubjectKeys) {
-      const a = field(rec, key);
-      const b = field(targetRec, key);
-      if (a !== undefined || b !== undefined) {
-        if (a !== b) {
-          mismatch = true;
-          break;
-        }
-      }
-    }
-    if (info.type === 'decision') {
-      // A Decision's lineage is (subject, role): SPEC §5.13 derives the displayed next
-      // action from the effective non-superseded `next_action` Decision, so an
-      // `execution_choice` must not be able to supersede a `next_action` on the same
-      // subject and quietly remove it from that derivation.
-      const sa = field(rec, 'subject') as AnyObject | undefined;
-      const sb = field(targetRec, 'subject') as AnyObject | undefined;
-      if (
-        strField(sa, 'kind') !== strField(sb, 'kind') ||
-        strField(sa, 'id') !== strField(sb, 'id') ||
-        strField(rec, 'role') !== strField(targetRec, 'role')
-      ) {
-        mismatch = true;
-      }
-    }
-    if (mismatch) {
+    if (supersessionSubjectKey(rec) !== supersessionSubjectKey(targetRec)) {
       return failResult('invariant.supersession_subject', `${info.type} supersedes a different subject`);
     }
   }

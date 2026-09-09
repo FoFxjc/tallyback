@@ -9,15 +9,8 @@
  * projections and consumers never treat a superseded body as current.
  */
 
-import type {
-  AnyRecord,
-  AttemptEnd,
-  BlockerResolution,
-  Decision,
-  Reconciliation,
-  Settlement,
-  TaskDeclaration,
-} from '../contract/index.js';
+import type { AnyRecord } from '../contract/index.js';
+import { supersessionSubjectKey } from '../contract/supersession.js';
 import { LEDGER_RECORD_TYPES, recordId, recordTypeOf } from './snapshot.js';
 
 /** ID prefixes whose records may carry `supersedes`. */
@@ -39,37 +32,11 @@ export function getSupersedes(record: AnyRecord): string | undefined {
  * The logical lineage subject of a supersession-capable record. Two records may form a
  * supersession link only when they share this key (same type is checked separately).
  *
- * This must agree exactly with the contract validator's TB-SUP-002 check
- * (`supersession.same_subject`): the helper is exported for hosts deciding whether two
- * records *can* form a lineage, so a looser key here would let a host build supersessions
- * the Store then rejects, and a stricter one would make it refuse links the Store accepts.
+ * Delegates to `contract/supersession.ts`'s `supersessionSubjectKey`, the canonical
+ * definition, so this and the contract validator's TB-SUP-002 check can never drift apart.
  */
 export function supersessionSubject(record: AnyRecord): string | undefined {
-  const info = recordTypeOf(record);
-  if (!info.supersessionCapable) return undefined;
-  switch (info.prefix) {
-    case 'dcl_':
-      return `task:${(record as TaskDeclaration).task_id}`;
-    case 'set_': {
-      // A Settlement settles one Attempt, so its lineage is the (task, attempt) pair —
-      // a settlement of a *different* attempt of the same task is a separate decision,
-      // not a correction of this one. This matches the validator's TB-SUP-002 check.
-      const settlement = record as Settlement;
-      return `task:${settlement.task_id}:attempt:${settlement.attempt_id}`;
-    }
-    case 'ate_':
-      return `attempt:${(record as AttemptEnd).attempt_id}`;
-    case 'rec_':
-      return `evidence:${(record as Reconciliation).evidence_id}`;
-    case 'brs_':
-      return `blocker:${(record as BlockerResolution).blocker_id}`;
-    case 'dec_': {
-      const decision = record as Decision;
-      return `decision:${decision.subject.kind}:${decision.subject.id}:${decision.role}`;
-    }
-    default:
-      return undefined;
-  }
+  return supersessionSubjectKey(record) ?? undefined;
 }
 
 /** IDs referenced by any `supersedes` field in the given (same-type) record set. */

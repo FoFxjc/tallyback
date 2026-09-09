@@ -19,6 +19,7 @@
  * explicit legacy-provenance variant.
  */
 
+import { compareByCodeUnit } from '../contract/jcs.js';
 import { newId } from './ids.js';
 import type {
   Actor,
@@ -367,7 +368,7 @@ export function assembleMigratedSnapshot(
   // (contract/canonicalization.json). The producer emits them canonical; the validator
   // rejects — rather than silently normalizes — anything that arrives otherwise.
   const byId = <T>(items: T[], key: keyof T): T[] =>
-    [...items].sort((a, b) => (a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0));
+    [...items].sort((a, b) => compareByCodeUnit(a[key] as unknown as string, b[key] as unknown as string));
   return {
     schema_version: '1.0.0',
     revision: options.revision ?? 0,

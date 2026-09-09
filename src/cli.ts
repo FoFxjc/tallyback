@@ -33,10 +33,18 @@ import { buildLandReport, createGitResolver, type LandReport } from './land/inde
 import { buildTaskViews, DEFAULT_STALE_AFTER_MS, summarizeTaskViews } from './view/index.js';
 import { buildWatchReport, createWatchResolver } from './watch/index.js';
 import { canMutateContractVersion, handshake } from './version.js';
+import {
+  ACTOR_KINDS,
+  ATTEMPT_END_OUTCOMES,
+  CHECK_RESULT_OUTCOMES,
+  DECISION_ROLES,
+  DECISION_SUBJECT_KINDS,
+  DISPOSITIONS,
+  SETTLEMENT_DECISIONS,
+} from './contract/index.js';
 import type {
   Actor,
   ActorKind,
-  CheckResultOutcome,
   Diagnostic,
   Evidence,
   Reconciliation,
@@ -120,14 +128,15 @@ function optionalStr(args: Args, key: string): string | undefined {
   return typeof value === 'string' ? value : undefined;
 }
 
-const ACTOR_KINDS: readonly ActorKind[] = [
-  'human',
-  'subagent',
-  'executor',
-  'tool',
-  'unknown',
-  'migrated',
-];
+/** Parse a `--key` value restricted to one of `allowed`, erroring with the same message
+ * shape every enum flag has always used: `--key must be one of a|b|c`. */
+function enumArg<T extends string>(args: Args, key: string, allowed: readonly T[]): T {
+  const value = str(args, key);
+  if (!(allowed as readonly string[]).includes(value)) {
+    throw new CliError(`--${key} must be one of ${allowed.join('|')}`);
+  }
+  return value as T;
+}
 
 /** Parse an `--actor` / `--as` value of the form `kind:id`. */
 function actor(args: Args, key: string, fallback: Actor): Actor {
@@ -424,19 +433,14 @@ async function dispatch(store: Store, command: string, args: Args): Promise<unkn
     }
 
     case 'record-check': {
-      const outcome = str(args, 'outcome');
-      if (!['verdict_emitted', 'verdict_withheld', 'check_failed'].includes(outcome)) {
-        throw new CliError(
-          '--outcome must be one of verdict_emitted|verdict_withheld|check_failed',
-        );
-      }
+      const outcome = enumArg(args, 'outcome', CHECK_RESULT_OUTCOMES);
       const verdicts = jsonArray<Verdict>(args, 'verdict');
       if (verdicts.length > 1) {
         throw new CliError('--verdict may be given at most once (a result carries one Verdict)');
       }
       return store.recordCheckResult({
         check_invocation_id: str(args, 'invocation-id'),
-        outcome: outcome as CheckResultOutcome,
+        outcome,
         diagnostics: diagnostics(args, 'diagnostic'),
         reconciliations: jsonArray<Reconciliation>(args, 'reconciliation'),
         produced_evidence: jsonArray<Evidence>(args, 'evidence-record'),
@@ -473,10 +477,7 @@ async function dispatch(store: Store, command: string, args: Args): Promise<unkn
     }
 
     case 'end': {
-      const outcome = str(args, 'outcome');
-      if (outcome !== 'returned' && outcome !== 'failed' && outcome !== 'cancelled') {
-        throw new CliError('--outcome must be one of returned|failed|cancelled');
-      }
+      const outcome = enumArg(args, 'outcome', ATTEMPT_END_OUTCOMES);
       return store.endAttempt({
         attempt_id: str(args, 'attempt-id'),
         outcome,
@@ -517,10 +518,7 @@ async function dispatch(store: Store, command: string, args: Args): Promise<unkn
     }
 
     case 'resolve': {
-      const disposition = str(args, 'disposition');
-      if (disposition !== 'resolved' && disposition !== 'withdrawn') {
-        throw new CliError('--disposition must be one of resolved|withdrawn');
-      }
+      const disposition = enumArg(args, 'disposition', DISPOSITIONS);
       return store.resolveBlocker({
         blocker_id: str(args, 'blocker-id'),
         disposition,
@@ -532,14 +530,11 @@ async function dispatch(store: Store, command: string, args: Args): Promise<unkn
     }
 
     case 'settle': {
-      const decision = str(args, 'decision');
-      if (!['accept', 'retry', 'abandon', 'land'].includes(decision)) {
-        throw new CliError('--decision must be one of accept|retry|abandon|land');
-      }
+      const decision = enumArg(args, 'decision', SETTLEMENT_DECISIONS);
       return store.settle({
         task_id: taskRef(store, args),
         attempt_id: str(args, 'attempt-id'),
-        decision: decision as 'accept' | 'retry' | 'abandon' | 'land',
+        decision,
         decided_by: actor(args, 'actor', DEFAULT_ACTOR),
         basis: {
           verdict_id: optionalStr(args, 'verdict-id') ?? null,
@@ -553,17 +548,11 @@ async function dispatch(store: Store, command: string, args: Args): Promise<unkn
     }
 
     case 'decision': {
-      const subjectKind = str(args, 'subject-kind');
-      if (!['project', 'topic', 'task', 'attempt'].includes(subjectKind)) {
-        throw new CliError('--subject-kind must be one of project|topic|task|attempt');
-      }
-      const role = str(args, 'role');
-      if (role !== 'execution_choice' && role !== 'next_action') {
-        throw new CliError('--role must be one of execution_choice|next_action');
-      }
+      const subjectKind = enumArg(args, 'subject-kind', DECISION_SUBJECT_KINDS);
+      const role = enumArg(args, 'role', DECISION_ROLES);
       return store.recordDecision({
-        subject: { kind: subjectKind as never, id: str(args, 'subject-id') },
-        role: role as 'execution_choice' | 'next_action',
+        subject: { kind: subjectKind, id: str(args, 'subject-id') },
+        role,
         question: str(args, 'question'),
         choice: str(args, 'choice'),
         rationale: str(args, 'rationale'),

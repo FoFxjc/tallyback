@@ -9,6 +9,7 @@
  */
 
 import { validate_append } from '../contract/index.js';
+import { compareByCodeUnit } from '../contract/jcs.js';
 import type { AnyRecord, AppendOperation, Snapshot } from '../contract/index.js';
 import {
   allRecords,
@@ -93,7 +94,7 @@ function snapshotWithRecords(current: Snapshot, records: AnyRecord[]): Snapshot 
     const info = recordTypeOf(record);
     if (!info.collection) continue;
     const collection = next[info.collection] as unknown as AnyRecord[];
-    collection.sort((a, b) => (recordId(a) < recordId(b) ? -1 : recordId(a) > recordId(b) ? 1 : 0));
+    collection.sort((a, b) => compareByCodeUnit(recordId(a), recordId(b)));
   }
   next.revision = current.revision + 1;
   next.included_through = next.revision;

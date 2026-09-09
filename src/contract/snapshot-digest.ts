@@ -15,15 +15,11 @@
  * anything else.
  */
 
-import { canonicalizeJson } from './jcs.js';
+import { canonicalizeJson, compareByCodeUnit } from './jcs.js';
 import { digest } from './digest.js';
 import { recordIdOf, RECORD_TYPES } from './record-types.js';
 import { sha256Hex } from './digest.js';
 import type { AnyRecord, Digest, Snapshot } from './types.js';
-
-function compareIds(a: string, b: string): number {
-  return a < b ? -1 : a > b ? 1 : 0;
-}
 
 /**
  * The canonical form used for the semantic digest: `projections` removed and every record
@@ -38,7 +34,7 @@ export function canonicalSnapshotForDigest(snapshot: Snapshot): unknown {
     const value = out[info.collection];
     if (!Array.isArray(value)) continue;
     const sorted = (value as AnyRecord[]).slice();
-    sorted.sort((x, y) => compareIds(recordIdOf(x) ?? '', recordIdOf(y) ?? ''));
+    sorted.sort((x, y) => compareByCodeUnit(recordIdOf(x) ?? '', recordIdOf(y) ?? ''));
     out[info.collection] = sorted;
   }
   return out;
