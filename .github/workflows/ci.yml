@@ -31,6 +31,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
+      - run: npm ci
       - run: npm run build
       # Exercises the `tallyback validate` gate from docs/branch-workflow.md §7 against
       # a freshly initialized ledger, so CI proves the gate itself still runs cleanly —
