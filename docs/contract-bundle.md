@@ -1,8 +1,7 @@
 # Tallyback v1 — Contract Bundle Structure
 
-> Planning document. Defines the shape and responsibilities of the versioned contract
-> bundle. The bundle itself is authored during the development phase, after this spec is
-> reviewed and frozen.
+> Historical v1 contract-bundle design record. The bundle described here is implemented
+> under `contract/`; this document records its structure and release semantics.
 
 ## 1. Layout
 
