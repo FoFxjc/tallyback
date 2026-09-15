@@ -197,23 +197,6 @@ Tallyback answers **what came back from delegated work, what supports it, and wh
 - Evidence-aware review before merging independent branches
 - Local or restricted environments where cloud orchestration is undesirable
 
-## Initial direction
-
-The first milestone is to define a shared execution-accountability model that can unify the existing Store and Check foundations without turning either into a workflow engine.
-
-The model must support:
-
-- durable topics and tasks;
-- multiple attempts per task;
-- executor, session, worktree, and branch references;
-- explicit claims and evidence;
-- independent verification verdicts;
-- blockers and next actions;
-- compact PM-agent projections;
-- explicit integration settlement.
-
-Watchdog behavior, visualization, and third-party adapters should build on that model rather than create parallel sources of state.
-
 ## Name
 
 In control systems, a _tally-back_ signal reports the observed state following a remote command.

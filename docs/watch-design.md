@@ -1,8 +1,8 @@
 # Tallyback Watch — design (v1, on-demand, read-only)
 
-> Planning document, matching the pattern of `docs/land-design.md` and
-> `docs/view-design.md`. Watch is the third host-layer component built on the frozen
-> contract; this document defines its v1 scope before `src/watch/` is written.
+> Historical v1 design record. The implementation described here now exists under
+> `src/watch/`; this document is retained as the design record of the component, not as
+> work-in-progress planning.
 
 ## 1. What Watch is for
 

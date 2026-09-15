@@ -124,6 +124,11 @@ new contract release:
 - backward-compatible addition → **minor**;
 - clarification/correction that does not change accepted behavior → **patch**.
 
+Contract bundle immutability — the property that `version` + digests identify one stable
+bundle — begins once a contract version is publicly released and tagged. Before that
+first public release, documentation-only corrections to an unreleased bundle may
+regenerate its digests without implying a new semantic contract version.
+
 Artifact digests identify the exact bundle used by a validator or a Check.
 
 ## 5. invariants.json
