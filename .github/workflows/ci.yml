@@ -20,7 +20,7 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
-      - run: npx vitest run test/dist-cli.test.ts
+      - run: npm run test:dist-cli
 
   validate-gate:
     runs-on: ubuntu-latest
