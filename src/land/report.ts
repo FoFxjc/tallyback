@@ -15,7 +15,10 @@
  */
 
 import type { Attempt, Settlement, Snapshot, Verdict, Workspace } from '../contract/index.js';
-import { computeProjectionValues, isLandSettlementVerificationReady } from '../ledger/projections.js';
+import {
+  computeProjectionValues,
+  isLandSettlementVerificationReady,
+} from '../ledger/projections.js';
 import { effectiveRecords } from '../ledger/supersession.js';
 
 /** Why a candidate could not be classified `git_ready` (design §4). */

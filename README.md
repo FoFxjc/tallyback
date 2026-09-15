@@ -109,13 +109,13 @@ Core rules:
 
 Tallyback is modular. Users should be able to adopt only the parts they need.
 
-| Component            | Responsibility                                                                | Status                                                                                  |
-| -------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| **Tallyback Store**  | Tasks, attempts, checkpoints, decisions, blockers, and compact resume context | Existing foundation in [claude-task-store](https://github.com/FoFxjc/claude-task-store) |
-| **Tallyback Check**  | Semantic verification of implementation and merge-readiness claims            | Existing foundation in [done-or-not](https://github.com/FoFxjc/done-or-not)             |
-| **Tallyback Watch**  | Optional external detection of stale, lost, or inconsistent execution         | v1 implemented — on-demand lost/inconsistent detection over open Attempts (`src/watch/`) |
-| **Tallyback Land**   | Integration readiness, ordering, conflict awareness, and merge settlement     | v1 implemented — read-only readiness/conflict report over `ready_to_land` (`src/land/`) |
-| **Tallyback View**   | Local project status, reports, evidence trails, and visualization             | v1 implemented — one compact per-task report (`src/view/`)                             |
+| Component            | Responsibility                                                                | Status                                                                                                        |
+| -------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Tallyback Store**  | Tasks, attempts, checkpoints, decisions, blockers, and compact resume context | Existing foundation in [claude-task-store](https://github.com/FoFxjc/claude-task-store)                       |
+| **Tallyback Check**  | Semantic verification of implementation and merge-readiness claims            | Existing foundation in [done-or-not](https://github.com/FoFxjc/done-or-not)                                   |
+| **Tallyback Watch**  | Optional external detection of stale, lost, or inconsistent execution         | v1 implemented — on-demand lost/inconsistent detection over open Attempts (`src/watch/`)                      |
+| **Tallyback Land**   | Integration readiness, ordering, conflict awareness, and merge settlement     | v1 implemented — read-only readiness/conflict report over `ready_to_land` (`src/land/`)                       |
+| **Tallyback View**   | Local project status, reports, evidence trails, and visualization             | v1 implemented — one compact per-task report (`src/view/`)                                                    |
 | **Tallyback Bridge** | Adapters for agent hosts, stores, and worktree managers                       | v1 implemented — generic adapter description (`src/bridge/`) + one Claude Code plugin (`bridge/claude-code/`) |
 
 Possible adoption levels:

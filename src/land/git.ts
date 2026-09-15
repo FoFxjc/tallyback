@@ -93,7 +93,11 @@ export function createGitResolver(options: ResolveOptions = {}): GitResolver {
       return { status: 'behind' };
     }
 
-    const diff = await runGit(root, ['diff', '--name-only', `${input.target_branch}...${input.branch}`]);
+    const diff = await runGit(root, [
+      'diff',
+      '--name-only',
+      `${input.target_branch}...${input.branch}`,
+    ]);
     if (!diff.ok) {
       return {
         status: 'unresolved',

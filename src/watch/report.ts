@@ -17,7 +17,11 @@
  */
 
 import type { Attempt, Snapshot, Timestamp, Workspace } from '../contract/index.js';
-import { computeProjectionValues, lastActivityAt, type StalePolicy } from '../ledger/projections.js';
+import {
+  computeProjectionValues,
+  lastActivityAt,
+  type StalePolicy,
+} from '../ledger/projections.js';
 import { effectiveRecords } from '../ledger/supersession.js';
 
 /** One Watch observation kind (design §4). */
@@ -84,7 +88,9 @@ export type WatchResolveResult = WatchUnresolvedResult | WatchNoBranchResult | W
  * branch/target resolution and the diff check — so this module is unit-testable without
  * shelling out to `git`.
  */
-export type WatchResolver = (input: WatchResolveInput) => WatchResolveResult | Promise<WatchResolveResult>;
+export type WatchResolver = (
+  input: WatchResolveInput,
+) => WatchResolveResult | Promise<WatchResolveResult>;
 
 const WATCH_CODES = {
   WORKSPACE_NOT_FOUND: 'watch.workspace_not_found',

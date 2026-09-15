@@ -46,7 +46,10 @@ describe('buildWatchReport', () => {
     // A fresh attempt with no claim: buildLedger's fixture attempt already carries a claim,
     // and a Workspace can back at most one open Attempt at a time
     // (`invariant.workspace_exclusivity`), so this needs its own second workspace.
-    const ws = await fixture.store.registerWorkspace({ repository_id: fixture.repository_id, branch: 'main' });
+    const ws = await fixture.store.registerWorkspace({
+      repository_id: fixture.repository_id,
+      branch: 'main',
+    });
     if (!ws.ok) throw new Error('registerWorkspace failed');
     const dispatched = await fixture.store.dispatch({
       task_id: fixture.task_id,
@@ -59,9 +62,15 @@ describe('buildWatchReport', () => {
     if (!dispatched.ok) throw new Error('dispatch failed');
 
     const resolver: WatchResolver = () => ({ status: 'commits', count: 0 });
-    const report = await buildWatchReport(fixture.store.currentSnapshot(), resolver, NOT_STALE_POLICY);
+    const report = await buildWatchReport(
+      fixture.store.currentSnapshot(),
+      resolver,
+      NOT_STALE_POLICY,
+    );
 
-    const forSecondAttempt = report.findings.filter((f) => f.attempt_id === dispatched.attempt.attempt_id);
+    const forSecondAttempt = report.findings.filter(
+      (f) => f.attempt_id === dispatched.attempt.attempt_id,
+    );
     expect(forSecondAttempt).toHaveLength(0);
   });
 
@@ -73,9 +82,15 @@ describe('buildWatchReport', () => {
       code: 'resolution.path_unavailable',
       reason: 'worktree root does not exist',
     });
-    const report = await buildWatchReport(fixture.store.currentSnapshot(), resolver, NOT_STALE_POLICY);
+    const report = await buildWatchReport(
+      fixture.store.currentSnapshot(),
+      resolver,
+      NOT_STALE_POLICY,
+    );
 
-    const lost = report.findings.filter((f) => f.attempt_id === fixture.attempt_id && f.kind === 'lost');
+    const lost = report.findings.filter(
+      (f) => f.attempt_id === fixture.attempt_id && f.kind === 'lost',
+    );
     expect(lost).toHaveLength(1);
     expect(lost[0]).toMatchObject({
       task_id: fixture.task_id,
@@ -89,7 +104,11 @@ describe('buildWatchReport', () => {
     // buildLedger's fixture attempt already has a claim (fixture.claim_id).
 
     const resolver: WatchResolver = () => ({ status: 'commits', count: 0 });
-    const report = await buildWatchReport(fixture.store.currentSnapshot(), resolver, NOT_STALE_POLICY);
+    const report = await buildWatchReport(
+      fixture.store.currentSnapshot(),
+      resolver,
+      NOT_STALE_POLICY,
+    );
 
     const inconsistent = report.findings.filter(
       (f) => f.attempt_id === fixture.attempt_id && f.kind === 'inconsistent',
@@ -130,7 +149,11 @@ describe('buildWatchReport', () => {
       code: 'resolution.path_unavailable',
       reason: 'would be lost, if considered',
     });
-    const report = await buildWatchReport(fixture.store.currentSnapshot(), resolver, NOT_STALE_POLICY);
+    const report = await buildWatchReport(
+      fixture.store.currentSnapshot(),
+      resolver,
+      NOT_STALE_POLICY,
+    );
 
     expect(report.findings.filter((f) => f.attempt_id === fixture.attempt_id)).toHaveLength(0);
     expect(report.summary.open_attempts).toBe(0);
@@ -155,7 +178,11 @@ describe('buildWatchReport', () => {
       code: 'resolution.path_unavailable',
       reason: 'would be lost, if considered',
     });
-    const report = await buildWatchReport(fixture.store.currentSnapshot(), resolver, NOT_STALE_POLICY);
+    const report = await buildWatchReport(
+      fixture.store.currentSnapshot(),
+      resolver,
+      NOT_STALE_POLICY,
+    );
 
     expect(report.findings.filter((f) => f.attempt_id === fixture.attempt_id)).toHaveLength(0);
     expect(report.summary.open_attempts).toBe(0);
@@ -173,7 +200,9 @@ describe('buildWatchReport', () => {
       policy,
     );
 
-    const stale = report.findings.filter((f) => f.attempt_id === fixture.attempt_id && f.kind === 'stale');
+    const stale = report.findings.filter(
+      (f) => f.attempt_id === fixture.attempt_id && f.kind === 'stale',
+    );
     expect(stale).toHaveLength(1);
     expect(report.summary.stale).toBe(1);
   });
@@ -202,7 +231,11 @@ describe('buildWatchReport', () => {
       }
       return { status: 'commits', count: 1 };
     };
-    const report = await buildWatchReport(fixture.store.currentSnapshot(), resolver, NOT_STALE_POLICY);
+    const report = await buildWatchReport(
+      fixture.store.currentSnapshot(),
+      resolver,
+      NOT_STALE_POLICY,
+    );
 
     const unresolved = report.findings.filter(
       (f) => f.attempt_id === dispatched.attempt.attempt_id && f.kind === 'unresolved',
@@ -224,9 +257,13 @@ interface CliRun {
 
 async function runRaw(projectRoot: string, args: string[]): Promise<CliRun> {
   try {
-    const { stdout, stderr } = await execFileAsync(TSX, [CLI, ...args, '--project-root', projectRoot], {
-      cwd: ROOT,
-    });
+    const { stdout, stderr } = await execFileAsync(
+      TSX,
+      [CLI, ...args, '--project-root', projectRoot],
+      {
+        cwd: ROOT,
+      },
+    );
     return { code: 0, stdout, stderr };
   } catch (err) {
     const e = err as { code?: number; stdout?: string; stderr?: string };

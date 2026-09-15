@@ -160,7 +160,8 @@ describe('buildLandReport', () => {
 
     const resolver: GitResolver = (input) => ({
       status: 'ready',
-      files: input.branch === 'main' ? ['src/shared.ts', 'src/a.ts'] : ['src/shared.ts', 'src/b.ts'],
+      files:
+        input.branch === 'main' ? ['src/shared.ts', 'src/a.ts'] : ['src/shared.ts', 'src/b.ts'],
     });
     const report = await buildLandReport(a.store.currentSnapshot(), resolver, TARGET_BRANCH);
 
@@ -202,9 +203,13 @@ interface CliRun {
 
 async function runRaw(projectRoot: string, args: string[]): Promise<CliRun> {
   try {
-    const { stdout, stderr } = await execFileAsync(TSX, [CLI, ...args, '--project-root', projectRoot], {
-      cwd: ROOT,
-    });
+    const { stdout, stderr } = await execFileAsync(
+      TSX,
+      [CLI, ...args, '--project-root', projectRoot],
+      {
+        cwd: ROOT,
+      },
+    );
     return { code: 0, stdout, stderr };
   } catch (err) {
     const e = err as { code?: number; stdout?: string; stderr?: string };

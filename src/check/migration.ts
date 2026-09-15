@@ -368,7 +368,9 @@ export function assembleMigratedSnapshot(
   // (contract/canonicalization.json). The producer emits them canonical; the validator
   // rejects — rather than silently normalizes — anything that arrives otherwise.
   const byId = <T>(items: T[], key: keyof T): T[] =>
-    [...items].sort((a, b) => compareByCodeUnit(a[key] as unknown as string, b[key] as unknown as string));
+    [...items].sort((a, b) =>
+      compareByCodeUnit(a[key] as unknown as string, b[key] as unknown as string),
+    );
   return {
     schema_version: '1.0.0',
     revision: options.revision ?? 0,

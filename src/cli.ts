@@ -662,7 +662,9 @@ async function runReconcile(projectRoot: string, args: Args): Promise<void> {
 async function runLand(store: Store, args: Args): Promise<void> {
   const targetBranch = str(args, 'target-branch', 'main');
   const snapshot = store.currentSnapshot();
-  const resolver = createGitResolver({ bindingsPath: join(store.root, 'runtime', 'bindings.json') });
+  const resolver = createGitResolver({
+    bindingsPath: join(store.root, 'runtime', 'bindings.json'),
+  });
   const report: LandReport = await buildLandReport(snapshot, resolver, targetBranch);
   print({ target_branch: targetBranch, ...report });
   process.stderr.write(
@@ -684,7 +686,8 @@ async function runLand(store: Store, args: Args): Promise<void> {
 async function runView(store: Store, args: Args): Promise<void> {
   const taskIds = taskRefs(store, args);
   const staleAfterMsRaw = optionalStr(args, 'stale-after-ms');
-  const staleAfterMs = staleAfterMsRaw !== undefined ? Number(staleAfterMsRaw) : DEFAULT_STALE_AFTER_MS;
+  const staleAfterMs =
+    staleAfterMsRaw !== undefined ? Number(staleAfterMsRaw) : DEFAULT_STALE_AFTER_MS;
   if (!Number.isFinite(staleAfterMs) || staleAfterMs < 0) {
     throw new CliError('--stale-after-ms must be a non-negative finite number');
   }
@@ -715,14 +718,17 @@ async function runView(store: Store, args: Args): Promise<void> {
  */
 async function runWatch(store: Store, args: Args): Promise<void> {
   const staleAfterMsRaw = optionalStr(args, 'stale-after-ms');
-  const staleAfterMs = staleAfterMsRaw !== undefined ? Number(staleAfterMsRaw) : DEFAULT_STALE_AFTER_MS;
+  const staleAfterMs =
+    staleAfterMsRaw !== undefined ? Number(staleAfterMsRaw) : DEFAULT_STALE_AFTER_MS;
   if (!Number.isFinite(staleAfterMs) || staleAfterMs < 0) {
     throw new CliError('--stale-after-ms must be a non-negative finite number');
   }
 
   const snapshot = store.currentSnapshot();
   const policy = { now: new Date().toISOString(), staleAfterMs };
-  const resolver = createWatchResolver({ bindingsPath: join(store.root, 'runtime', 'bindings.json') });
+  const resolver = createWatchResolver({
+    bindingsPath: join(store.root, 'runtime', 'bindings.json'),
+  });
   const report = await buildWatchReport(snapshot, resolver, policy);
 
   print(report);

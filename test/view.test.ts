@@ -40,7 +40,11 @@ describe('buildTaskViews', () => {
       await store.createTopic({ name: 't', goal: 'g', created_by: ALICE }),
     );
     const { task } = unwrap<{ task: { task_id: string } }>(
-      await store.createTask({ topic_id: topic.topic_id, title: 'Undispatched claim', alias: 'T1' }),
+      await store.createTask({
+        topic_id: topic.topic_id,
+        title: 'Undispatched claim',
+        alias: 'T1',
+      }),
     );
     const { declaration } = unwrap<{ declaration: { declaration_id: string } }>(
       await store.declare({
@@ -117,9 +121,9 @@ describe('buildTaskViews', () => {
 
     // The underlying ledger record DOES carry a payload — proving View actively drops it,
     // not that the fixture happens not to have one.
-    const rawEvidence = fixture.store.currentSnapshot().evidence.find(
-      (e) => e.evidence_id === fixture.evidence_id,
-    );
+    const rawEvidence = fixture.store
+      .currentSnapshot()
+      .evidence.find((e) => e.evidence_id === fixture.evidence_id);
     expect(rawEvidence).toMatchObject({ payload: { text: 'the validation logic was added' } });
   });
 
@@ -129,11 +133,17 @@ describe('buildTaskViews', () => {
       await fixture.store.createTopic({ name: 't2', goal: 'g2', created_by: ALICE }),
     );
     const { task: secondTask } = unwrap<{ task: { task_id: string } }>(
-      await fixture.store.createTask({ topic_id: topic.topic_id, title: 'Second task', alias: 'T2' }),
+      await fixture.store.createTask({
+        topic_id: topic.topic_id,
+        title: 'Second task',
+        alias: 'T2',
+      }),
     );
 
     const allViews = buildTaskViews(fixture.store.currentSnapshot());
-    expect(allViews.map((v) => v.task_id).sort()).toEqual([fixture.task_id, secondTask.task_id].sort());
+    expect(allViews.map((v) => v.task_id).sort()).toEqual(
+      [fixture.task_id, secondTask.task_id].sort(),
+    );
 
     const narrowed = buildTaskViews(fixture.store.currentSnapshot(), [secondTask.task_id]);
     expect(narrowed).toHaveLength(1);
@@ -168,9 +178,13 @@ interface CliRun {
 
 async function runRaw(projectRoot: string, args: string[]): Promise<CliRun> {
   try {
-    const { stdout, stderr } = await execFileAsync(TSX, [CLI, ...args, '--project-root', projectRoot], {
-      cwd: ROOT,
-    });
+    const { stdout, stderr } = await execFileAsync(
+      TSX,
+      [CLI, ...args, '--project-root', projectRoot],
+      {
+        cwd: ROOT,
+      },
+    );
     return { code: 0, stdout, stderr };
   } catch (err) {
     const e = err as { code?: number; stdout?: string; stderr?: string };
@@ -189,7 +203,15 @@ describe('tallyback view (CLI)', () => {
     expect(topicRun.code).toBe(0);
     const topicId = (JSON.parse(topicRun.stdout) as { topic: { topic_id: string } }).topic.topic_id;
 
-    const taskRun = await runRaw(root, ['task', '--topic-id', topicId, '--title', 'T', '--alias', 'T1']);
+    const taskRun = await runRaw(root, [
+      'task',
+      '--topic-id',
+      topicId,
+      '--title',
+      'T',
+      '--alias',
+      'T1',
+    ]);
     expect(taskRun.code).toBe(0);
 
     const run = await runRaw(root, ['view']);

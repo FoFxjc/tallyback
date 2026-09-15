@@ -71,7 +71,7 @@ export const READ_ONLY_REPORTS: readonly ReadOnlyReport[] = [
     name: 'land',
     command: 'land',
     summary:
-      'Cross-checks the ledger\'s ready_to_land projection against live Git state. Read-only and advisory: it never merges, rebases, pushes, or writes to the ledger.',
+      "Cross-checks the ledger's ready_to_land projection against live Git state. Read-only and advisory: it never merges, rebases, pushes, or writes to the ledger.",
   },
   {
     name: 'view',
@@ -83,7 +83,7 @@ export const READ_ONLY_REPORTS: readonly ReadOnlyReport[] = [
     name: 'watch',
     command: 'watch',
     summary:
-      'Cross-checks every open Attempt against live workspace/Git state for lost/inconsistent/unresolved conditions plus the ledger\'s own stale projection. Read-only and advisory: no Blocker is raised, no ledger write.',
+      "Cross-checks every open Attempt against live workspace/Git state for lost/inconsistent/unresolved conditions plus the ledger's own stale projection. Read-only and advisory: no Blocker is raised, no ledger write.",
   },
 ];
 

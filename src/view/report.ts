@@ -25,7 +25,11 @@ import type {
   Timestamp,
   VerdictConclusion,
 } from '../contract/index.js';
-import { computeProjectionValues, type ProjectionValues, type StalePolicy } from '../ledger/projections.js';
+import {
+  computeProjectionValues,
+  type ProjectionValues,
+  type StalePolicy,
+} from '../ledger/projections.js';
 import { effectiveRecords } from '../ledger/supersession.js';
 
 /** SPEC §7.2 / design §3: the default staleness window, absent an explicit override. */
@@ -136,7 +140,11 @@ function isAfter(a: Timestamp, b: Timestamp): boolean {
  * correctness-critical judgment (design §4 steps 4-6), so an arbitrary-but-deterministic
  * tiebreak is enough.
  */
-function pickLatest<T>(items: readonly T[], at: (item: T) => Timestamp, id: (item: T) => string): T | undefined {
+function pickLatest<T>(
+  items: readonly T[],
+  at: (item: T) => Timestamp,
+  id: (item: T) => string,
+): T | undefined {
   let best: T | undefined;
   for (const item of items) {
     if (!best) {
@@ -159,7 +167,9 @@ function deriveNextAction(snapshot: Snapshot, task: Task, projections: Projectio
   // settlement via verification_exception does (`src/land/report.ts`'s own fixtures). A
   // settled task is a terminal resting state regardless of whether the check chain ran, so
   // that check has to short-circuit ahead of steps 4-7, not sit behind them.
-  const effectiveSettlements = effectiveRecords(snapshot.settlements).filter((s) => s.task_id === task.task_id);
+  const effectiveSettlements = effectiveRecords(snapshot.settlements).filter(
+    (s) => s.task_id === task.task_id,
+  );
   if (effectiveSettlements.length > 0) {
     const latestSettlement = pickLatest(
       effectiveSettlements,
@@ -169,16 +179,26 @@ function deriveNextAction(snapshot: Snapshot, task: Task, projections: Projectio
     return `settled: ${latestSettlement.decision}`;
   }
 
-  const declaration = effectiveRecords(snapshot.declarations).find((d) => d.task_id === task.task_id);
+  const declaration = effectiveRecords(snapshot.declarations).find(
+    (d) => d.task_id === task.task_id,
+  );
   if (!declaration) return 'declare';
 
   const attempts = snapshot.attempts.filter((a) => a.task_id === task.task_id);
   if (attempts.length === 0) return 'dispatch';
-  const latestAttempt = pickLatest(attempts, (a) => a.dispatched_at, (a) => a.attempt_id)!;
+  const latestAttempt = pickLatest(
+    attempts,
+    (a) => a.dispatched_at,
+    (a) => a.attempt_id,
+  )!;
 
   const claimsForAttempt = snapshot.claims.filter((c) => c.attempt_id === latestAttempt.attempt_id);
   if (claimsForAttempt.length === 0) return 'observe (claim)';
-  const latestClaim = pickLatest(claimsForAttempt, (c) => c.claimed_at, (c) => c.claim_id)!;
+  const latestClaim = pickLatest(
+    claimsForAttempt,
+    (c) => c.claimed_at,
+    (c) => c.claim_id,
+  )!;
 
   const invocationsForClaim = snapshot.check_invocations.filter(
     (ci) => ci.subject.kind === 'claim' && ci.subject.id === latestClaim.claim_id,
@@ -199,7 +219,9 @@ function deriveNextAction(snapshot: Snapshot, task: Task, projections: Projectio
 }
 
 function buildTaskView(snapshot: Snapshot, task: Task, projections: ProjectionValues): TaskView {
-  const declaration = effectiveRecords(snapshot.declarations).find((d) => d.task_id === task.task_id);
+  const declaration = effectiveRecords(snapshot.declarations).find(
+    (d) => d.task_id === task.task_id,
+  );
 
   const attempts = snapshot.attempts.filter((a) => a.task_id === task.task_id);
   const attemptIds = new Set(attempts.map((a) => a.attempt_id));
@@ -219,8 +241,14 @@ function buildTaskView(snapshot: Snapshot, task: Task, projections: ProjectionVa
   const verdictIds = new Set(projections.verified[task.task_id] ?? []);
   const verdicts = snapshot.verdicts.filter((v) => verdictIds.has(v.verdict_id));
 
-  const effectiveSettlements = effectiveRecords(snapshot.settlements).filter((s) => s.task_id === task.task_id);
-  const settlement = pickLatest(effectiveSettlements, (s) => s.decided_at, (s) => s.settlement_id);
+  const effectiveSettlements = effectiveRecords(snapshot.settlements).filter(
+    (s) => s.task_id === task.task_id,
+  );
+  const settlement = pickLatest(
+    effectiveSettlements,
+    (s) => s.decided_at,
+    (s) => s.settlement_id,
+  );
 
   const status: TaskViewStatus = {
     blocked: (projections.blocked[task.task_id]?.length ?? 0) > 0,
@@ -236,7 +264,11 @@ function buildTaskView(snapshot: Snapshot, task: Task, projections: ProjectionVa
     title: task.title,
     topic_id: task.topic_id,
     declaration: declaration
-      ? { declaration_id: declaration.declaration_id, objective: declaration.objective, criteria: declaration.criteria }
+      ? {
+          declaration_id: declaration.declaration_id,
+          objective: declaration.objective,
+          criteria: declaration.criteria,
+        }
       : null,
     attempts: attempts.map((a) => ({
       attempt_id: a.attempt_id,
@@ -291,7 +323,11 @@ function buildTaskView(snapshot: Snapshot, task: Task, projections: ProjectionVa
  * `policy` drives the `stale` status field via `computeProjectionValues`; omitted, `stale`
  * reads `false` for every task rather than guessing a time reference.
  */
-export function buildTaskViews(snapshot: Snapshot, taskIds?: string[], policy?: StalePolicy): TaskView[] {
+export function buildTaskViews(
+  snapshot: Snapshot,
+  taskIds?: string[],
+  policy?: StalePolicy,
+): TaskView[] {
   const wanted = taskIds ? new Set(taskIds) : null;
   const tasks = wanted ? snapshot.tasks.filter((t) => wanted.has(t.task_id)) : snapshot.tasks;
   const projections = computeProjectionValues(snapshot, policy);
