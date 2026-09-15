@@ -1,8 +1,10 @@
 # Tallyback v1 — Implementation Plan
 
-> Planning document. Development begins **only after** the written contract
-> (`contract/SPEC.md` + these planning docs) is reviewed and frozen, and only after a
-> separate explicit approval. This phase is documentation and planning only.
+> Historical document. Describes the planning posture before v1 development began.
+> v1 development **has** happened: the contract was frozen, the schemas/validators/
+> fixtures/Store/Check landed, and Watch/Land/View/Bridge v1 were built on top. This
+> file is retained as a record of the build order and bounded-scope decisions that
+> governed that work — it is no longer "documentation only".
 
 ## 1. Build order
 
@@ -50,11 +52,12 @@ ranges, and feature/provider interfaces). Every mutating workflow preflights it 
 closed on unsupported majors. Explicit migration includes preview, validation, and a
 migration report; it is not a compatibility fallback.
 
-## 3. Freeze gate
+## 3. Freeze gate (historical)
 
-The written contract is reviewed and frozen first. Development (steps 2–10) begins only
-after a separate explicit approval. No schema, validator, binding, adapter, test, or
-modification to either existing foundation is written before that approval.
+The v1 written contract was reviewed and frozen before implementation; steps 2–10 of the
+build order below were carried out against that frozen contract. The freeze-first
+posture is preserved as a process expectation: any future contract change ships under a
+new contract major version, with no in-place rewrites of the v1 spec.
 
 ## 4. Governing test
 

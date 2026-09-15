@@ -705,16 +705,16 @@ async function runView(store: Store, args: Args): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Watch (read-only, on-demand lost/inconsistent detection — docs/watch-design.md)
+// Watch (read-only, on-demand lost / claim_without_branch_advance detection — docs/watch-design.md)
 // ---------------------------------------------------------------------------
 
 /**
  * `tallyback watch [--stale-after-ms <n>]` — cross-checks every open Attempt (no
  * `AttemptEnd`, no effective Settlement) against live workspace/Git state: `lost` when the
- * bound workspace no longer resolves, `inconsistent` when a Claim exists but the branch
- * shows no commits since dispatch, `unresolved` when there is no branch to check, plus the
- * ledger's own `stale` projection. Read-only and advisory only: no Blocker is raised, no
- * ledger write (design §2).
+ * bound workspace no longer resolves, `claim_without_branch_advance` when a Claim exists
+ * but the branch shows no commits since dispatch (observation only — does not judge the
+ * claim), `unresolved` when there is no branch to check, plus the ledger's own `stale`
+ * projection. Read-only and advisory only: no Blocker is raised, no ledger write (design §2).
  */
 async function runWatch(store: Store, args: Args): Promise<void> {
   const staleAfterMsRaw = optionalStr(args, 'stale-after-ms');
@@ -734,7 +734,7 @@ async function runWatch(store: Store, args: Args): Promise<void> {
   print(report);
   process.stderr.write(
     `watch: ${report.summary.open_attempts} open attempt(s), ${report.summary.stale} stale, ` +
-      `${report.summary.lost} lost, ${report.summary.inconsistent} inconsistent, ` +
+      `${report.summary.lost} lost, ${report.summary.claim_without_branch_advance} claim_without_branch_advance, ` +
       `${report.summary.unresolved} unresolved\n`,
   );
 }

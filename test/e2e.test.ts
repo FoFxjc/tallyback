@@ -259,7 +259,7 @@ describe('e2e — the full loop through the real CLI, a real git repository, and
     expect(validated.ok).toBe(true);
   }, 120_000);
 
-  it('flags a claimed but unadvanced branch as inconsistent, and land ignores the unsettled attempt', async () => {
+  it('flags a claimed but unadvanced branch as claim_without_branch_advance, and land ignores the unsettled attempt', async () => {
     const projectRoot = await tempRoot('tallyback-e2e-open-');
 
     const init = (await tb(
@@ -367,11 +367,11 @@ describe('e2e — the full loop through the real CLI, a real git repository, and
     const watch = (await tb(projectRoot, 'watch')) as unknown as {
       findings: { attempt_id: string; kind: string; detail?: { claim_count?: number } }[];
     };
-    const inconsistent = watch.findings.filter(
-      (f) => f.attempt_id === attemptId && f.kind === 'inconsistent',
+    const cwba = watch.findings.filter(
+      (f) => f.attempt_id === attemptId && f.kind === 'claim_without_branch_advance',
     );
-    expect(inconsistent).toHaveLength(1);
-    expect(inconsistent[0]!.detail).toMatchObject({ claim_count: 1 });
+    expect(cwba).toHaveLength(1);
+    expect(cwba[0]!.detail).toMatchObject({ claim_count: 1 });
 
     // No effective land Settlement yet: outside ready_to_land entirely, so this task is
     // absent from both `ready` and `unresolved`.

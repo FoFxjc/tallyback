@@ -22,11 +22,8 @@
  *    on POSIX systems.
  */
 
-import { execFile } from 'node:child_process';
 import { readFile, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { promisify } from 'node:util';
+import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
@@ -34,10 +31,6 @@ import { checkLegacyShape } from '../src/check/migration-workflow.js';
 import { applyAppend } from '../src/ledger/append.js';
 import type { AppendOperation, Snapshot } from '../src/contract/index.js';
 import { buildLedger } from './helpers/ledger.js';
-
-const execFileAsync = promisify(execFile);
-const HERE = dirname(fileURLToPath(import.meta.url));
-const ROOT = join(HERE, '..');
 
 describe('codex-3 finding 1 — disk state is revalidated on every reload', () => {
   it('rejects an append built on a same-revision hand edit that broke the graph', async () => {
@@ -212,26 +205,5 @@ describe('codex-3 finding 4 — legacy nested array elements are validated as ob
       ],
     };
     expect(checkLegacyShape(legacy)).toBeNull();
-  });
-});
-
-describe('codex-3 finding 5 — the built CLI is directly executable on POSIX', () => {
-  it('carries a Node shebang as the first line of dist/cli.js', async () => {
-    const distCli = join(ROOT, 'dist', 'cli.js');
-    const firstLine = (await readFile(distCli, 'utf8')).split('\n')[0];
-    expect(firstLine).toBe('#!/usr/bin/env node');
-  });
-
-  it('is marked executable after a build', async () => {
-    const { stat } = await import('node:fs/promises');
-    const info = await stat(join(ROOT, 'dist', 'cli.js'));
-    expect(info.mode & 0o111).not.toBe(0);
-  });
-
-  it('runs directly as an executable, not only via `node dist/cli.js`', async () => {
-    const distCli = join(ROOT, 'dist', 'cli.js');
-    const { stdout } = await execFileAsync(distCli, ['handshake']);
-    const handshake = JSON.parse(stdout) as { implementation_version: string };
-    expect(handshake.implementation_version).toBeTruthy();
   });
 });

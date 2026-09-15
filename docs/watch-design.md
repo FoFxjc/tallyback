@@ -6,7 +6,7 @@
 
 ## 1. What Watch is for
 
-README's ecosystem table: *"Optional external detection of stale, lost, or inconsistent
+README's ecosystem table: *"Optional external detection of stale, lost, or drifting
 execution."* Of those three:
 
 - **stale** already has a full, tested implementation: `staleTaskIds`/`isTaskStale`
@@ -15,7 +15,7 @@ execution."* Of those three:
   purely ledger-time-based (last record timestamp vs. now) and needs no external I/O, so
   there is nothing left for a "host-layer" component to add here. Watch **surfaces** it,
   it does not recompute it.
-- **lost** and **inconsistent** are new: both require cross-referencing the ledger against
+- **lost** and **claim_without_branch_advance** are new: both require cross-referencing the ledger against
   the outside world (Git + filesystem), the same "host-layer" gap `src/land/report.ts`
   already fills for `ready_to_land`. Nothing in `src/ledger/` or `src/check/` currently
   detects either, because a pure `Snapshot` function cannot perform live I/O (the same
@@ -29,11 +29,14 @@ else currently detects:
    the binding is missing, or the path is no longer a Git repository. The ledger still
    thinks the work is in progress; the physical place it was supposed to be happening
    doesn't exist anymore.
-2. **Inconsistent** — the Attempt has at least one Claim (the executor asserted progress),
-   but the bound branch shows zero commits since the Attempt was dispatched. This is the
-   product's founding thesis made concrete: *"An agent saying 'done' is a claim, not a
-   fact"* (README) — Watch is the check that catches a claim with literally nothing behind
-   it in the repository, before it ever reaches a Check/Verdict cycle.
+2. **`claim_without_branch_advance`** — the Attempt has at least one Claim (the executor asserted progress),
+   but the bound branch shows zero commits since the Attempt was dispatched. The name
+   names the observation (a claim exists, the branch has not advanced); it does not
+   conclude the claim is wrong — a claim can describe investigation, tests, analysis,
+   no-op outcomes, or uncommitted work, all of which the executor's own Evidence may
+   legitimately support. Watch names what the ledger and Git disagree about; whether the
+   claim is correct is left to Check + Verdict (README: *"An agent saying 'done' is a claim,
+   not a fact"*).
 
 ## 2. Bounded scope for v1
 
@@ -46,7 +49,7 @@ Per `docs/implementation-plan.md` §2 and the project's non-goals, Watch v1 is
   state of the world *right now* — same as `tallyback land`/`tallyback view`. A host that
   wants periodic checking runs this command from its own scheduler (a CI cron job, a
   systemd timer) — Tallyback does not provide or manage that scheduler itself.
-- **No automatic action.** Detecting a lost or inconsistent Attempt never raises a
+- **No automatic action.** Detecting a lost or `claim_without_branch_advance` Attempt never raises a
   Blocker, never writes to the ledger, never mutates anything. `docs/branch-workflow.md`'s
   and Land's precedent both hold: a report names what a human/PM agent should look at;
   raising an actual Blocker is a separate, explicit `tallyback block` call by whoever acts
@@ -76,12 +79,12 @@ For each open Attempt:
   `repository_unbound`, `workspace_unbound`, `path_unavailable`, `not_a_git_repository`)
   means "lost" — report the code/reason verbatim, the same way Land reports
   `git_unresolved`.
-- **Inconsistent** — only checked when resolution succeeds (an Attempt can't be both
-  "lost" and "inconsistent" — lost is a strict precondition failure). Resolve the
+- **`claim_without_branch_advance`** — only checked when resolution succeeds (an Attempt can't be both
+  "lost" and `claim_without_branch_advance` — lost is a strict precondition failure). Resolve the
   Workspace's `branch` field (as Land does); if present, run
   `git log --since=<dispatched_at> --oneline <branch>` (read-only) in the resolved root.
-  Zero lines back **and** at least one Claim exists on this Attempt → "inconsistent": a
-  claim exists but the branch shows no activity since dispatch. No `branch` field on the
+  Zero lines back **and** at least one Claim exists on this Attempt → `claim_without_branch_advance`:
+  a claim exists but the branch shows no activity since dispatch. No `branch` field on the
   Workspace → not evaluable, reported as `unresolved` (same posture as Land's
   `git_unresolved` for a missing branch), not silently skipped.
 
@@ -95,13 +98,13 @@ For each open Attempt:
     {
       "task_id": "tsk_...",
       "attempt_id": "att_...",
-      "kind": "lost", // "stale" | "lost" | "inconsistent" | "unresolved"
+      "kind": "lost", // "stale" | "lost" | "claim_without_branch_advance" | "unresolved"
       "code": "resolution.path_unavailable", // present for lost/unresolved
       "reason": "worktree root does not exist",
       "detail": { "last_activity_at": "...", "claim_count": 1 } // kind-specific, informational only
     }
   ],
-  "summary": { "open_attempts": 3, "stale": 1, "lost": 1, "inconsistent": 0, "unresolved": 0 }
+  "summary": { "open_attempts": 3, "stale": 1, "lost": 1, "claim_without_branch_advance": 0, "unresolved": 0 }
 }
 ```
 
@@ -119,7 +122,7 @@ own output).
 - No notification/alerting integration (Slack, email, webhooks) — that is exactly the
   "telemetry, remote service" surface `docs/implementation-plan.md` §2 rules out. A host
   wanting alerts pipes this command's JSON output into its own notifier.
-- No new "lost"/"inconsistent" classification beyond §3 — no attempt to detect, say,
+- No new "lost" / `claim_without_branch_advance` classification beyond §3 — no attempt to detect, say,
   force-pushed history, rewritten commits, or executor crash signals; those would need
   information this ledger + a local worktree cannot provide.
 

@@ -3,11 +3,12 @@
  * reality have drifted apart (`docs/watch-design.md`).
  *
  * `docs/watch-design.md` (§1) frames this as the host-layer half of README's "Optional
- * external detection of stale, lost, or inconsistent execution": `stale` is already fully
+ * external detection of stale, lost, or drifting execution": `stale` is already fully
  * derivable from the ledger alone (`computeProjectionValues(...).stale`), so Watch only
  * adds the two checks that require live I/O — `lost` (the bound workspace no longer
- * resolves) and `inconsistent` (a Claim exists but the branch shows no commits since
- * dispatch). Both are new work exactly the way Land's Git half is: a pure `Snapshot`
+ * resolves) and `claim_without_branch_advance` (a Claim exists but the branch shows no
+ * commits since dispatch; observation only, not a verdict on the claim). Both are new
+ * work exactly the way Land's Git half is: a pure `Snapshot`
  * function cannot perform live I/O, so the resolver is dependency-injected (mirroring
  * `src/land/report.ts`'s `GitResolver`) and `src/watch/git.ts` supplies the real,
  * Git-backed implementation.
@@ -25,7 +26,7 @@ import {
 import { effectiveRecords } from '../ledger/supersession.js';
 
 /** One Watch observation kind (design §4). */
-export type WatchFindingKind = 'stale' | 'lost' | 'inconsistent' | 'unresolved';
+export type WatchFindingKind = 'stale' | 'lost' | 'claim_without_branch_advance' | 'unresolved';
 
 export interface WatchFinding {
   task_id: string;
@@ -42,7 +43,7 @@ export interface WatchSummary {
   open_attempts: number;
   stale: number;
   lost: number;
-  inconsistent: number;
+  claim_without_branch_advance: number;
   unresolved: number;
 }
 
@@ -173,15 +174,18 @@ async function classify(
     return findings;
   }
 
-  // `inconsistent`: a claim exists on this attempt but the branch shows nothing new since
-  // dispatch — the founding thesis (README: "a claim, not a fact") made concrete.
+  // `claim_without_branch_advance`: a claim exists on this attempt but the branch shows
+  // nothing new since dispatch. Observation only — the claim may describe investigation,
+  // tests, analysis, no-op outcomes, or uncommitted work; this finding names what the
+  // ledger and Git disagree about, not a verdict on the claim itself (README: "a claim,
+  // not a fact").
   if (result.count === 0) {
     const claimCount = snapshot.claims.filter((c) => c.attempt_id === attempt.attempt_id).length;
     if (claimCount > 0) {
       findings.push({
         task_id: attempt.task_id,
         attempt_id: attempt.attempt_id,
-        kind: 'inconsistent',
+        kind: 'claim_without_branch_advance',
         detail: { claim_count: claimCount },
       });
     }
@@ -212,7 +216,8 @@ export async function buildWatchReport(
     open_attempts: attempts.length,
     stale: findings.filter((f) => f.kind === 'stale').length,
     lost: findings.filter((f) => f.kind === 'lost').length,
-    inconsistent: findings.filter((f) => f.kind === 'inconsistent').length,
+    claim_without_branch_advance: findings.filter((f) => f.kind === 'claim_without_branch_advance')
+      .length,
     unresolved: findings.filter((f) => f.kind === 'unresolved').length,
   };
 

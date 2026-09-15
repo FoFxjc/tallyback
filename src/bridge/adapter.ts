@@ -83,7 +83,7 @@ export const READ_ONLY_REPORTS: readonly ReadOnlyReport[] = [
     name: 'watch',
     command: 'watch',
     summary:
-      "Cross-checks every open Attempt against live workspace/Git state for lost/inconsistent/unresolved conditions plus the ledger's own stale projection. Read-only and advisory: no Blocker is raised, no ledger write.",
+      "Cross-checks every open Attempt against live workspace/Git state for lost / claim_without_branch_advance / unresolved conditions plus the ledger's own stale projection. Read-only and advisory: no Blocker is raised, no ledger write.",
   },
 ];
 

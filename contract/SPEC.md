@@ -2,10 +2,10 @@
 
 > **Delegate work. Know what came back.**
 
-Status: **Draft for review — documentation only.** This specification consolidates the
-grilling session's decisions into the normative contract for Tallyback v1. It is a
-*freeze target*: review and freeze it before any schema, validator, binding, adapter,
-test, or foundation change is written.
+Status: **Frozen (v1).** This specification is the normative contract that Tallyback v1
+implements. The schemas, invariant catalog, fixtures, reference validator, Store, and
+Check boundary described here all exist in this repository and pass the conformance
+suite; substantive changes ship under a new contract major version.
 
 ---
 

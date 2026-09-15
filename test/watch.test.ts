@@ -1,5 +1,5 @@
 /**
- * Watch: on-demand lost/inconsistent detection over open Attempts
+ * Watch: on-demand lost / `claim_without_branch_advance` detection over open Attempts
  * (`docs/watch-design.md`).
  *
  * `src/watch/report.ts`'s unit tests drive `buildWatchReport` with a fake, injected
@@ -36,7 +36,7 @@ async function initGitRepo(root: string): Promise<void> {
 
 const NOT_STALE_POLICY = { now: new Date().toISOString(), staleAfterMs: 48 * 60 * 60 * 1000 };
 
-/** A resolver that never flags lost/unresolved/inconsistent — always plenty of commits. */
+/** A resolver that never flags lost / unresolved / claim_without_branch_advance — always plenty of commits. */
 const ALWAYS_FINE_RESOLVER: WatchResolver = () => ({ status: 'commits', count: 3 });
 
 describe('buildWatchReport', () => {
@@ -99,8 +99,8 @@ describe('buildWatchReport', () => {
     expect(report.summary.lost).toBe(1);
   });
 
-  it('reports inconsistent when a claim exists but the resolver reports zero commits since dispatch', async () => {
-    const fixture = await buildLedger('tallyback-watch-inconsistent-');
+  it('reports claim_without_branch_advance when a claim exists but the resolver reports zero commits since dispatch', async () => {
+    const fixture = await buildLedger('tallyback-watch-cwba-');
     // buildLedger's fixture attempt already has a claim (fixture.claim_id).
 
     const resolver: WatchResolver = () => ({ status: 'commits', count: 0 });
@@ -110,16 +110,16 @@ describe('buildWatchReport', () => {
       NOT_STALE_POLICY,
     );
 
-    const inconsistent = report.findings.filter(
-      (f) => f.attempt_id === fixture.attempt_id && f.kind === 'inconsistent',
+    const cwba = report.findings.filter(
+      (f) => f.attempt_id === fixture.attempt_id && f.kind === 'claim_without_branch_advance',
     );
-    expect(inconsistent).toHaveLength(1);
-    expect(inconsistent[0]!.detail).toMatchObject({ claim_count: 1 });
-    expect(report.summary.inconsistent).toBe(1);
+    expect(cwba).toHaveLength(1);
+    expect(cwba[0]!.detail).toMatchObject({ claim_count: 1 });
+    expect(report.summary.claim_without_branch_advance).toBe(1);
   });
 
-  it('reports no inconsistent finding when the resolver reports commits since dispatch', async () => {
-    const fixture = await buildLedger('tallyback-watch-consistent-');
+  it('reports no claim_without_branch_advance finding when the resolver reports commits since dispatch', async () => {
+    const fixture = await buildLedger('tallyback-watch-cwba-none-');
 
     const report = await buildWatchReport(
       fixture.store.currentSnapshot(),
@@ -127,11 +127,11 @@ describe('buildWatchReport', () => {
       NOT_STALE_POLICY,
     );
 
-    const inconsistent = report.findings.filter(
-      (f) => f.attempt_id === fixture.attempt_id && f.kind === 'inconsistent',
+    const cwba = report.findings.filter(
+      (f) => f.attempt_id === fixture.attempt_id && f.kind === 'claim_without_branch_advance',
     );
-    expect(inconsistent).toHaveLength(0);
-    expect(report.summary.inconsistent).toBe(0);
+    expect(cwba).toHaveLength(0);
+    expect(report.summary.claim_without_branch_advance).toBe(0);
   });
 
   it('excludes an ended attempt entirely, even one the resolver would otherwise flag', async () => {

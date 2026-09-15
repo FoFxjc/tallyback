@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "tree": {
     "algorithm": "sha-256",
-    "value": "c201d1a3657168f49632cc204335f8540b3d58a0a74979ab24865af6bb7bd02f"
+    "value": "657d52abf3ed6f7a8e29d2825c54372bc2bc142aea1c7f8b51f7b538db1cbf82"
   },
   "artifacts": {
     "spec": {
@@ -12,7 +12,7 @@
       "role": "normative",
       "digest": {
         "algorithm": "sha-256",
-        "value": "dfb8bb6f6450f4b14cebe075c20c0b7a0511414ff6f52691fa489a3a78f1482a"
+        "value": "8691611ed679342e4bff251f8d9e02ac0ebc56bce8c658f49764d07b1582016f"
       }
     },
     "records_schema": {
@@ -106,6 +106,6 @@
   },
   "self_digest": {
     "algorithm": "sha-256",
-    "value": "c12ecdcad125e7b2c40b698c50d506ce2835046b8f64327bdcc2aa7e1f34814e"
+    "value": "49ead99c64deb2027a869cb3b0ec1b42f79a54f26f18059d19c426dab3b26b83"
   }
 }
