@@ -22,7 +22,7 @@
  */
 
 import { join } from 'node:path';
-import { diagnoseLedger, reconcileLedger, Store } from './ledger/index.js';
+import { diagnoseLedger, newId, nowIso, reconcileLedger, Store } from './ledger/index.js';
 import {
   applyMigration,
   previewMigration,
@@ -45,10 +45,14 @@ import {
 import type {
   Actor,
   ActorKind,
+  ConfidenceLevel,
   Diagnostic,
   Evidence,
+  Finality,
+  Finding,
   Reconciliation,
   Verdict,
+  VerdictConclusion,
 } from './contract/index.js';
 
 // ---------------------------------------------------------------------------
@@ -66,7 +70,7 @@ type Args = Record<string, string | string[]>;
  * literal string `"true"` in an immutable Settlement. A value is a value; only a declared
  * boolean flag stands alone.
  */
-const BOOLEAN_FLAGS = new Set(['apply', 'preview', 'dry-run', 'help']);
+const BOOLEAN_FLAGS = new Set(['apply', 'preview', 'dry-run', 'help', 'allow-partial']);
 
 function parseArgs(argv: string[]): { command: string; args: Args } {
   const [command, ...rest] = argv;
@@ -362,7 +366,7 @@ async function run(): Promise<void> {
   // Mutating commands: preflight the capability handshake against the ledger.
   preflight(store.currentSnapshot().schema_version);
 
-  const outcome = await dispatch(store, command, args);
+  const outcome = await dispatch(store, command, args, submitter);
   print(outcome);
   // A rejected mutation is an ordinary outcome for the library, but for a shell it is a
   // failure: `tallyback claim … && tallyback settle …` and any CI step must not carry on
@@ -384,7 +388,12 @@ function isRejected(outcome: unknown): boolean {
   );
 }
 
-async function dispatch(store: Store, command: string, args: Args): Promise<unknown> {
+async function dispatch(
+  store: Store,
+  command: string,
+  args: Args,
+  submitter: Actor,
+): Promise<unknown> {
   switch (command) {
     // -- Bootstrap: the operations that make `init` → `declare` → `dispatch` reachable --
 
@@ -561,13 +570,16 @@ async function dispatch(store: Store, command: string, args: Args): Promise<unkn
         supersedes: optionalStr(args, 'supersedes'),
       });
     }
+    case 'verdict': {
+      return runVerdict(store, args, submitter);
+    }
 
     default:
       throw new CliError(
         `unknown command "${command}". Available: handshake, version, init, migrate, ` +
           `validate, reconcile, show, list, bindings, land, view, watch, topic, task, workspace, ` +
-          `bind, declare, dispatch, end, claim, evidence, begin-check, record-check, block, ` +
-          `resolve, settle, decision`,
+          `bind, declare, dispatch, end, claim, evidence, begin-check, record-check, verdict, ` +
+          `block, resolve, settle, decision`,
       );
   }
 }
@@ -646,6 +658,269 @@ async function runReconcile(projectRoot: string, args: Args): Promise<void> {
     dry_run: dryRun,
     revision: outcome.plan.snapshot.revision,
     rewrites: outcome.plan.rewrites,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Verdict (ergonomic Verdict authoring — SPEC §5.4, §8.1)
+// ---------------------------------------------------------------------------
+
+/** Allowed per-criterion assessments and overall Verdict conclusions (closed contract enum). */
+const VERDICT_ASSESSMENTS: readonly VerdictConclusion[] = [
+  'supported',
+  'partially_supported',
+  'unsupported',
+  'contradicted',
+];
+
+const CONFIDENCE_LEVELS: readonly ConfidenceLevel[] = ['low', 'medium', 'high'];
+
+/**
+ * Parse a `--criterion <cri_id>=<assessment>` pair into its parts.
+ * Throws CliError with an actionable message on a malformed token.
+ */
+function parseCriterionAssessment(
+  raw: string,
+  declaredCriterionIds: ReadonlySet<string>,
+  declarationId: string,
+): { criterion_id: string; assessment: VerdictConclusion } {
+  const eq = raw.indexOf('=');
+  if (eq <= 0) {
+    throw new CliError(
+      `--criterion must be "<cri_id>=<assessment>" (one of supported|partially_supported|unsupported|contradicted); got "${raw}"`,
+    );
+  }
+  const criterionId = raw.slice(0, eq);
+  const assessment = raw.slice(eq + 1);
+  if (!declaredCriterionIds.has(criterionId)) {
+    throw new CliError(
+      `--criterion ${criterionId} does not belong to declaration ${declarationId}; declared criteria are: ${[...declaredCriterionIds].join(', ')}`,
+    );
+  }
+  if (!(VERDICT_ASSESSMENTS as readonly string[]).includes(assessment)) {
+    throw new CliError(
+      `--criterion assessment for ${criterionId} must be one of ${VERDICT_ASSESSMENTS.join('|')}; got "${assessment}"`,
+    );
+  }
+  return { criterion_id: criterionId, assessment: assessment as VerdictConclusion };
+}
+
+/**
+ * `tallyback verdict` — ergonomic Verdict authoring on top of the existing Check flow.
+ *
+ * The command mechanically handles everything a human/PM cannot get wrong about syntax
+ * and record construction (Verdict id, issued_at, scope.unevaluated_criteria, finding
+ * shape, the surrounding CheckInvocation + CheckResult) while forcing every actual
+ * judgment — each criterion's assessment, the overall rationale, the confidence level,
+ * uncertainty, and limitations — to be supplied explicitly.
+ *
+ * No claim of "tests/Git/claim say it is done" is silently mapped to `supported`.
+ * Reuses `Store.beginCheckFor` and `Store.recordCheckResult`; never writes a Settlement.
+ */
+async function runVerdict(store: Store, args: Args, submitter: Actor): Promise<unknown> {
+  const snapshot = store.currentSnapshot();
+
+  // -- Resolve claim ---------------------------------------------------------
+  const claimId = str(args, 'claim');
+  const claim = snapshot.claims.find((c) => c.claim_id === claimId);
+  if (!claim) {
+    throw new CliError(`--claim: no Claim ${claimId} in this ledger`);
+  }
+
+  const attemptFromFlag = optionalStr(args, 'attempt');
+  if (attemptFromFlag !== undefined && attemptFromFlag !== claim.attempt_id) {
+    throw new CliError(
+      `--attempt ${attemptFromFlag} does not match the Claim's attempt ${claim.attempt_id}; a Verdict judges one Claim, not an arbitrary Attempt`,
+    );
+  }
+
+  // -- Resolve declaration ---------------------------------------------------
+  const declaration = snapshot.declarations.find((d) => d.declaration_id === claim.declaration_id);
+  if (!declaration) {
+    throw new CliError(
+      `--claim references declaration ${claim.declaration_id} which is not present in this ledger`,
+    );
+  }
+
+  const declaredCriteriaById = new Map(
+    declaration.criteria.map((c) => [c.criterion_id, c] as const),
+  );
+  const declaredCriterionIds = new Set(declaredCriteriaById.keys());
+  if (declaredCriterionIds.size === 0) {
+    throw new CliError(
+      `declaration ${declaration.declaration_id} has no criteria; nothing to assess`,
+    );
+  }
+
+  // -- Parse per-criterion assessments --------------------------------------
+  const rawCriteria = strArray(args, 'criterion');
+  if (rawCriteria.length === 0) {
+    throw new CliError(`at least one --criterion <cri_id>=<assessment> is required`);
+  }
+
+  const assessments: { criterion_id: string; assessment: VerdictConclusion }[] = [];
+  const seenIds = new Set<string>();
+  const duplicateIds: string[] = [];
+  for (const raw of rawCriteria) {
+    const parsed = parseCriterionAssessment(raw, declaredCriterionIds, declaration.declaration_id);
+    if (seenIds.has(parsed.criterion_id)) {
+      duplicateIds.push(parsed.criterion_id);
+      continue;
+    }
+    seenIds.add(parsed.criterion_id);
+    assessments.push(parsed);
+  }
+  if (duplicateIds.length > 0) {
+    throw new CliError(
+      `duplicate --criterion assessments for: ${[...new Set(duplicateIds)].join(', ')}; each criterion may be assessed at most once`,
+    );
+  }
+
+  const evaluatedIds = assessments.map((a) => a.criterion_id);
+  const unevaluatedIds = [...declaredCriterionIds].filter((id) => !seenIds.has(id));
+  const allowPartial = args['allow-partial'] === 'true';
+  if (unevaluatedIds.length > 0 && !allowPartial) {
+    const lines = unevaluatedIds
+      .map((id) => {
+        const crit = declaredCriteriaById.get(id);
+        return `  - ${id}${crit ? ` (${crit.code})` : ''}`;
+      })
+      .join('\n');
+    throw new CliError(
+      `${unevaluatedIds.length} declared criteria were not assessed:\n${lines}\n` +
+        `Provide an explicit assessment for each criterion, or pass --allow-partial to leave some unevaluated.`,
+    );
+  }
+
+  // -- Validate evidence / reconciliation references ------------------------
+  const evidenceFlag = strArray(args, 'evidence');
+  const evidenceIds = evidenceFlag.length > 0 ? evidenceFlag : claim.evidence_ids;
+  const reconciliationIds = strArray(args, 'reconciliation');
+  const knownEvidence = new Set(snapshot.evidence.map((e) => e.evidence_id));
+  const knownReconciliation = new Set(snapshot.reconciliations.map((r) => r.reconciliation_id));
+  const missingEvidence = evidenceIds.filter((id) => !knownEvidence.has(id));
+  const missingReconciliation = reconciliationIds.filter((id) => !knownReconciliation.has(id));
+  const referenceProblems: string[] = [];
+  if (missingEvidence.length > 0) {
+    referenceProblems.push(
+      `--evidence references not in this ledger: ${missingEvidence.join(', ')}`,
+    );
+  }
+  if (missingReconciliation.length > 0) {
+    referenceProblems.push(
+      `--reconciliation references not in this ledger: ${missingReconciliation.join(', ')}`,
+    );
+  }
+  if (referenceProblems.length > 0) {
+    throw new CliError(referenceProblems.join('\n'));
+  }
+
+  // -- Required enums + strings ---------------------------------------------
+  const confidence = enumArg(args, 'confidence', CONFIDENCE_LEVELS);
+  const finality = (optionalStr(args, 'finality') ?? 'final') as Finality;
+  const rationale = str(args, 'rationale');
+  const confidenceRationale = optionalStr(args, 'confidence-rationale') ?? rationale;
+  const conclusionFlag = optionalStr(args, 'conclusion');
+
+  const conclusion: VerdictConclusion = (() => {
+    if (conclusionFlag !== undefined) {
+      if (!(VERDICT_ASSESSMENTS as readonly string[]).includes(conclusionFlag)) {
+        throw new CliError(
+          `--conclusion must be one of ${VERDICT_ASSESSMENTS.join('|')}; got "${conclusionFlag}"`,
+        );
+      }
+      return conclusionFlag as VerdictConclusion;
+    }
+    // Safe to auto-derive ONLY when every criterion is evaluated AND every assessment
+    // agrees. Mixed assessments or any unevaluated criterion require the operator to
+    // state the overall conclusion explicitly — `Verdict.conclusion` is a semantic
+    // judgment, not a mechanical aggregation.
+    const assessmentValues = assessments.map((a) => a.assessment);
+    if (unevaluatedIds.length > 0) {
+      throw new CliError(
+        `--conclusion is required when some criteria are left unevaluated (${unevaluatedIds.length} unevaluated); ` +
+          `pass --conclusion one of ${VERDICT_ASSESSMENTS.join('|')}.`,
+      );
+    }
+    const first = assessmentValues[0]!;
+    const uniform = assessmentValues.every((a) => a === first);
+    if (!uniform) {
+      const distinct = [...new Set(assessmentValues)];
+      throw new CliError(
+        `--conclusion is required when per-criterion assessments are mixed (saw ${distinct.join(', ')}); ` +
+          `pass --conclusion one of ${VERDICT_ASSESSMENTS.join('|')}.`,
+      );
+    }
+    return first;
+  })();
+  // -- Optional metadata + actor identity -----------------------------------
+  const uncertainty = strArray(args, 'uncertainty');
+  const limitations = strArray(args, 'limitation');
+  const checkerId = optionalStr(args, 'checker-id') ?? 'operator-authored';
+  const checkerVersion = optionalStr(args, 'checker-version') ?? 'v1';
+  if (!checkerId || !checkerVersion) {
+    throw new CliError('--checker-id and --checker-version must be non-empty when provided');
+  }
+  const issuedBy = actor(args, 'actor', submitter);
+
+  // -- Construct Verdict + Findings -----------------------------------------
+  const findings: Finding[] = assessments.map((a) => {
+    const crit = declaredCriteriaById.get(a.criterion_id)!;
+    return {
+      criterion_id: a.criterion_id,
+      assessment: a.assessment,
+      summary: `${crit.code}: assessed as ${a.assessment}`,
+      // Finding.basis_refs is a criterion-specific citation, distinct from
+      // Verdict.basis.evidence_ids. This slice has no per-criterion evidence syntax,
+      // so it defaults empty rather than silently inheriting every Claim/Verdict
+      // evidence id — that would fabricate a per-criterion citation nobody supplied.
+      basis_refs: [],
+    };
+  });
+
+  const verdict: Verdict = {
+    verdict_id: newId('ver_'),
+    subject: { kind: 'claim', id: claimId },
+    declaration_id: declaration.declaration_id,
+    scope: {
+      evaluated_criteria: evaluatedIds,
+      unevaluated_criteria: unevaluatedIds,
+    },
+    conclusion,
+    finality,
+    basis: {
+      evidence_ids: evidenceIds,
+      reconciliation_ids: reconciliationIds,
+    },
+    findings,
+    confidence: {
+      level: confidence,
+      rationale: confidenceRationale,
+    },
+    rationale,
+    uncertainty,
+    limitations,
+    issued_by: issuedBy,
+    issued_at: nowIso(),
+    checker: { id: checkerId, version: checkerVersion },
+  };
+
+  // -- Record through the canonical Check flow ------------------------------
+  const begun = await store.beginCheckFor({
+    claim_id: claimId,
+    checker: { id: checkerId, version: checkerVersion },
+    invoked_by: issuedBy,
+  });
+  if (!begun.ok) {
+    return begun;
+  }
+
+  return store.recordCheckResult({
+    check_invocation_id: begun.invocation.check_invocation_id,
+    outcome: 'verdict_emitted',
+    verdict,
+    produced_by: issuedBy,
+    diagnostics: [],
   });
 }
 

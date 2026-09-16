@@ -39,6 +39,7 @@ const REAL_CLI_COMMANDS = [
   'evidence',
   'begin-check',
   'record-check',
+  'verdict',
   'block',
   'resolve',
   'settle',
