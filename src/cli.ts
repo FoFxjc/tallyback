@@ -70,7 +70,7 @@ type Args = Record<string, string | string[]>;
  * literal string `"true"` in an immutable Settlement. A value is a value; only a declared
  * boolean flag stands alone.
  */
-const BOOLEAN_FLAGS = new Set(['apply', 'preview', 'dry-run', 'help', 'allow-partial']);
+const BOOLEAN_FLAGS = new Set(['apply', 'preview', 'dry-run', 'help', 'allow-partial', 'all']);
 
 function parseArgs(argv: string[]): { command: string; args: Args } {
   const [command, ...rest] = argv;
@@ -676,27 +676,60 @@ const VERDICT_ASSESSMENTS: readonly VerdictConclusion[] = [
 const CONFIDENCE_LEVELS: readonly ConfidenceLevel[] = ['low', 'medium', 'high'];
 
 /**
- * Parse a `--criterion <cri_id>=<assessment>` pair into its parts.
- * Throws CliError with an actionable message on a malformed token.
+ * Parse a `--criterion <ref>=<assessment>` pair, where `<ref>` is either the generated
+ * `cri_<UUIDv7>` criterion id or the human-meaningful `code` declared in the
+ * TaskDeclaration. The canonical Verdict always stores only `criterion_id` — this is a
+ * CLI ergonomic, not a contract change (SPEC §5.4). Throws CliError with an actionable
+ * message on a malformed token, an unknown ref, an ambiguous code (the same code is
+ * reused by two criteria), or a ref that resolves to no criterion in this declaration.
+ *
+ * Cross-form duplicates (e.g. `backup=supported` and `cri_<UUIDv7>=supported` for the
+ * same Criterion) are caught by the caller's `seenIds` set, not here — both forms resolve
+ * to the same canonical `criterion_id`, which the per-criterion duplicate detection already
+ * rejects.
  */
 function parseCriterionAssessment(
   raw: string,
   declaredCriterionIds: ReadonlySet<string>,
+  codeToCriterionIds: ReadonlyMap<string, string[]>,
   declarationId: string,
 ): { criterion_id: string; assessment: VerdictConclusion } {
   const eq = raw.indexOf('=');
   if (eq <= 0) {
     throw new CliError(
-      `--criterion must be "<cri_id>=<assessment>" (one of supported|partially_supported|unsupported|contradicted); got "${raw}"`,
+      `--criterion must be "<ref>=<assessment>" where <ref> is a cri_<UUIDv7> id OR the code declared on the TaskDeclaration; one of supported|partially_supported|unsupported|contradicted; got "${raw}"`,
     );
   }
-  const criterionId = raw.slice(0, eq);
+  const criterionRef = raw.slice(0, eq);
   const assessment = raw.slice(eq + 1);
-  if (!declaredCriterionIds.has(criterionId)) {
+
+  let criterionId: string | undefined;
+  if (declaredCriterionIds.has(criterionRef)) {
+    // Author supplied the canonical criterion id directly.
+    criterionId = criterionRef;
+  } else {
+    const candidates = codeToCriterionIds.get(criterionRef);
+    if (candidates !== undefined && candidates.length === 1) {
+      criterionId = candidates[0]!;
+    } else if (candidates !== undefined && candidates.length > 1) {
+      // The same `code` was declared twice on this declaration — there is no single
+      // criterion to assess. Refusing beats silently picking one: the operator either
+      // fixes the declaration or supplies the `cri_<UUIDv7>` id to disambiguate.
+      throw new CliError(
+        `--criterion "${criterionRef}" is ambiguous: code is declared on ${candidates.length} criteria in declaration ${declarationId} (${candidates.join(', ')}); use the cri_<UUIDv7> id to disambiguate`,
+      );
+    }
+  }
+
+  if (criterionId === undefined) {
+    const allCodes = [...codeToCriterionIds.keys()].sort();
+    const allIds = [...declaredCriterionIds].sort();
     throw new CliError(
-      `--criterion ${criterionId} does not belong to declaration ${declarationId}; declared criteria are: ${[...declaredCriterionIds].join(', ')}`,
+      `--criterion "${criterionRef}" is neither a declared code (${allCodes.join(', ')}) ` +
+        `nor a cri_<UUIDv7> id (${allIds.join(', ')}) on declaration ${declarationId}`,
     );
   }
+
   if (!(VERDICT_ASSESSMENTS as readonly string[]).includes(assessment)) {
     throw new CliError(
       `--criterion assessment for ${criterionId} must be one of ${VERDICT_ASSESSMENTS.join('|')}; got "${assessment}"`,
@@ -752,17 +785,35 @@ async function runVerdict(store: Store, args: Args, submitter: Actor): Promise<u
     );
   }
 
+  // Build the code → [criterion_id] map. The same `code` may legitimately appear on more
+  // than one criterion (the schema permits it); the CLI resolves uniquely only when the
+  // declaration happens to be unambiguous, and otherwise forces the operator to supply the
+  // `cri_<UUIDv7>` id. We never modify the declaration here.
+  const codeToCriterionIds = new Map<string, string[]>();
+  for (const c of declaration.criteria) {
+    const list = codeToCriterionIds.get(c.code);
+    if (list) list.push(c.criterion_id);
+    else codeToCriterionIds.set(c.code, [c.criterion_id]);
+  }
+
   // -- Parse per-criterion assessments --------------------------------------
   const rawCriteria = strArray(args, 'criterion');
   if (rawCriteria.length === 0) {
-    throw new CliError(`at least one --criterion <cri_id>=<assessment> is required`);
+    throw new CliError(
+      `at least one --criterion <ref>=<assessment> is required; <ref> may be a cri_<UUIDv7> id or the criterion's declared code`,
+    );
   }
 
   const assessments: { criterion_id: string; assessment: VerdictConclusion }[] = [];
   const seenIds = new Set<string>();
   const duplicateIds: string[] = [];
   for (const raw of rawCriteria) {
-    const parsed = parseCriterionAssessment(raw, declaredCriterionIds, declaration.declaration_id);
+    const parsed = parseCriterionAssessment(
+      raw,
+      declaredCriterionIds,
+      codeToCriterionIds,
+      declaration.declaration_id,
+    );
     if (seenIds.has(parsed.criterion_id)) {
       duplicateIds.push(parsed.criterion_id);
       continue;
@@ -929,10 +980,23 @@ async function runVerdict(store: Store, args: Args, submitter: Actor): Promise<u
 // ---------------------------------------------------------------------------
 
 /**
- * `tallyback land [--target-branch main]` — cross-checks the ledger's `ready_to_land`
- * projection against live Git state. Read-only and advisory: it never merges, rebases,
- * pushes, or writes to the ledger (design §2). Worktrees are resolved the same way Check
- * resolves them, via `runtime/bindings.json`.
+ * `tallyback land [--target-branch main] [--all]` — cross-checks the ledger's
+ * `ready_to_land` projection against live Git state. Read-only and advisory: it never
+ * merges, rebases, pushes, or writes to the ledger (design §2). Worktrees are resolved the
+ * same way Check resolves them, via `runtime/bindings.json`.
+ *
+ * Candidate classification is fixed at the resolver/report boundary:
+ *   - `ready`      = `status: 'git_ready'` — currently actionable for integration.
+ *   - `unresolved` = `status: 'git_behind' | 'git_unresolved'` — actionable but Git
+ *                    reality cannot yet resolve it.
+ *   - `historical` = `status: 'git_integrated'` — already integrated; not actionable.
+ *
+ * By default, the CLI omits the `historical` bucket from the JSON output entirely (it
+ * only emits `target_branch`, `ready`, `unresolved`, `conflicts`). `--all` adds the
+ * `historical` bucket back into the output — never into `ready` — for callers who want
+ * to audit / inspect already-integrated history. Reclassifying an integrated candidate
+ * as `ready` would be a lie (telling the operator to "land me" work that has already
+ * landed) and is explicitly avoided.
  */
 async function runLand(store: Store, args: Args): Promise<void> {
   const targetBranch = str(args, 'target-branch', 'main');
@@ -941,10 +1005,27 @@ async function runLand(store: Store, args: Args): Promise<void> {
     bindingsPath: join(store.root, 'runtime', 'bindings.json'),
   });
   const report: LandReport = await buildLandReport(snapshot, resolver, targetBranch);
-  print({ target_branch: targetBranch, ...report });
+
+  // Default invocation: emit only the actionable surface. `--all` re-adds the
+  // `historical` bucket as a sibling of `ready` / `unresolved` — never folding integrated
+  // candidates into `ready` (which would lie about readiness).
+  const out: Record<string, unknown> = {
+    target_branch: targetBranch,
+    ready: report.ready,
+    unresolved: report.unresolved,
+    conflicts: report.conflicts,
+  };
+  const includeAll = args['all'] === 'true';
+  if (includeAll) out.historical = report.historical;
+  print(out);
+
+  const historicalTail =
+    includeAll && report.historical.length > 0
+      ? `, ${report.historical.length} historical`
+      : '';
   process.stderr.write(
     `land: ${report.ready.length} ready, ${report.unresolved.length} unresolved, ` +
-      `${report.conflicts.length} conflict group(s) against "${targetBranch}"\n`,
+      `${report.conflicts.length} conflict group(s)${historicalTail} against "${targetBranch}"\n`,
   );
 }
 
@@ -955,8 +1036,14 @@ async function runLand(store: Store, args: Args): Promise<void> {
 /**
  * `tallyback view [--task-id <id>]... [--stale-after-ms <n>]` — assembles the compact
  * per-task shape SPEC §6 calls a "tallyback": declaration, attempts, claims, evidence
- * pointers, blockers, verification, settlement, status, and next_action. Read-only; never
- * writes to the ledger (design §2).
+ * pointers, blockers, verification, settlement, status, and next_action. Read-only;
+ * never writes to the ledger (design §2).
+ *
+ * View is a pure-Snapshot projection (SPEC §5.11: Settlement is not a Task status).
+ * Every Task is surfaced regardless of Settlement decision; effective Settlements are
+ * reported via `next_action: "settled: <decision>"` and `status.settled`, exactly as
+ * v1 specified. Active-vs-historical filtering is intentionally NOT applied here —
+ * it is an open retention-design question for a future evidence-driven slice.
  */
 async function runView(store: Store, args: Args): Promise<void> {
   const taskIds = taskRefs(store, args);

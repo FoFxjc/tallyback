@@ -322,6 +322,12 @@ function buildTaskView(snapshot: Snapshot, task: Task, projections: ProjectionVa
  * in the snapshot; given, narrows to exactly those (backing the CLI's `--task-id`).
  * `policy` drives the `stale` status field via `computeProjectionValues`; omitted, `stale`
  * reads `false` for every task rather than guessing a time reference.
+ *
+ * View is a pure-Snapshot projection — it does not implement a Task lifecycle policy
+ * (SPEC §5.11: Settlement is not a Task status). Effective Settlements are surfaced
+ * via `next_action: "settled: <decision>"` and `status.settled`, exactly as v1 did.
+ * Active-vs-historical filtering is an open retention-design question and is NOT
+ * applied here.
  */
 export function buildTaskViews(
   snapshot: Snapshot,

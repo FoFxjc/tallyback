@@ -400,7 +400,13 @@ describe('tallyback verdict — ergonomic authoring, explicit judgments only', (
     ]);
     expect(run.code).not.toBe(0);
     expect(run.stderr).toContain(foreignCriterionId);
-    expect(run.stderr).toContain('does not belong to declaration');
+    // The error names the declaration whose criteria were searched, so the operator can
+    // tell at a glance that the foreign id belongs to a different declaration's
+    // criterion set. (Stabilization slice changed the exact phrasing from "does not
+    // belong to declaration" to "is neither a declared code ... nor a cri_<UUIDv7> id
+    // ... on declaration <id>" so it covers both the code-alias and id-direct forms.)
+    expect(run.stderr).toContain('on declaration');
+    expect(run.stderr).toContain(fx.declarationId);
 
     const state = await stateOf(fx.root);
     expect(state.verdicts).toHaveLength(0);
@@ -873,6 +879,270 @@ describe('tallyback verdict — ergonomic authoring, explicit judgments only', (
     );
     state = await stateOf(fx.root);
     expect(state.verdicts[1]!.conclusion).toBe('contradicted');
+  }, 90_000);
+
+  it('--criterion accepts the declared `code` as an alias for the cri_<UUIDv7> id, and the canonical Verdict still stores only criterion_id', async () => {
+    // Dogfood evidence: the PM kept typing `--criterion backup=supported` instead of
+    // `--criterion cri_<UUIDv7>=supported`. This test proves the alias is accepted and the
+    // canonical wire record still carries only the criterion id.
+    const fx = await buildMultiCriterionLedger('tallyback-verdict-alias-');
+
+    await tb(
+      fx.root,
+      'verdict',
+      '--claim',
+      fx.claimId,
+      '--criterion',
+      'a-first=supported',
+      '--criterion',
+      'b-second=supported',
+      '--criterion',
+      'c-third=partially_supported',
+      '--criterion',
+      'd-fourth=unsupported',
+      '--rationale',
+      '4-of-4 via code aliases',
+      '--confidence',
+      'high',
+      '--conclusion',
+      'partially_supported',
+      '--as',
+      'human:alice',
+    );
+
+    const state = await stateOf(fx.root);
+    const verdict = state.verdicts[0]!;
+    // Canonical wire record: every Finding carries the canonical cri_<UUIDv7> id, never
+    // the human code. The CLI ergonomic must not leak into the ledger.
+    expect(verdict.findings).toHaveLength(4);
+    for (const finding of verdict.findings) {
+      expect(finding.criterion_id).toMatch(/^cri_/);
+    }
+    const byCriterion = new Map(
+      verdict.findings.map((f) => [f.criterion_id as string, f.assessment as string] as const),
+    );
+    expect(byCriterion.get(fx.criterionIds[0])).toBe('supported');
+    expect(byCriterion.get(fx.criterionIds[1])).toBe('supported');
+    expect(byCriterion.get(fx.criterionIds[2])).toBe('partially_supported');
+    expect(byCriterion.get(fx.criterionIds[3])).toBe('unsupported');
+    expect(verdict.conclusion).toBe('partially_supported');
+  }, 90_000);
+
+  it('--criterion accepts a mix of code aliases and cri_<UUIDv7> ids', async () => {
+    const fx = await buildMultiCriterionLedger('tallyback-verdict-mixed-');
+
+    await tb(
+      fx.root,
+      'verdict',
+      '--claim',
+      fx.claimId,
+      '--criterion',
+      'a-first=supported', // code
+      '--criterion',
+      `${fx.criterionIds[1]}=supported`, // id
+      '--criterion',
+      `${fx.criterionIds[2]}=supported`, // id
+      '--criterion',
+      'd-fourth=supported', // code
+      '--rationale',
+      'all green via mixed refs',
+      '--confidence',
+      'high',
+    );
+
+    const state = await stateOf(fx.root);
+    const verdict = state.verdicts[0]!;
+    expect(verdict.findings.map((f) => f.assessment)).toEqual([
+      'supported',
+      'supported',
+      'supported',
+      'supported',
+    ]);
+    expect(verdict.conclusion).toBe('supported');
+  }, 90_000);
+
+  it('--criterion with an unknown code fails clearly, listing the declared codes and ids', async () => {
+    const fx = await buildMultiCriterionLedger('tallyback-verdict-unknowncode-');
+
+    const run = await runRaw(fx.root, [
+      'verdict',
+      '--claim',
+      fx.claimId,
+      '--criterion',
+      `${fx.criterionIds[0]}=supported`,
+      '--criterion',
+      'not-a-declared-code=supported',
+      '--rationale',
+      'r',
+      '--confidence',
+      'low',
+    ]);
+    expect(run.code).not.toBe(0);
+    expect(run.stderr).toContain('not-a-declared-code');
+    // The error names every declared code and every declared id, so the operator never
+    // has to crack open `state.json` to find the right one.
+    expect(run.stderr).toContain('a-first');
+    expect(run.stderr).toContain('b-second');
+    expect(run.stderr).toContain('c-third');
+    expect(run.stderr).toContain('d-fourth');
+
+    const state = await stateOf(fx.root);
+    expect(state.verdicts).toHaveLength(0);
+  }, 60_000);
+
+  it('--criterion cross-form duplicate (code + id for the same Criterion) is rejected as duplicate', async () => {
+    // The bug case this exists to prevent: operator writes
+    //   --criterion backup=supported --criterion cri_<UUIDv7>=supported
+    // for the SAME criterion (the id is the one declared under code `backup`). Without
+    // the canonical-id-first resolution, the CLI would silently accept both and the
+    // verdict would carry the assessment twice. We must reject it explicitly.
+    const fx = await buildMultiCriterionLedger('tallyback-verdict-crossdup-');
+
+    const run = await runRaw(fx.root, [
+      'verdict',
+      '--claim',
+      fx.claimId,
+      '--criterion',
+      'a-first=supported', // code → criterionIds[0]
+      '--criterion',
+      `${fx.criterionIds[0]}=unsupported`, // id → same criterion as above
+      '--criterion',
+      'b-second=supported',
+      '--criterion',
+      'c-third=supported',
+      '--criterion',
+      'd-fourth=supported',
+      '--rationale',
+      'r',
+      '--confidence',
+      'medium',
+    ]);
+    expect(run.code).not.toBe(0);
+    expect(run.stderr).toContain('duplicate');
+    expect(run.stderr).toContain(fx.criterionIds[0]!);
+
+    const state = await stateOf(fx.root);
+    expect(state.verdicts).toHaveLength(0);
+  }, 90_000);
+
+  it('--criterion with an ambiguous code (declared twice on one TaskDeclaration) refuses rather than silently picks one', async () => {
+    // Build a separate ledger whose Declaration declares the SAME `code` on two distinct
+    // criteria. The schema permits this (codes are not required to be unique within a
+    // declaration); the CLI must refuse the code alias rather than silently picking one.
+    const root = await tempRoot('tallyback-verdict-ambiguous-');
+    await tb(root, 'init', '--repository', 'main', '--topic', 't', '--goal', 'g');
+    const topics = (await tb(root, 'list', '--what', 'topics')) as unknown as {
+      topics: { topic_id: string }[];
+    };
+    await tb(root, 'task', '--topic-id', topics.topics[0]!.topic_id, '--title', 'T', '--alias', 'T1');
+
+    const init = (await tb(root, 'show')) as unknown as {
+      repositories: { repository_id: string }[];
+    };
+    const workspace = (await tb(
+      root,
+      'workspace',
+      '--repository-id',
+      init.repositories[0]!.repository_id,
+      '--branch',
+      'main',
+    )) as unknown as { workspace: { workspace_id: string } };
+
+    // Declare a TaskDeclaration with TWO criteria that share `code: 'shared'`. The
+    // CLI's `declare` command lets codes repeat (no validation against duplicates), so
+    // we can build the fixture directly through the public surface.
+    const declared = (await tb(
+      root,
+      'declare',
+      '--task-id',
+      'T1',
+      '--objective',
+      'ambiguous',
+      '--criterion',
+      'shared:first ambiguous',
+      '--criterion',
+      'shared:second ambiguous',
+    )) as unknown as { declaration: { declaration_id: string; criteria: { criterion_id: string; code: string }[] } };
+    expect(declared.declaration.criteria).toHaveLength(2);
+    expect(declared.declaration.criteria.every((c) => c.code === 'shared')).toBe(true);
+    const criterionIds = declared.declaration.criteria.map((c) => c.criterion_id);
+
+    const dispatched = (await tb(
+      root,
+      'dispatch',
+      '--task-id',
+      'T1',
+      '--declaration-id',
+      declared.declaration.declaration_id,
+      '--repository-id',
+      init.repositories[0]!.repository_id,
+      '--workspace-id',
+      workspace.workspace.workspace_id,
+    )) as unknown as { attempt: { attempt_id: string } };
+    const evidence = (await tb(
+      root,
+      'evidence',
+      '--kind',
+      'observation',
+      '--payload',
+      '{"text":"x"}',
+    )) as unknown as { evidence: { evidence_id: string } };
+    const claim = (await tb(
+      root,
+      'claim',
+      '--task-id',
+      'T1',
+      '--attempt-id',
+      dispatched.attempt.attempt_id,
+      '--declaration-id',
+      declared.declaration.declaration_id,
+      '--statement',
+      's',
+      '--evidence',
+      evidence.evidence.evidence_id,
+    )) as unknown as { claim: { claim_id: string } };
+
+    // `--criterion shared=...` is ambiguous; the CLI must refuse, naming both ids so the
+    // operator can pick one explicitly.
+    const ambiguous = await runRaw(root, [
+      'verdict',
+      '--claim',
+      claim.claim.claim_id,
+      '--criterion',
+      'shared=supported',
+      '--rationale',
+      'r',
+      '--confidence',
+      'low',
+    ]);
+    expect(ambiguous.code).not.toBe(0);
+    expect(ambiguous.stderr).toContain('ambiguous');
+    expect(ambiguous.stderr).toContain('shared');
+    // Both criterion ids are named so the operator can pick one.
+    for (const cid of criterionIds) {
+      expect(ambiguous.stderr).toContain(cid);
+    }
+
+    // The same input with the cri_<UUIDv7> id of one criterion resolves cleanly —
+    // proving the refusal is specifically about the ambiguous code alias, not a wider
+    // problem with the declaration.
+    const disambiguated = await runRaw(root, [
+      'verdict',
+      '--claim',
+      claim.claim.claim_id,
+      '--criterion',
+      `${criterionIds[0]}=supported`,
+      '--criterion',
+      `${criterionIds[1]}=supported`,
+      '--rationale',
+      'r',
+      '--confidence',
+      'low',
+    ]);
+    expect(disambiguated.code).toBe(0);
+
+    const state = await stateOf(root);
+    expect(state.verdicts).toHaveLength(1);
   }, 90_000);
 });
 

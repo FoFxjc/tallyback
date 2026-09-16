@@ -24,7 +24,18 @@ import { effectiveRecords } from '../ledger/supersession.js';
 /** Why a candidate could not be classified `git_ready` (design §4). */
 export type LandUnresolvedStatus = 'git_unresolved' | 'git_behind';
 
-export type LandStatus = 'git_ready' | LandUnresolvedStatus;
+/**
+ * `git_integrated` is a NEW status introduced by the stabilization slice: it means
+ * `git merge-base --is-ancestor <branch> <target_branch>` returned true, so every commit
+ * on the candidate's branch is already reachable from the target — the work is integrated.
+ * Such a candidate is NOT currently actionable: there is nothing new to land, regardless
+ * of whether the worktree still exists or the branch's commits have been deleted.
+ *
+ * `git_integrated` candidates ALWAYS route to `LandReport.historical` and never to
+ * `ready` — see `buildLandReport`. Reclassifying an integrated candidate as `ready`
+ * would tell the operator to "land me" for work that has already landed.
+ */
+export type LandStatus = 'git_ready' | 'git_integrated' | LandUnresolvedStatus;
 
 /**
  * One `ready_to_land` task, cross-checked against live Git state for one attempt's
@@ -53,9 +64,20 @@ export interface LandConflict {
 }
 
 export interface LandReport {
+  /** Currently actionable for integration: `status: 'git_ready'`. */
   ready: LandCandidate[];
+  /** Currently actionable but Git reality cannot yet resolve them: `git_behind` or `git_unresolved`. */
   unresolved: LandCandidate[];
+  /** File-overlap conflicts computed strictly over `ready` candidates (actionable-on-actionable). */
   conflicts: LandConflict[];
+  /**
+   * Historical candidates: `status: 'git_integrated'` — Git already proves the branch is
+   * in the target's history. NOT actionable; there is nothing new to land. The CLI emits
+   * this bucket only with `--all`; the report itself always populates it so callers
+   * can rely on the field for their own audits. Never folded into `ready` — see
+   * `buildLandReport`'s docstring for the rationale.
+   */
+  historical: LandCandidate[];
 }
 
 /** One resolver query: is `branch` ahead of `target_branch`, and what files differ? */
@@ -72,6 +94,20 @@ export interface GitReadyResult {
   files: string[];
 }
 
+/**
+ * `status: 'integrated'` — every commit on the candidate's branch is already reachable
+ * from `target_branch` (verified via `merge-base --is-ancestor`, possibly through a
+ * sibling workspace when the original binding's worktree is gone). The branch is NOT
+ * currently actionable: there is nothing new to land. `files` is the same diff the
+ * `ready` result would carry, kept only so an `--all` archaeology pass can still report
+ * what the change set was — empty array when the resolver chose not to compute it.
+ */
+export interface GitIntegratedResult {
+  status: 'integrated';
+  files?: string[];
+  reason?: string;
+}
+
 export interface GitBehindResult {
   status: 'behind';
 }
@@ -82,7 +118,11 @@ export interface GitUnresolvedResult {
   reason: string;
 }
 
-export type GitResolveResult = GitReadyResult | GitBehindResult | GitUnresolvedResult;
+export type GitResolveResult =
+  | GitReadyResult
+  | GitIntegratedResult
+  | GitBehindResult
+  | GitUnresolvedResult;
 
 /** A pluggable, injectable Git resolver: `(input) => result`. Never a shell string. */
 export type GitResolver = (input: GitResolveInput) => GitResolveResult | Promise<GitResolveResult>;
@@ -195,6 +235,17 @@ async function classify(
     };
   }
 
+  if (result.status === 'integrated') {
+    // The work is already integrated into `target_branch`. Carry the optional diff
+    // (when the resolver computed it — useful for `--all` archaeology) and the resolver's
+    // `reason` (which may name a sibling workspace that proved it), but route to the
+    // `historical` bucket by default in `buildLandReport`.
+    const reason = result.reason ?? `branch ${branch} is integrated into ${targetBranch}`;
+    return result.files
+      ? { ...withWorkspace, branch, status: 'git_integrated', overlapping_files: [...result.files].sort(), reason }
+      : { ...withWorkspace, branch, status: 'git_integrated', reason };
+  }
+
   if (result.status === 'behind') {
     return { ...withWorkspace, branch, status: 'git_behind' };
   }
@@ -280,6 +331,22 @@ function computeConflicts(ready: LandCandidate[]): LandConflict[] {
  * Build a `LandReport` for `snapshot`'s `ready_to_land` tasks against `targetBranch`,
  * using `resolve` for the live Git half (design §7). Never mutates the snapshot or
  * anything else; a pure fold over ledger facts plus resolver answers.
+ *
+ * Classification is unambiguous and never overridden by an option flag:
+ *   - `ready`:       `status: 'git_ready'` — currently actionable for integration.
+ *   - `unresolved`:  `status: 'git_behind' | 'git_unresolved'` — currently actionable,
+ *                    but Git reality cannot yet be resolved (worktree gone, branch behind
+ *                    target, etc.) — i.e. these are actionable work that needs attention.
+ *   - `historical`:  `status: 'git_integrated'` — integration is already proven
+ *                    (`git merge-base --is-ancestor <branch> <target>` succeeds), so the
+ *                    candidate is NOT actionable; there is nothing new to land.
+ *
+ * `git_integrated` is never folded into `ready` under any code path. Reclassifying a
+ * non-actionable historical candidate as actionable would be a lie — and a CI consumer
+ * filtering on `ready` would silently start reporting "land me" for work that has
+ * already landed. The CLI exposes `historical` as a separate bucket only when the user
+ * explicitly opts in via `--all` (so the default JSON shape for downstream parsers
+ * remains stable when no historical candidates exist).
  */
 export async function buildLandReport(
   snapshot: Snapshot,
@@ -297,13 +364,23 @@ export async function buildLandReport(
     settlements.map((settlement) => classify(snapshot, settlement, targetBranch, resolve)),
   );
 
-  const ready = candidates
-    .filter((c) => c.status === 'git_ready')
-    .sort((a, b) => a.task_id.localeCompare(b.task_id));
+  // Sort stable, lexical by task_id; within a task, by settlement_id (a task can have
+  // more than one effective land Settlement on distinct attempts — design §7).
+  const byId = (a: LandCandidate, b: LandCandidate): number => {
+    const t = a.task_id.localeCompare(b.task_id);
+    if (t !== 0) return t;
+    return a.settlement_id.localeCompare(b.settlement_id);
+  };
+
+  // `git_integrated` is NEVER folded into `ready`. The CLI emits `historical` separately
+  // when `--all` is passed, but the report itself always populates it so callers can
+  // rely on the field for their own audits.
+  const historical = candidates.filter((c) => c.status === 'git_integrated').sort(byId);
+  const ready = candidates.filter((c) => c.status === 'git_ready').sort(byId);
   const unresolved = candidates
-    .filter((c) => c.status !== 'git_ready')
-    .sort((a, b) => a.task_id.localeCompare(b.task_id));
+    .filter((c) => c.status === 'git_behind' || c.status === 'git_unresolved')
+    .sort(byId);
   const conflicts = computeConflicts(ready);
 
-  return { ready, unresolved, conflicts };
+  return { ready, unresolved, conflicts, historical };
 }

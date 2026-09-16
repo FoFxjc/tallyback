@@ -208,6 +208,34 @@ export async function gitDiff(root: string, args: readonly string[]): Promise<Gi
 }
 
 /**
+ * `git merge-base --is-ancestor <ancestor> <descendant>` exits 0 when every commit of
+ * `ancestor` is reachable from `descendant` (i.e. `ancestor` is, in fact, an ancestor of
+ * `descendant`), 1 when it is not, and a real error code otherwise.
+ *
+ * **Parameter-order caveat.** The function name is "isAncestor" but the call asks whether
+ * `ancestor` is reachable from `descendant` — the opposite of what some readers naïvely
+ * infer. `merge-base --is-ancestor X Y` answers "is X reachable from Y?", not "is X an
+ * ancestor of Y?" — and `merge-base` itself is symmetric, so the two readings are
+ * equivalent as long as the caller wires the names the right way around. The wrapper
+ * here does that wiring for you; pass `ancestor` first, `descendant` second.
+ *
+ * Returns the same tri-state pattern the rest of this file uses for an ambiguous
+ * pre-condition (`true` / `false` / `environment_unavailable`); an ordinary non-ancestor
+ * result is `false`, not `null` — only a missing `git` binary is `null`, so callers can
+ * distinguish "Git says no" from "Git isn't here to ask."
+ */
+export async function gitMergeBaseIsAncestor(
+  root: string,
+  ancestor: string,
+  descendant: string,
+): Promise<true | false | null> {
+  const result = await runGit(root, ['merge-base', '--is-ancestor', ancestor, descendant]);
+  if (result.ok) return true;
+  if (result.code === 'environment_unavailable') return null;
+  return false;
+}
+
+/**
  * Validate that `path` is a Git worktree and capture its observed context.
  * Emits `path_unavailable`, `not_a_git_repository`, `object_unavailable`,
  * `environment_unavailable`, or `check_error` as appropriate.

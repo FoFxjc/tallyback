@@ -167,6 +167,155 @@ describe('summarizeTaskViews', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Regression: View surfaces every Task with every Settlement decision verbatim.
+// SPEC §5.11 says Settlement is not a Task status; View must not invent a
+// lifecycle policy that hides tasks based on Settlement decision. The four
+// decisions are presentational only — they show up in `next_action` and
+// `status.settled` exactly as v1 specified, and the task itself is always in
+// the returned `tasks` array.
+//
+// Active-vs-historical View filtering is an open retention-design question for
+// a future evidence-driven slice; it is intentionally NOT applied here.
+// ---------------------------------------------------------------------------
+
+describe('View — every Settlement decision is presentable; no Task-lifecycle filtering (rollback regression)', () => {
+  // The Settlement basis matrix (TB-LC-005): `accept` and `land` accept
+  // `verification_exception`; `retry` and `abandon` must NOT cite one. Build each
+  // settle call with the shape the validator accepts.
+  function settleInput(decision: 'accept' | 'retry' | 'abandon' | 'land') {
+    const useVerificationException = decision === 'accept' || decision === 'land';
+    return {
+      decision,
+      basis: { verdict_id: null, attempt_end_id: null, blocker_ids: [] },
+      ...(useVerificationException ? { verification_exception: 'accepted by hand' } : {}),
+      rationale: `settled with ${decision}`,
+      decided_by: ALICE,
+    };
+  }
+
+  it('`accept`-settled task is still surfaced by default View; `next_action` echoes the decision', async () => {
+    const fixture = await buildLedger('tallyback-view-accept-present-');
+    const settled = await fixture.store.settle({
+      task_id: fixture.task_id,
+      attempt_id: fixture.attempt_id,
+      ...settleInput('accept'),
+    });
+    expect(settled.ok).toBe(true);
+
+    const views = buildTaskViews(fixture.store.currentSnapshot());
+    expect(views).toHaveLength(1);
+    expect(views[0]!.task_id).toBe(fixture.task_id);
+    expect(views[0]!.next_action).toBe('settled: accept');
+    expect(views[0]!.settlement?.decision).toBe('accept');
+    expect(views[0]!.status.settled).toBe(true);
+  });
+
+  it('`retry`-settled task is still surfaced by default View; `next_action` echoes the decision', async () => {
+    const fixture = await buildLedger('tallyback-view-retry-present-');
+    const settled = await fixture.store.settle({
+      task_id: fixture.task_id,
+      attempt_id: fixture.attempt_id,
+      ...settleInput('retry'),
+    });
+    expect(settled.ok).toBe(true);
+
+    const views = buildTaskViews(fixture.store.currentSnapshot());
+    expect(views).toHaveLength(1);
+    expect(views[0]!.next_action).toBe('settled: retry');
+    expect(views[0]!.settlement?.decision).toBe('retry');
+  });
+
+  it('`abandon`-settled task is still surfaced by default View; `next_action` echoes the decision', async () => {
+    const fixture = await buildLedger('tallyback-view-abandon-present-');
+    const settled = await fixture.store.settle({
+      task_id: fixture.task_id,
+      attempt_id: fixture.attempt_id,
+      ...settleInput('abandon'),
+    });
+    expect(settled.ok).toBe(true);
+
+    const views = buildTaskViews(fixture.store.currentSnapshot());
+    expect(views).toHaveLength(1);
+    expect(views[0]!.next_action).toBe('settled: abandon');
+    expect(views[0]!.settlement?.decision).toBe('abandon');
+  });
+
+  it('`land`-settled task is still surfaced by default View; `next_action` echoes the decision', async () => {
+    const fixture = await buildLedger('tallyback-view-land-present-');
+    const settled = await fixture.store.settle({
+      task_id: fixture.task_id,
+      attempt_id: fixture.attempt_id,
+      ...settleInput('land'),
+    });
+    expect(settled.ok).toBe(true);
+
+    const views = buildTaskViews(fixture.store.currentSnapshot());
+    expect(views).toHaveLength(1);
+    expect(views[0]!.next_action).toBe('settled: land');
+    expect(views[0]!.settlement?.decision).toBe('land');
+  });
+
+  it('a Task with multiple effective Settlements is still surfaced; `next_action` echoes the latest effective decision (v1 behavior)', async () => {
+    // SPEC §5.11 says supersession is explicit. Multiple effective Settlements are
+    // therefore a real state, and `next_action` already picks the latest by
+    // `decided_at` (a presentation concern, NOT a Task-lifecycle concern). This test
+    // proves that:
+    //   - the task is in the View (no hiding)
+    //   - the task's next_action reflects the latest effective Settlement decision
+    //   - the older effective Settlement remains accessible via the underlying ledger
+    //     (i.e. it was not silently superseded; only `next_action` prefers the latest)
+    const fixture = await buildLedger('tallyback-view-multi-settle-');
+    // First Settlement: `land`.
+    const landSettled = await fixture.store.settle({
+      task_id: fixture.task_id,
+      attempt_id: fixture.attempt_id,
+      ...settleInput('land'),
+    });
+    expect(landSettled.ok).toBe(true);
+    // Dispatch a second Attempt and settle `accept`. Both Settlements remain effective
+    // (no supersedes set), so both are retained in the ledger.
+    const cur = fixture.store.currentSnapshot();
+    const declaration = cur.declarations.find((d) => d.task_id === fixture.task_id)!;
+    const { workspace } = unwrap<{ workspace: { workspace_id: string } }>(
+      await fixture.store.registerWorkspace({ repository_id: fixture.repository_id, branch: 'main' }),
+    );
+    const { attempt } = unwrap<{ attempt: { attempt_id: string } }>(
+      await fixture.store.dispatch({
+        task_id: fixture.task_id,
+        declaration_id: declaration.declaration_id,
+        repository_id: fixture.repository_id,
+        workspace_id: workspace.workspace_id,
+        executor: AGENT,
+        dispatched_by: ALICE,
+      }),
+    );
+    const acceptSettled = await fixture.store.settle({
+      task_id: fixture.task_id,
+      attempt_id: attempt.attempt_id,
+      ...settleInput('accept'),
+    });
+    expect(acceptSettled.ok).toBe(true);
+
+    // Default View: task is present (no hiding).
+    const views = buildTaskViews(fixture.store.currentSnapshot());
+    expect(views).toHaveLength(1);
+    expect(views[0]!.task_id).toBe(fixture.task_id);
+
+    // next_action echoes the latest effective decision (`accept` was appended after
+    // `land`). The Task itself is not "filtered" — it just shows the latest presentation.
+    expect(views[0]!.next_action).toBe('settled: accept');
+
+    // Both Settlements are still effective in the ledger (none silently superseded):
+    const settlementDecisions = fixture.store
+      .currentSnapshot()
+      .settlements.filter((s) => s.task_id === fixture.task_id)
+      .map((s) => s.decision)
+      .sort();
+    expect(settlementDecisions).toEqual(['accept', 'land']);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // CLI wiring
 // ---------------------------------------------------------------------------
 
