@@ -28,8 +28,9 @@ export type LandUnresolvedStatus = 'git_unresolved' | 'git_behind';
  * `git_integrated` is a NEW status introduced by the stabilization slice: it means
  * `git merge-base --is-ancestor <branch> <target_branch>` returned true, so every commit
  * on the candidate's branch is already reachable from the target — the work is integrated.
- * Such a candidate is NOT currently actionable: there is nothing new to land, regardless
- * of whether the worktree still exists or the branch's commits have been deleted.
+ * Such a candidate is NOT currently actionable: there is nothing new to land.
+ * The integration proof does not require the original worktree to still exist, provided
+ * the candidate branch ref can still be resolved from a usable workspace.
  *
  * `git_integrated` candidates ALWAYS route to `LandReport.historical` and never to
  * `ready` — see `buildLandReport`. Reclassifying an integrated candidate as `ready`
