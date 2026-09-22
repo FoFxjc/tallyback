@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tallyback — Delegate work. Know what came back.</title>
+  <meta name="description" content="Local, Git-native accountability infrastructure for delegated agent work." />
+  <link rel="stylesheet" href="assets/tallyback.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <h1>Tallyback</h1>
+      <p class="tagline">Delegate work. Know what came back.</p>
+      <p class="sub">
+        Local, Git-native accountability for delegated agent work. Tallyback keeps a
+        durable account of what was assigned, what an executor claims happened, what the
+        repository can prove, and whether the result is ready to land — as a plain
+        directory on your own machine, no server required.
+      </p>
+      <div class="cta-row">
+        <a class="btn primary" href="https://github.com/FoFxjc/tallyback">View on GitHub</a>
+        <a class="btn" href="https://github.com/FoFxjc/tallyback/blob/main/contract/SPEC.md">Read the contract</a>
+        <a class="btn" href="https://github.com/FoFxjc/tallyback#quick-start">Quick Start</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="problem">
+      <div class="wrap">
+        <p class="kicker">The problem</p>
+        <h2>An agent saying "done" is a claim, not a fact.</h2>
+        <p class="lead">
+          Delegated agent work follows a familiar shape — and loses its own history along
+          the way.
+        </p>
+        <div class="flow">
+          <div class="flow-step"><span class="name">User / PM</span><span class="q">discusses a goal</span></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><span class="name">Delegates work</span><span class="q">to an agent, subagent, or human</span></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><span class="name">Worktree / branch</span><span class="q">the executor works in isolation</span></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><span class="name">"Done"</span><span class="q">a claim arrives back</span></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><span class="name">?</span><span class="q">what actually happened?</span></div>
+        </div>
+        <p>The missing layer has to answer:</p>
+        <ul class="plain">
+          <li>What was promised?</li>
+          <li>What actually ran?</li>
+          <li>What came back?</li>
+          <li>What evidence supports it?</li>
+          <li>What has been verified?</li>
+          <li>What can safely integrate?</li>
+        </ul>
+        <blockquote class="callout">Activity is not completion. A claim is not evidence.</blockquote>
+      </div>
+    </section>
+
+    <section id="loop">
+      <div class="wrap">
+        <p class="kicker">Core workflow</p>
+        <h2>Declare → Dispatch → Observe → Verify → Settle</h2>
+        <p class="lead">Five record boundaries, not a mandatory linear state machine — a Task can have several Attempts, and a Blocker or Claim can arrive at any point.</p>
+        <div class="flow">
+          <div class="flow-step"><span class="name">Declare</span><span class="q">What is the task, and what would count as done?</span></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><span class="name">Dispatch</span><span class="q">Which attempt, executor, worktree, and branch own it?</span></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><span class="name">Observe</span><span class="q">What claims, evidence, and blockers came back?</span></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><span class="name">Verify</span><span class="q">Do repository reality and Git support the claim?</span></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><span class="name">Settle</span><span class="q">Accept, retry, abandon, or land?</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="model">
+      <div class="wrap">
+        <p class="kicker">The accountability model</p>
+        <h2>Task = durable responsibility. Agent = replaceable executor.</h2>
+        <p class="lead">A Task can survive several Attempts, across several agents, models, and worktrees, without losing continuity.</p>
+        <div class="tree" aria-label="Tallyback record structure">Topic
+└── Task                          the stable unit of responsibility
+    ├── Declaration + Criteria    what would count as done
+    ├── Attempt                   one execution of the task
+    │   ├── Executor               a replaceable agent, subagent, process, or human
+    │   └── Workspace / Branch     the worktree an attempt owns
+    ├── Claim                     a statement about progress or completion
+    ├── Evidence                  a pointer to tests, commits, artifacts, observations
+    ├── Verdict                   an independent per-criterion assessment
+    └── Settlement                the explicit accept / retry / abandon / land decision</div>
+      </div>
+    </section>
+
+    <section id="trust">
+      <div class="wrap">
+        <p class="kicker">Trust model</p>
+        <h2>The ledger records judgments. It does not become truth by storing them.</h2>
+        <div class="ladder" role="img" aria-label="Trust ordering, most trusted at top">
+          <div class="rung top">Repository / Tests</div>
+          <div class="down">↓</div>
+          <div class="rung">Git Facts</div>
+          <div class="down">↓</div>
+          <div class="rung">Tallyback Records</div>
+          <div class="down">↓</div>
+          <div class="rung">Model Memory</div>
+        </div>
+        <p class="lead">
+          Agent-provided content is treated as untrusted data. Completion is never
+          inferred solely from activity. Claims stay separate from Evidence and from
+          Verdicts. Consequential claims are reconciled against repository/Git reality
+          before they carry weight.
+        </p>
+      </div>
+    </section>
+
+    <section id="capabilities">
+      <div class="wrap">
+        <p class="kicker">What it can do today</p>
+        <h2>Implemented and exercised by 440+ tests, not aspirational.</h2>
+        <div class="cards">
+          <div class="card"><h3>Declare</h3><p>Explicit objectives and named acceptance criteria before work starts.</p></div>
+          <div class="card"><h3>Track Attempts</h3><p>Executor, session, branch, and workspace ownership per Attempt.</p></div>
+          <div class="card"><h3>Observe</h3><p>Claims, evidence, blockers, and attempt outcomes — kept separate from each other.</p></div>
+          <div class="card"><h3>Verify</h3><p>Independent per-criterion Verdicts with confidence, rationale, and limitations.</p></div>
+          <div class="card"><h3>Settle</h3><p>Explicit accept / retry / abandon / land decisions — immutable and attributed.</p></div>
+          <div class="card"><h3>View</h3><p>A compact, ledger-derived per-task or project report. No live Git required.</p></div>
+          <div class="card"><h3>Watch</h3><p>Detects an Attempt whose workspace vanished, or a Claim with no branch advance.</p></div>
+          <div class="card"><h3>Land</h3><p>Read-only Git integration readiness, ordering, and file-overlap conflict awareness.</p></div>
+          <div class="card"><h3>Bridge</h3><p>A host-neutral adapter, plus one Claude Code plugin, driving the same CLI.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="parallel">
+      <div class="wrap">
+        <p class="kicker">Parallel work → Land</p>
+        <h2>Two branches, one integration-readiness report.</h2>
+        <div class="tree" aria-label="Parallel task flow">Task A ── dispatched to worktree A (branch feature/a)
+Task B ── dispatched to worktree B (branch feature/b)
+             │
+     both return Claims + Evidence
+             │
+        PM verifies each Claim (tallyback verdict)
+             │
+    land authorization (settle --decision land)
+             │
+        tallyback land: both git_ready, but flags an
+        overlapping-file conflict between A and B
+             │
+  a human/agent resolves order and performs the
+   ordinary Git merge — outside Tallyback</div>
+        <p class="lead">
+          Tallyback never orchestrates the workers and never performs the merge. A
+          candidate's observed lifecycle moves conceptually through
+          <code>git_ready</code> → (target moves) → <code>git_behind</code> →
+          <code>git_integrated</code> once Git actually proves it landed — Land reports
+          each state as observed, not as a guaranteed universal transition.
+        </p>
+      </div>
+    </section>
+
+    <section id="view-vs-land">
+      <div class="wrap">
+        <p class="kicker">View vs. Land</p>
+        <h2>Ledger reality and Git reality are different questions.</h2>
+        <div class="compare">
+          <div class="col">
+            <h3>VIEW</h3>
+            <p><strong>Ledger reality.</strong></p>
+            <ul>
+              <li>What has been declared / claimed / verified / settled?</li>
+              <li>Pure projection over the ledger — no live Git.</li>
+              <li>Every Task is surfaceable, regardless of Settlement.</li>
+            </ul>
+          </div>
+          <div class="col">
+            <h3>LAND</h3>
+            <p><strong>Git reality.</strong></p>
+            <ul>
+              <li>What is currently actionable for integration, right now?</li>
+              <li>Cross-checks <code>ready_to_land</code> against live Git state.</li>
+              <li>Read-only and advisory — never merges, rebases, or pushes.</li>
+            </ul>
+          </div>
+        </div>
+        <p class="lead">
+          And within Settlement, <code>accept</code> and <code>land</code> are two
+          different decisions: <code>accept</code> judges a result acceptable;
+          <code>land</code> is explicit authorization to integrate. Only an effective
+          <code>land</code> Settlement enters <code>ready_to_land</code>.
+          <code>Verdict != acceptance != landing authorization != actual Git
+          integration.</code>
+        </p>
+      </div>
+    </section>
+
+    <section id="non-goals">
+      <div class="wrap">
+        <p class="kicker">Boundaries</p>
+        <h2>What Tallyback deliberately does not do</h2>
+        <ul class="plain">
+          <li>It does not choose or run your agents.</li>
+          <li>It does not orchestrate execution or schedule work.</li>
+          <li>It does not merge, rebase, or push Git branches.</li>
+          <li>It does not replace tests, CI, or code review.</li>
+          <li>It does not turn a model's claim into a fact merely by recording it.</li>
+          <li>It does not require a cloud account or database server.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="status">
+      <div class="wrap">
+        <p class="kicker">Pre-release status</p>
+        <h2>0.1.x pre-release. v1 contract frozen.</h2>
+        <div class="status-grid">
+          <div class="item"><span class="label">Implementation</span>0.1.x pre-release</div>
+          <div class="item"><span class="label">Contract</span>v1 frozen, implemented</div>
+          <div class="item"><span class="label">Runtime / CLI ergonomics</span>may evolve pre-1.0</div>
+          <div class="item"><span class="label">npm publication</span>not currently the release path — source clone only</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>
+        <a href="https://github.com/FoFxjc/tallyback">Repository</a> ·
+        <a href="https://github.com/FoFxjc/tallyback/blob/main/contract/SPEC.md">Contract spec</a> ·
+        <a href="https://github.com/FoFxjc/tallyback/blob/main/README.md">README</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
