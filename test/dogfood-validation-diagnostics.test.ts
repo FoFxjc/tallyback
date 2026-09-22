@@ -124,13 +124,13 @@ describe('dogfood — nested schema error selection is general, not Evidence-onl
 
   it('an unrelated malformed nested object (Verdict.confidence) is reported at its own path', async () => {
     const raw = await readFile(FIXTURE, 'utf8');
-    const snapshot = JSON.parse(raw) as Snapshot & { verdicts: Array<Record<string, unknown>> };
+    const snapshot = JSON.parse(raw) as Snapshot;
     expect(snapshot.verdicts.length).toBeGreaterThan(0);
 
     // Break the nested `confidence` object (missing required `level`) without touching
     // anything else about the record — every other branch of AnyRecord will still fail at
     // the record's own root, exactly like the Evidence dogfood case.
-    const verdict = snapshot.verdicts[0]! as { confidence: Record<string, unknown> };
+    const verdict = snapshot.verdicts[0]! as unknown as { confidence: Record<string, unknown> };
     delete verdict.confidence.level;
 
     const result = validate_snapshot(snapshot);
