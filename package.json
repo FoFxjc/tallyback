@@ -4,12 +4,28 @@
   "description": "Local, Git-native accountability infrastructure for delegated agent work.",
   "type": "module",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "engines": {
     "node": ">=20"
   },
   "bin": {
     "tallyback": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "contract",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "SECURITY.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FoFxjc/tallyback.git"
+  },
+  "homepage": "https://github.com/FoFxjc/tallyback",
+  "bugs": {
+    "url": "https://github.com/FoFxjc/tallyback/issues"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

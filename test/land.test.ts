@@ -610,11 +610,7 @@ describe('buildLandReport — already-integrated candidates (stabilization slice
     // `buildLandReport` no longer takes options; its routing is fixed at the resolver/
     // report boundary. Verify both that `ready` excludes the integrated candidate and
     // that `historical` includes it with the correct status.
-    const report = await buildLandReport(
-      fixture.store.currentSnapshot(),
-      resolver,
-      TARGET_BRANCH,
-    );
+    const report = await buildLandReport(fixture.store.currentSnapshot(), resolver, TARGET_BRANCH);
 
     expect(report.ready).toHaveLength(0);
     expect(report.unresolved).toHaveLength(0);

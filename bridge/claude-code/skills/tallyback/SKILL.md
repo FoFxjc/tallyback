@@ -1,4 +1,5 @@
 ---
+name: tallyback
 description: Use when driving a Tallyback-tracked task through its lifecycle (declare, dispatch, observe, verify, settle) or when asked for a land, view, or watch report. Surfaces each loop phase's precondition and guardrail instead of forwarding raw `tallyback` commands.
 ---
 

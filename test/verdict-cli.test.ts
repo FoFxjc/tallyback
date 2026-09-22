@@ -1034,7 +1034,16 @@ describe('tallyback verdict — ergonomic authoring, explicit judgments only', (
     const topics = (await tb(root, 'list', '--what', 'topics')) as unknown as {
       topics: { topic_id: string }[];
     };
-    await tb(root, 'task', '--topic-id', topics.topics[0]!.topic_id, '--title', 'T', '--alias', 'T1');
+    await tb(
+      root,
+      'task',
+      '--topic-id',
+      topics.topics[0]!.topic_id,
+      '--title',
+      'T',
+      '--alias',
+      'T1',
+    );
 
     const init = (await tb(root, 'show')) as unknown as {
       repositories: { repository_id: string }[];
@@ -1062,7 +1071,9 @@ describe('tallyback verdict — ergonomic authoring, explicit judgments only', (
       'shared:first ambiguous',
       '--criterion',
       'shared:second ambiguous',
-    )) as unknown as { declaration: { declaration_id: string; criteria: { criterion_id: string; code: string }[] } };
+    )) as unknown as {
+      declaration: { declaration_id: string; criteria: { criterion_id: string; code: string }[] };
+    };
     expect(declared.declaration.criteria).toHaveLength(2);
     expect(declared.declaration.criteria.every((c) => c.code === 'shared')).toBe(true);
     const criterionIds = declared.declaration.criteria.map((c) => c.criterion_id);

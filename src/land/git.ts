@@ -103,11 +103,7 @@ async function checkIntegration(
   branch: string,
   target: string,
   witnessLabel: string,
-): Promise<
-  | { integrated: true; files?: string[]; reason: string }
-  | { integrated: false }
-  | null
-> {
+): Promise<{ integrated: true; files?: string[]; reason: string } | { integrated: false } | null> {
   const result = await gitMergeBaseIsAncestor(root, branch, target);
   if (result === null) return null;
   if (!result) return { integrated: false };
@@ -252,12 +248,7 @@ export function createGitResolver(options: ResolveOptions = {}): GitResolver {
     // every `git_ready` / `git_behind` reading — the work is done. `null` (git
     // unavailable) falls through to today's behaviour rather than silently rewriting
     // the result.
-    const integration = await checkIntegration(
-      root,
-      input.branch,
-      input.target_branch,
-      'primary',
-    );
+    const integration = await checkIntegration(root, input.branch, input.target_branch, 'primary');
     if (integration === null) {
       return {
         status: 'unresolved',

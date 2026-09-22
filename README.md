@@ -6,8 +6,176 @@ Tallyback is local, Git-native accountability infrastructure for delegated agent
 
 It keeps a durable account of what was assigned, what an executor claims happened, what the repository can prove, and whether the result is ready to land.
 
-> [!IMPORTANT]
-> Tallyback v1 is a **0.1.x pre-release**: the contract (`contract/`) is **frozen and implemented**, and Store / Check / Watch / Land / View / Bridge v1 all exist with passing tests, but no public release has been declared yet. This repository is suitable for real dogfooding, not for downstream consumers.
+## Status
+
+Tallyback v1 is a **0.1.x public pre-release**:
+
+- The v1 wire-format contract under [`contract/`](contract/) is **frozen and implemented**.
+- The Store / Check / Watch / Land / View / Bridge v1 surface exists and is exercised by the in-tree test suite (400+ tests).
+- Implementation is still **pre-1.0**: anything outside the contract (CLI ergonomics, JSON shapes of read-only reports, internal modules) may change between 0.1.x releases.
+- Suitable for **experimentation and real delegated-work dogfood**, including as the persistence layer for an agent host.
+- Not claiming production-hardening for every environment; see [Known limitations](#known-limitations) below.
+
+## Requirements
+
+Tallyback runs entirely on a single machine.
+
+- **Node.js** `>= 20` (matches `engines.node` in `package.json`).
+- **Git** available on `$PATH` for `land`, `view`, and `watch` operations.
+- **Local filesystem access** — the ledger is a `.tallyback/` directory under the project root.
+
+No database server, cloud account, network round-trip, or remote clone/fetch is required.
+
+## Install
+
+Tallyback is published as a GitHub source pre-release. The recommended way to run it today is
+to clone the repository, build it, and point your shell at `dist/cli.js`:
+
+```bash
+git clone https://github.com/FoFxjc/tallyback.git
+cd tallyback
+npm ci
+npm run build
+# expose `tallyback` for this shell:
+export PATH="$PWD/dist:$PATH"
+# or invoke it directly:
+node /path/to/tallyback/dist/cli.js --help
+```
+
+An npm-distributable package is **not** part of this pre-release. The repository ships an
+explicit package surface (see `package.json#files`) so a future npm release will be
+reproducible, but the tarball is not yet announced for installation.
+
+## Quick Start
+
+Every Tallyback project starts with `init`, which materializes the `.tallyback/` ledger
+under the chosen project root. From there the **declare → dispatch → observe → verify →
+settle** loop runs entirely through the CLI; `land`, `view`, `watch`, and `validate` are
+the read-only reports and gates around it.
+
+```bash
+# 0. Pick a project root (this directory will hold `.tallyback/`).
+PROJ=/tmp/tallyback-demo
+mkdir -p "$PROJ" && cd "$PROJ"
+
+# 1. Capability handshake — runnable with no ledger; always safe.
+tallyback handshake
+# {
+#   "contract": "tallyback",
+#   "implementation_version": "0.1.0",
+#   "command_api_version": "1",
+#   "supported_contract_versions": ["1.0.0"],
+#   "features": ["store", "check", "migration", "land", "view", "watch"]
+# }
+
+# 2. Initialize a project with one Topic and one Repository.
+tallyback init --topic "Demo" --goal "try the loop" --repository demo
+
+# Capture the IDs printed by `init` into shell variables — every subsequent step
+# references at least one of them.
+TOPIC=top_<…>   # from `topics[0].topic_id`
+REPO=repo_<…>   # from `repositories[0].repository_id`
+
+# 3. Create a Task under the Topic, then a Workspace under the Repository.
+tallyback task --topic-id "$TOPIC" --title "Demo task"
+TASK=tsk_<…>    # from `task.task_id`
+
+tallyback workspace --repository-id "$REPO" --alias worktree-1 --branch main
+WS=wsp_<…>      # from `workspace.workspace_id`
+
+# 4. Declare the work + acceptance criteria, then dispatch an Attempt.
+tallyback declare \
+  --task-id "$TASK" \
+  --objective "Demonstrate Tallyback's core loop" \
+  --criterion "ships:sends the work back" \
+  --criterion "proof:reproducible evidence exists"
+DECL=dcl_<…>    # from `declaration.declaration_id`
+
+tallyback dispatch \
+  --task-id "$TASK" \
+  --declaration-id "$DECL" \
+  --executor "tool:smoke-bot" \
+  --repository-id "$REPO" \
+  --workspace-id "$WS"
+ATT=att_<…>     # from `attempt.attempt_id`
+
+# 5. Observe: record Evidence, then a Claim that cites it.
+tallyback evidence \
+  --kind observation \
+  --note "tests pass in CI" \
+  --payload '{"text":"all checks green"}' \
+  --actor tool:smoke-bot
+EVID=evi_<…>    # from `evidence.evidence_id`
+
+tallyback claim \
+  --task-id "$TASK" \
+  --attempt-id "$ATT" \
+  --declaration-id "$DECL" \
+  --statement "Implemented and verified" \
+  --evidence "$EVID" \
+  --actor tool:smoke-bot
+CLAIM=clm_<…>   # from `claim.claim_id`
+
+# 6. Verify: ergonomic Verdict authoring against each declared criterion.
+tallyback verdict \
+  --claim "$CLAIM" \
+  --criterion "<cri_…>=supported" \
+  --criterion "<cri_…>=supported" \
+  --conclusion supported \
+  --finality final \
+  --confidence high \
+  --rationale "All criteria evaluated as supported"
+VER=ver_<…>     # from `bundle.verdict.verdict_id`
+
+# 7. Settle: explicit, attributed decision.
+tallyback settle \
+  --task-id "$TASK" \
+  --attempt-id "$ATT" \
+  --decision accept \
+  --verdict-id "$VER" \
+  --rationale "All criteria supported at high confidence" \
+  --actor tool:pm
+
+# 8. Read-only reports.
+tallyback view --task-id "$TASK"      # compact per-task tallyback
+tallyback land --target-branch main   # readiness against a target branch
+tallyback validate                    # CI gate; exits non-zero on ledger problems
+
+# 9. End-to-end gate. Safe to run in CI on a freshly initialized ledger.
+tallyback validate
+```
+
+Each command prints machine-readable JSON to stdout and a one-line human summary to
+stderr, so the same commands work in a terminal and in a pipeline.
+
+For the full command surface (every flag, every record type), see
+[`src/cli.ts`](src/cli.ts); for the underlying API, see [`src/index.ts`](src/index.ts).
+
+## Known limitations
+
+These are real observed boundaries of the v1 implementation, not speculation.
+
+- **Advisory only.** `tallyback land` reports readiness, ordering, and conflict groups; it
+  **never merges, rebases, pushes, or writes to the ledger**. A human or PM agent makes
+  the actual landing decision based on its output.
+- **No remote fetch.** `land`, `view`, and `watch` operate on the local Workspace's
+  current state only. There is no `git fetch` step anywhere in the loop.
+- **Deleted candidate branch refs can prevent historical integration proof.** If every
+  Workspace bound to a candidate's `repository_id` has lost the branch ref, `land`
+  reports `git_unresolved` rather than inferring integration; there is no
+  inferred/synthesized proof path in v1. See [Land documentation](docs/land-design.md).
+- **Sibling fallback is positive-proof only.** `land` may consult another Workspace under
+  the same `repository_id` when the Attempt's original worktree is gone — but only when
+  that Workspace can positively answer the Git query. It does not copy refs between
+  Workspaces and does not assume they share an object database.
+- **View does not filter active vs historical.** Every Task is surfaceable through
+  `tallyback view` regardless of Settlement decision; there is no `--archived` / `--active`
+  flag in v1. See [View documentation](docs/view-design.md).
+- **Local-first bindings.** Workspace roots live in `runtime/bindings.json`, which is
+  gitignored on purpose (per SPEC §5.2). Multi-machine collaboration uses Git for the
+  ledger and re-binds locally after clone.
+- **Pre-1.0 ergonomics.** CLI flag names and read-only report shapes are stable for the
+  v1 contract surface but may evolve between 0.1.x releases outside the contract.
 
 ## Why Tallyback exists
 
@@ -214,7 +382,7 @@ Tallyback does not ask you to trust the executor's final message. It keeps the r
 
 The v1 architecture is specified as a versioned wire-format contract. Status: **frozen
 and implemented** — the schemas, invariant catalog, fixtures, reference validator, Store,
-and Check boundary described below all exist and pass 300+ tests.
+and Check boundary described below all exist and pass 434+ tests.
 
 - [Normative specification](contract/SPEC.md) — the accountability model, identity,
   record graph, state model, Store↔Check boundary, and conformance model.

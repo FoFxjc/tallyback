@@ -1,5 +1,15 @@
 {
   "name": "tallyback",
-  "description": "Skill for driving a Tallyback-tracked task through declare/dispatch/observe/verify/settle, plus the land/view/watch read-only reports.",
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "description": "Skill for driving a Tallyback-tracked task through declare / dispatch / observe / verify / settle, plus the `tallyback land`, `view`, and `watch` read-only reports.",
+  "author": {
+    "name": "The Tallyback Authors",
+    "url": "https://github.com/FoFxjc/tallyback"
+  },
+  "homepage": "https://github.com/FoFxjc/tallyback",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FoFxjc/tallyback.git"
+  },
+  "license": "Apache-2.0"
 }

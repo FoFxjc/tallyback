@@ -1020,9 +1020,7 @@ async function runLand(store: Store, args: Args): Promise<void> {
   print(out);
 
   const historicalTail =
-    includeAll && report.historical.length > 0
-      ? `, ${report.historical.length} historical`
-      : '';
+    includeAll && report.historical.length > 0 ? `, ${report.historical.length} historical` : '';
   process.stderr.write(
     `land: ${report.ready.length} ready, ${report.unresolved.length} unresolved, ` +
       `${report.conflicts.length} conflict group(s)${historicalTail} against "${targetBranch}"\n`,

@@ -1,8 +1,11 @@
-# Tallyback View — design (v1, one report shape)
+# Tallyback View — behavior (v1, one report shape)
 
-> Planning document, matching the pattern of `docs/land-design.md`. View is the second
-> host-layer component built on the frozen contract; this document defines its v1 scope
-> before `src/view/` is written.
+> Implemented behavior reference for the `tallyback view` command and the
+> `src/view/` module. View is the second host-layer component built on the frozen
+> v1 contract; the v1 scope below matches the running implementation.
+> History: this file began life as a planning document before `src/view/` was
+> written; the wording has been reconciled with the current behavior of
+> `src/view/report.ts` and `src/cli.ts:runView` for the public pre-release.
 
 ## 1. What View is for
 
@@ -39,6 +42,12 @@ non-goal. That constrains the shape of this feature directly:
 - **No new persisted state.** The per-task shape is assembled on demand from
   `store.currentSnapshot()`; it is never written into `state.json` (SPEC §7.2: derived
   projections are never authoritative and never canonical).
+- **Settlement is not a Task status.** A Settlement is a record (and a Verdict may rest
+  on a `verification_exception` with no CheckInvocation at all — SPEC §5.11). View
+  surfaces Settlements as a recorded decision; it does **not** invent an
+  `active` / `archived` / `completed` Task lifecycle, and every Task remains surfaceable
+  through View regardless of its Settlement decision. Active-vs-historical filtering
+  on top of View is an open retention-design question, explicitly out of scope for v1.
 - **Evidence pointers, not payload dumps.** SPEC §6's "compact" property is explicitly
   "evidence pointers rather than embedded blobs." View reports each Evidence record's
   `evidence_id`, `kind`, `submitted_by`, `submitted_at`, and `note` if present — never the
@@ -91,9 +100,10 @@ quality:
    verbatim — accept/retry/abandon/land — never upgrades it to "done"). Checked here,
    immediately after the blocker check and before declare/dispatch/observe/verify, because
    a Settlement can rest on a `verification_exception` with no Verdict — and no
-   CheckInvocation — at all (SPEC §5.11). A settled task is a terminal resting state
-   regardless of whether the check chain ran; gating this behind steps 3-6 would leave such
-   a task permanently reporting `"verify (begin-check)"`.
+   CheckInvocation — at all (SPEC §5.11). A settled task is a recorded decision; View
+   treats it as a resting state for the documented loop regardless of whether the check
+   chain ran — gating this behind steps 3-6 would leave such a task permanently
+   reporting `"verify (begin-check)"`.
 3. No effective `TaskDeclaration` → `"declare"`.
 4. No Attempt exists → `"dispatch"`.
 5. Latest Attempt has no Claim referencing it → `"observe (claim)"`.
@@ -138,6 +148,9 @@ computed from the same array the caller already has.
 - No HTML/Markdown/CSV rendering, no template selection (§2).
 - No evidence payload inclusion.
 - No new schema, no new record type, no ledger writes.
+- No `active` / `archived` / `completed` Task lifecycle filter — every Task remains
+  surfaceable regardless of Settlement decision; this is an open retention-design
+  question for a future slice (§2).
 - No cross-task "project health score" or similar synthesized judgment — `summary` is a
   literal count rollup, not an assessment.
 - No live Git state (that's Land's job — View does not duplicate `src/land/`; a caller

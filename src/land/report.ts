@@ -120,10 +120,7 @@ export interface GitUnresolvedResult {
 }
 
 export type GitResolveResult =
-  | GitReadyResult
-  | GitIntegratedResult
-  | GitBehindResult
-  | GitUnresolvedResult;
+  GitReadyResult | GitIntegratedResult | GitBehindResult | GitUnresolvedResult;
 
 /** A pluggable, injectable Git resolver: `(input) => result`. Never a shell string. */
 export type GitResolver = (input: GitResolveInput) => GitResolveResult | Promise<GitResolveResult>;
@@ -243,7 +240,13 @@ async function classify(
     // `historical` bucket by default in `buildLandReport`.
     const reason = result.reason ?? `branch ${branch} is integrated into ${targetBranch}`;
     return result.files
-      ? { ...withWorkspace, branch, status: 'git_integrated', overlapping_files: [...result.files].sort(), reason }
+      ? {
+          ...withWorkspace,
+          branch,
+          status: 'git_integrated',
+          overlapping_files: [...result.files].sort(),
+          reason,
+        }
       : { ...withWorkspace, branch, status: 'git_integrated', reason };
   }
 

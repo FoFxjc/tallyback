@@ -277,7 +277,10 @@ describe('View — every Settlement decision is presentable; no Task-lifecycle f
     const cur = fixture.store.currentSnapshot();
     const declaration = cur.declarations.find((d) => d.task_id === fixture.task_id)!;
     const { workspace } = unwrap<{ workspace: { workspace_id: string } }>(
-      await fixture.store.registerWorkspace({ repository_id: fixture.repository_id, branch: 'main' }),
+      await fixture.store.registerWorkspace({
+        repository_id: fixture.repository_id,
+        branch: 'main',
+      }),
     );
     const { attempt } = unwrap<{ attempt: { attempt_id: string } }>(
       await fixture.store.dispatch({

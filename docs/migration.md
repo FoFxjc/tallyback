@@ -1,8 +1,15 @@
 # Tallyback v1 — Migration Mapping
 
-> Planning document. Defines how the existing Store and Check foundations conform to the
-> canonical model. No foundation is modified until the written contract is reviewed and
-> frozen and development is separately approved.
+> Implemented behavior reference for the `tallyback migrate --source <legacy.json>`
+> command and the migration rules it applies to legacy Store snapshots.
+>
+> History: this document defines how the existing Store and Check foundations conform to
+> the canonical model. It originated as a planning artifact and was reconciled with the
+> running implementation in `src/check/migration.ts` /
+> `src/check/migration-workflow.ts` and the migration-rule section of
+> `src/contract/validator.ts` for the public pre-release. The rules below are
+> authoritative for `tallyback migrate`; the implementation in `src/` is the
+> reference implementation of them, not a second source of truth.
 
 ## 1. Migration rules (Store)
 

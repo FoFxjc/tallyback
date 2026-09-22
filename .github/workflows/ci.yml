@@ -16,6 +16,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - run: npm run format:check
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
@@ -40,3 +41,43 @@ jobs:
           mkdir -p /tmp/tallyback-ci-ledger
           node dist/cli.js init --project-root /tmp/tallyback-ci-ledger
           node dist/cli.js validate --project-root /tmp/tallyback-ci-ledger
+
+  package-smoke:
+    # Proves what gets packed is what external users can actually run: pack the tarball,
+    # install it into a clean project, and exercise the installed CLI from a path that
+    # does not include the source checkout.
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Pack tarball
+        run: npm pack
+      - name: Install tarball into a scratch project
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/tallyback-pack-smoke
+          cd /tmp/tallyback-pack-smoke
+          npm init -y >/dev/null
+          TAR=$(ls "$GITHUB_WORKSPACE"/tallyback-*.tgz | head -n1)
+          npm install "$TAR" >/dev/null
+      - name: '[smoke] handshake against the installed binary'
+        run: |
+          set -euo pipefail
+          cd /tmp/tallyback-pack-smoke
+          npx --no tallyback handshake | tee /tmp/hs.json
+          node -e "const h=require('/tmp/hs.json'); if(h.implementation_version!=='0.1.0'||h.contract!=='tallyback'){throw new Error('handshake mismatch')}"
+      - name: '[smoke] init + validate from the installed binary'
+        run: |
+          set -euo pipefail
+          cd /tmp/tallyback-pack-smoke
+          mkdir -p project && cd project
+          npx --no tallyback init --topic "Pack smoke" --goal "ci smoke" --repository demo | tee /tmp/init.json
+          node -e "const o=require('/tmp/init.json'); if(!o.ok) throw new Error('init failed')"
+          npx --no tallyback validate | tee /tmp/val.json
+          node -e "const o=require('/tmp/val.json'); if(!o.ok) throw new Error('validate failed')"
