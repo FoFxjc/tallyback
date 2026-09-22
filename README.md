@@ -21,26 +21,41 @@ Tallyback v1 is a **0.1.x public pre-release**:
 Tallyback runs entirely on a single machine.
 
 - **Node.js** `>= 20` (matches `engines.node` in `package.json`).
-- **Git** available on `$PATH` for `land`, `view`, and `watch` operations.
+- **Git** available on `$PATH` for the live Git-backed `land` and `watch` operations. `view` is a pure ledger projection and does not require Git.
 - **Local filesystem access** — the ledger is a `.tallyback/` directory under the project root.
 
 No database server, cloud account, network round-trip, or remote clone/fetch is required.
 
 ## Install
 
-Tallyback is published as a GitHub source pre-release. The recommended way to run it today is
-to clone the repository, build it, and point your shell at `dist/cli.js`:
+Tallyback is currently a GitHub source pre-release. The recommended source-clone path is:
 
 ```bash
 git clone https://github.com/FoFxjc/tallyback.git
 cd tallyback
 npm ci
 npm run build
-# expose `tallyback` for this shell:
-export PATH="$PWD/dist:$PATH"
-# or invoke it directly:
-node /path/to/tallyback/dist/cli.js --help
+
+# Create an npm link so package.json#bin exposes the `tallyback` command.
+npm link
+
+tallyback handshake
+tallyback version
 ```
+
+`npm link` creates the `tallyback` executable shim from `package.json#bin`.
+Merely adding `dist/` to `PATH` is not sufficient because the build artifact is named
+`dist/cli.js`, not `dist/tallyback`.
+
+If you do not want to create an npm link, invoke the built CLI directly instead:
+
+```bash
+node /path/to/tallyback/dist/cli.js handshake
+node /path/to/tallyback/dist/cli.js version
+```
+
+There is no general top-level `--help` command in the current 0.1.x CLI; unknown commands
+fail with the available command list.
 
 An npm-distributable package is **not** part of this pre-release. The repository ships an
 explicit package surface (see `package.json#files`) so a future npm release will be
@@ -80,7 +95,7 @@ REPO=repo_<…>   # from `repositories[0].repository_id`
 tallyback task --topic-id "$TOPIC" --title "Demo task"
 TASK=tsk_<…>    # from `task.task_id`
 
-tallyback workspace --repository-id "$REPO" --alias worktree-1 --branch main
+tallyback workspace --repository-id "$REPO" --branch main
 WS=wsp_<…>      # from `workspace.workspace_id`
 
 # 4. Declare the work + acceptance criteria, then dispatch an Attempt.
@@ -136,13 +151,21 @@ tallyback settle \
   --rationale "All criteria supported at high confidence" \
   --actor tool:pm
 
-# 8. Read-only reports.
+# 8. Read-only ledger reports / gates.
 tallyback view --task-id "$TASK"      # compact per-task tallyback
-tallyback land --target-branch main   # readiness against a target branch
 tallyback validate                    # CI gate; exits non-zero on ledger problems
 
-# 9. End-to-end gate. Safe to run in CI on a freshly initialized ledger.
-tallyback validate
+# `land` and `watch` additionally require a machine-local Workspace binding to a real
+# Git checkout. This minimal accept-flow intentionally stops before that Git-backed layer.
+# For a real delegated coding task, bind the registered Workspace to its checkout:
+#
+# tallyback bind \
+#   --repository-id "$REPO" \
+#   --workspace-id "$WS" \
+#   --root /absolute/path/to/the/git/worktree
+#
+# Then use `tallyback watch` while the Attempt is open, and `tallyback land` after an
+# explicit `land` Settlement when you want live Git integration-readiness evidence.
 ```
 
 Each command prints machine-readable JSON to stdout and a one-line human summary to
@@ -158,8 +181,9 @@ These are real observed boundaries of the v1 implementation, not speculation.
 - **Advisory only.** `tallyback land` reports readiness, ordering, and conflict groups; it
   **never merges, rebases, pushes, or writes to the ledger**. A human or PM agent makes
   the actual landing decision based on its output.
-- **No remote fetch.** `land`, `view`, and `watch` operate on the local Workspace's
-  current state only. There is no `git fetch` step anywhere in the loop.
+- **No remote fetch.** The live Git-backed `land` and `watch` commands operate on the
+  local Workspace's current state only. There is no `git fetch` step anywhere in the loop.
+  `view` is ledger-only and does not read live Git state.
 - **Deleted candidate branch refs can prevent historical integration proof.** If every
   Workspace bound to a candidate's `repository_id` has lost the branch ref, `land`
   reports `git_unresolved` rather than inferring integration; there is no
