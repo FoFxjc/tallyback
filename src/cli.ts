@@ -255,8 +255,43 @@ function preflight(schemaVersion: string): void {
 // Command handlers
 // ---------------------------------------------------------------------------
 
+/**
+ * Compact top-level usage, printed by `tallyback --help` / `tallyback help`.
+ *
+ * `--help` / `help` are natural first commands for a new user and must work from any
+ * directory, including one with no `.tallyback/` project yet — so this is handled before
+ * any project-root resolution or Store open below. There is no per-command help system;
+ * this deliberately stays a short, deterministic string rather than a generated help
+ * subsystem. Full flag-level detail lives in README.md and src/cli.ts.
+ */
+const HELP_TEXT = `tallyback — Git-native accountability ledger for delegated agent work
+
+Usage: tallyback <command> [--flag value ...]
+
+Capability / bootstrap:
+  handshake, version, init, migrate
+
+Core loop (declare -> dispatch -> observe -> verify -> settle):
+  topic, task, workspace, bind, declare, dispatch, end, claim, evidence,
+  begin-check, record-check, verdict, block, resolve, settle, decision
+
+Read-only reports / gates:
+  show, list, bindings, land, view, watch, validate, reconcile
+
+Run with no command for the capability handshake.
+For full flag-level syntax for each command, see README.md (Quick Start) or src/cli.ts.
+`;
+
 async function run(): Promise<void> {
   const { command, args } = parseArgs(process.argv.slice(2));
+
+  // Top-level help must work before any project-root / Store resolution: a new user
+  // reaching for `--help` should never be met with a raw ENOENT for a ledger that
+  // doesn't exist yet.
+  if (command === '--help' || command === 'help') {
+    process.stdout.write(HELP_TEXT);
+    return;
+  }
 
   // Read-only / capability commands first (no ledger, no preflight).
   if (command === 'handshake') {

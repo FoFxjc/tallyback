@@ -168,6 +168,27 @@ tallyback validate                    # CI gate; exits non-zero on ledger proble
 # explicit `land` Settlement when you want live Git integration-readiness evidence.
 ```
 
+### `accept` versus `land`: two different Settlement decisions
+
+`--decision accept` and `--decision land` are both valid `tallyback settle` decisions, but
+they mean different things and are **not interchangeable**:
+
+- `accept` records that the result was judged acceptable. It does not authorize
+  integration.
+- `land` records explicit authorization to integrate. Only an **effective** (non-superseded)
+  `land` Settlement enters the `ready_to_land` projection that `tallyback land` reads.
+
+If a task was settled with `accept` and later needs to be picked up by `tallyback land`,
+supersede the `accept` Settlement with a new `land` Settlement (`tallyback settle
+--decision land --supersedes <prior settlement id> ...`) — Settlements are immutable, so
+this is a new record, not an edit.
+
+A Verdict (`tallyback verdict`) is a separate concept from both: it is an assessment of
+whether the Claim's evidence supports the declared criteria. `Verdict != acceptance !=
+landing authorization != actual Git integration`. Even after a `land` Settlement,
+`tallyback land` remains read-only and advisory — it reports integration readiness and
+never performs the merge itself; see [Known limitations](#known-limitations).
+
 Each command prints machine-readable JSON to stdout and a one-line human summary to
 stderr, so the same commands work in a terminal and in a pipeline.
 

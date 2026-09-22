@@ -351,3 +351,33 @@ describe('the migrate CLI entry point', () => {
     expect(rerun.stderr).toContain('mutation.migration_already_applied');
   }, 120_000);
 });
+
+describe('top-level help', () => {
+  // Regression: `tallyback --help` / `tallyback help` used to fall through to project-root
+  // resolution and Store.open, surfacing a raw ENOENT for `.tallyback/project.json` from any
+  // directory without an initialized ledger. Help must work before any project lookup.
+
+  it('`--help` exits 0 with a usage summary and no project lookup', async () => {
+    const root = await tempRoot('tallyback-cli-help-');
+    const result = await runRaw(root, ['--help']);
+    expect(result.code).toBe(0);
+    expect(result.stdout).toContain('Usage: tallyback <command>');
+    expect(result.stdout).not.toContain('ENOENT');
+    expect(result.stderr).toBe('');
+  });
+
+  it('`help` exits 0 with a usage summary and no project lookup', async () => {
+    const root = await tempRoot('tallyback-cli-help-');
+    const result = await runRaw(root, ['help']);
+    expect(result.code).toBe(0);
+    expect(result.stdout).toContain('Usage: tallyback <command>');
+    expect(result.stdout).not.toContain('ENOENT');
+    expect(result.stderr).toBe('');
+  });
+
+  it('no command still returns the capability handshake', async () => {
+    const { stdout } = await execFileAsync(TSX, [CLI], { cwd: ROOT });
+    const parsed = JSON.parse(stdout) as { contract: string };
+    expect(parsed.contract).toBe('tallyback');
+  });
+});
