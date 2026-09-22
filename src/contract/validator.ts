@@ -237,11 +237,35 @@ function getCompiled(): CompiledValidators {
   return compiled;
 }
 
-/** First schema error as a human-readable message. */
-function firstSchemaError(v: SchemaValidator): string | undefined {
-  const first = v.errors?.[0];
-  if (!first) return undefined;
-  return `${first.instancePath ?? '/'} ${first.message ?? 'invalid'}`.trim();
+/**
+ * Select the most specific of a set of Ajv errors as a human-readable message.
+ *
+ * With `allErrors: true`, a failed `oneOf` (e.g. `AnyRecord`, which every record shape is
+ * a branch of) reports every branch's failure, not just the one the record actually
+ * resembles. An unrelated branch typically fails immediately at the record's own root
+ * (e.g. `/records/0` "must have required property 'project_id'" from the `Project`
+ * branch), while the branch the record is actually shaped like fails deeper inside its own
+ * nested schema (e.g. `/records/0/payload` "must have required property 'text'" from the
+ * `Evidence` branch's `observation` payload check). Ajv lists branches in schema
+ * declaration order, so naively taking `errors[0]` reports whichever branch happens to be
+ * declared first — not the branch relevant to this record. Depth of `instancePath` is a
+ * reasonable proxy for "how far into a candidate schema this data got before failing", so
+ * the deepest error is preferred; ties keep Ajv's original relative order. This is generic
+ * over any nested/oneOf schema shape, not specific to Evidence or `observation`.
+ */
+function mostSpecificSchemaError(v: SchemaValidator): string | undefined {
+  const errors = v.errors;
+  if (!errors || errors.length === 0) return undefined;
+  let selected = errors[0]!;
+  let bestDepth = (selected.instancePath ?? '').split('/').length;
+  for (const err of errors) {
+    const depth = (err.instancePath ?? '').split('/').length;
+    if (depth > bestDepth) {
+      selected = err;
+      bestDepth = depth;
+    }
+  }
+  return `${selected.instancePath ?? '/'} ${selected.message ?? 'invalid'}`.trim();
 }
 
 /**
@@ -253,7 +277,7 @@ export function validate_project_manifest(manifest: unknown): ValidationResult {
   if (!validate(manifest)) {
     return failResult(
       'schema.invalid_project_manifest',
-      firstSchemaError(validate) ?? 'project.json is malformed',
+      mostSpecificSchemaError(validate) ?? 'project.json is malformed',
     );
   }
   return okResult();
@@ -265,7 +289,7 @@ export function validate_bindings(bindings: unknown): ValidationResult {
   if (!validate(bindings)) {
     return failResult(
       'schema.invalid_bindings',
-      firstSchemaError(validate) ?? 'runtime/bindings.json is malformed',
+      mostSpecificSchemaError(validate) ?? 'runtime/bindings.json is malformed',
     );
   }
   return okResult();
@@ -277,7 +301,7 @@ export function validate_migration_report(report: unknown): ValidationResult {
   if (!validate(report)) {
     return failResult(
       'schema.invalid_migration_report',
-      firstSchemaError(validate) ?? 'migration report is malformed',
+      mostSpecificSchemaError(validate) ?? 'migration report is malformed',
     );
   }
   return okResult();
@@ -1369,7 +1393,7 @@ export function validate_snapshot(snapshot: Snapshot): ValidationResult {
 
   const { snapshot: validate } = getCompiled();
   if (!validate(snapshot)) {
-    return failResult('schema.unknown_property', firstSchemaError(validate) ?? 'snapshot is malformed');
+    return failResult('schema.unknown_property', mostSpecificSchemaError(validate) ?? 'snapshot is malformed');
   }
 
   const duplicateCriterion = checkNoDuplicateCriterionIn(records);
@@ -1410,7 +1434,7 @@ export function validate_append(current: Snapshot, operation: AppendOperation): 
 
   const { append: validate } = getCompiled();
   if (!validate(operation)) {
-    return failResult('schema.unknown_property', firstSchemaError(validate) ?? 'append operation is malformed');
+    return failResult('schema.unknown_property', mostSpecificSchemaError(validate) ?? 'append operation is malformed');
   }
 
   const duplicateCriterion = checkNoDuplicateCriterionIn(operation.records);
