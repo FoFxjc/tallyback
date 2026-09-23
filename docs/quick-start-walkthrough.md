@@ -49,9 +49,9 @@ node /path/to/tallyback/dist/cli.js version
 exits 0 without touching any project directory or ledger — safe to run from anywhere,
 including before `init`.
 
-An npm-distributable package is **not** part of this pre-release: `package.json` is
-marked `private`, and CI's `package-smoke` job packs/installs a tarball only to prove
-the packaging surface stays correct — not as a published-install path.
+Tallyback is **not published to npm yet**: `package.json` remains marked `private`.
+CI's `package-smoke` job packs and installs a tarball only to prove the packaging
+surface stays correct; the supported 0.1.0 install path is still a source clone.
 
 ## The full loop
 

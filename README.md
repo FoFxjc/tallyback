@@ -6,7 +6,7 @@
 
 Local, Git-native accountability for delegated agent work.
 
-[Quick Start](docs/quick-start-walkthrough.md) · [Contract](contract/SPEC.md) · [Docs](docs/) · [Changelog](CHANGELOG.md)
+[Quick Start](docs/quick-start-walkthrough.md) · [Contract](contract/SPEC.md) · [Docs](docs/) · [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md)
 
 [![CI](https://github.com/FoFxjc/tallyback/actions/workflows/ci.yml/badge.svg)](https://github.com/FoFxjc/tallyback/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
@@ -290,6 +290,7 @@ The **Task** remains the stable unit of responsibility; agents remain replaceabl
 - **[Branch workflow](docs/branch-workflow.md)** — branch / reconciliation model
 - **[Migration](docs/migration.md)** — migration mapping
 - **[Security](SECURITY.md)**
+- **[Contributing](CONTRIBUTING.md)**
 - **[Changelog](CHANGELOG.md)**
 
 ## License

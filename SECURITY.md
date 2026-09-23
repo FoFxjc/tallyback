@@ -37,10 +37,10 @@ on 2026-09-22.
   Vitest's UI server (the critical-severity vector) is opt-in via `--ui` and
   is not part of any command run by the project.
 - **Bumping is non-trivial.** `vitest@5` is SemVer-major. The `fixAvailable`
-  it suggests may rewrite mock APIs and test-runner behavior; accepting it
-  inside a release-prep slice would mix an unrelated change with the release
-  and risk regressing the 400+ test surface that is the core regression
-  guarantee.
+  it suggests may rewrite mock APIs and test-runner behavior. Upgrading solely
+  to silence dev-only advisories would mix a test-runner migration into an
+  otherwise unrelated change and risk regressing the 400+ test surface that
+  provides the project's regression guarantee.
 
 ### Recommended actions for downstream users
 
@@ -60,8 +60,13 @@ on 2026-09-22.
 
 ## Reporting a vulnerability
 
-For security issues that affect the runtime tree or the contract, please report
-privately by opening a GitHub issue marked confidential, or via the contact
-linked from `https://github.com/FoFxjc/tallyback`. For advisories already
-filed against transitive dev dependencies, the upstream trackers are the
-authoritative source.
+Please **do not open a public issue with vulnerability details**.
+
+If GitHub's **Report a vulnerability** option is available on the repository's
+Security tab, use that private reporting channel. Otherwise, contact the
+maintainer through the GitHub profile linked from
+`https://github.com/FoFxjc/tallyback` and coordinate private disclosure before
+publishing details.
+
+For advisories already filed against transitive dev dependencies, the upstream
+trackers are the authoritative source.

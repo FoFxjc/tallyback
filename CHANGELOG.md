@@ -1,16 +1,15 @@
 # Changelog
 
 All notable changes to Tallyback are recorded here. Versions follow [Semantic
-Versioning](https://semver.org/) within the 0.1.x pre-release window; the v1
-contract (`contract/`) is **frozen** and evolves independently under its own
-version.
+Versioning](https://semver.org/). The v1 contract (`contract/`) is **frozen**
+and evolves independently under its own version.
 
-## [0.1.0] — initial public pre-release
+## [0.1.0] — 2026-09-23
 
-First public pre-release of Tallyback. The v1 wire-format contract is frozen
-and implemented end-to-end; the CLI, the Store, and every host-layer component
-ship in this release. Suitable for real delegated-work dogfood, not yet for
-production-hardened downstream consumers.
+Initial public release of Tallyback. The v1 wire-format contract is frozen and
+implemented end to end; the CLI, Store, and host-layer components described
+below ship in this release. Implementation ergonomics outside the frozen
+contract may continue to evolve across 0.1.x releases.
 
 ### Added — public surface
 

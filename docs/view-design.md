@@ -5,7 +5,7 @@
 > v1 contract; the v1 scope below matches the running implementation.
 > History: this file began life as a planning document before `src/view/` was
 > written; the wording has been reconciled with the current behavior of
-> `src/view/report.ts` and `src/cli.ts:runView` for the public pre-release.
+> `src/view/report.ts` and `src/cli.ts:runView` for the 0.1.0 release.
 
 ## 1. What View is for
 

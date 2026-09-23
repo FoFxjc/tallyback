@@ -7,7 +7,7 @@
 > the canonical model. It originated as a planning artifact and was reconciled with the
 > running implementation in `src/check/migration.ts` /
 > `src/check/migration-workflow.ts` and the migration-rule section of
-> `src/contract/validator.ts` for the public pre-release. The rules below are
+> `src/contract/validator.ts` for the 0.1.0 release. The rules below are
 > authoritative for `tallyback migrate`; the implementation in `src/` is the
 > reference implementation of them, not a second source of truth.
 

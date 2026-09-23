@@ -5,7 +5,7 @@
 > frozen v1 contract; the v1 scope below matches the running implementation.
 > History: this file began life as a planning document before `src/land/` was
 > written; the wording has been reconciled with the current behavior of
-> `src/land/report.ts` and `src/cli.ts:runLand` for the public pre-release.
+> `src/land/report.ts` and `src/cli.ts:runLand` for the 0.1.0 release.
 
 ## 1. What Land is for
 
