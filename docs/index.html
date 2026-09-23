@@ -6,7 +6,7 @@
   <title>Tallyback — Delegate work. Know what came back.</title>
   <meta
     name="description"
-    content="A local, Git-native accountability layer for delegated agent work."
+    content="A local, Git-native accountability layer for delegated agent work: claims, evidence, reconciliation, verdicts, settlements, and live Git reality."
   />
   <link rel="stylesheet" href="assets/tallyback.css" />
 </head>
@@ -15,7 +15,7 @@
     <div class="shell topbar-inner">
       <a class="brand" href="#top">Tallyback</a>
       <nav aria-label="Primary navigation">
-        <a href="#done">Why</a>
+        <a href="#boundary">Why</a>
         <a href="#task">Task</a>
         <a href="#reality">Reality</a>
         <a href="#return">Return</a>
@@ -28,14 +28,14 @@
     <section class="hero">
       <div class="shell">
         <div class="hero-copy">
-          <p class="eyebrow">Accountability for delegated agent work</p>
+          <p class="eyebrow">Accountability after delegation</p>
           <h1>
             <span>Delegate work.</span>
             <span>Know what came back.</span>
           </h1>
           <p class="hero-lede">
-            Agent systems are getting very good at sending work out.
-            Tallyback gives delegated work a durable, inspectable return path.
+            Subagents and agent teams already know how to send work out.
+            Tallyback gives the coordinating agent a durable, inspectable return path.
           </p>
           <div class="hero-actions">
             <a class="action-primary" href="#return">See the return path</a>
@@ -46,20 +46,21 @@
             <span>local-first</span>
             <span>Git-native</span>
             <span>Apache-2.0</span>
+            <span>0.1.0 pre-release</span>
             <span>no daemon</span>
           </div>
         </div>
 
-        <div class="journey" aria-label="Delegated work goes out to an agent and accountability comes back through Tallyback">
+        <div class="journey" aria-label="A coordinating agent delegates to a worker or subagent and accountability returns through Tallyback">
           <div class="journey-labels" aria-hidden="true">
-            <span>PRINCIPAL</span>
-            <span>EXECUTOR</span>
+            <span>COORDINATOR</span>
+            <span>WORKER</span>
           </div>
 
           <div class="journey-row outbound">
             <div class="endpoint">
-              <span class="endpoint-name">You</span>
-              <span class="endpoint-note">“Build the mutation API.”</span>
+              <span class="endpoint-name">Primary Agent</span>
+              <span class="endpoint-note">declare · dispatch · oversee</span>
             </div>
             <div class="route">
               <span class="route-label">delegate</span>
@@ -67,25 +68,27 @@
               <span class="route-arrow">→</span>
             </div>
             <div class="endpoint right">
-              <span class="endpoint-name">Agent</span>
+              <span class="endpoint-name">Worker / Subagent</span>
               <span class="endpoint-note">worktree · tools · code</span>
             </div>
           </div>
 
           <div class="executor-event">
             <span class="event-mark">“Done.”</span>
-            <span class="event-note">the executor returns a Claim</span>
+            <span class="event-note">the worker returns a Claim</span>
           </div>
 
           <div class="journey-row inbound">
             <div class="endpoint">
-              <span class="endpoint-name">You</span>
-              <span class="endpoint-note">now know what came back</span>
+              <span class="endpoint-name">Primary Agent</span>
+              <span class="endpoint-note">reviews Verdict · records Settlement</span>
             </div>
-            <div class="return-track" aria-label="Claim to settlement return path">
+            <div class="return-track" aria-label="Claim through settlement accountability path">
               <span>CLAIM</span>
               <i></i>
               <span>EVIDENCE</span>
+              <i></i>
+              <span>RECONCILIATION</span>
               <i></i>
               <span>VERDICT</span>
               <i></i>
@@ -99,9 +102,47 @@
         </div>
 
         <p class="hero-thesis">
-          Tallyback is the accountability layer between
-          <strong>“I delegated the work”</strong> and
-          <strong>“I know what came back.”</strong>
+          Coordination tells the primary agent <strong>who is doing what.</strong>
+          Tallyback tells it <strong>what it actually knows when the work comes back.</strong>
+        </p>
+      </div>
+    </section>
+
+    <section id="boundary" class="boundary-band">
+      <div class="shell">
+        <div class="boundary-head">
+          <p class="chapter-kicker">Coordination ≠ accountability</p>
+          <h2>Subagents solve delegation. Agent teams solve coordination. Tallyback starts where coordination stops.</h2>
+        </div>
+
+        <div class="boundary-grid" aria-label="Coordination compared with accountability">
+          <div class="boundary-column">
+            <span class="side-label">COORDINATION</span>
+            <strong>Who is doing what?</strong>
+            <div class="boundary-lines">
+              <span>delegate work</span>
+              <span>parallelize execution</span>
+              <span>share progress</span>
+              <span>return results</span>
+            </div>
+          </div>
+
+          <div class="boundary-divider" aria-hidden="true">→</div>
+
+          <div class="boundary-column accountable">
+            <span class="side-label">ACCOUNTABILITY</span>
+            <strong>What do we actually know?</strong>
+            <div class="boundary-lines">
+              <span>record the Claim</span>
+              <span>bind and reconcile Evidence</span>
+              <span>issue a Verdict</span>
+              <span>settle and inspect Git reality</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="boundary-note">
+          Delegation works without Tallyback. Tallyback makes the return accountable.
         </p>
       </div>
     </section>
@@ -118,7 +159,7 @@
 
         <div class="done-layout">
           <div class="done-claim">
-            <span class="speaker">AGENT</span>
+            <span class="speaker">WORKER / SUBAGENT</span>
             <blockquote>“I finished the task.”</blockquote>
             <div class="not-equal">≠</div>
             <p>completion</p>
@@ -143,17 +184,26 @@
               </div>
             </div>
             <div class="chain-link">↓</div>
-            <div class="chain-item emphasized">
+            <div class="chain-item">
               <span class="chain-index">03</span>
               <div>
-                <strong>VERDICT</strong>
-                <p>An independent assessment against the declared criteria.</p>
-                <code>supported · 7 / 7 · confidence high</code>
+                <strong>RECONCILIATION</strong>
+                <p>An attributed factual check against repository or Git reality.</p>
+                <code>git.object.exists · confirmed</code>
               </div>
             </div>
             <div class="chain-link">↓</div>
             <div class="chain-item emphasized">
               <span class="chain-index">04</span>
+              <div>
+                <strong>VERDICT</strong>
+                <p>An independent semantic assessment against the declared criteria.</p>
+                <code>supported · 7 / 7 · confidence high</code>
+              </div>
+            </div>
+            <div class="chain-link">↓</div>
+            <div class="chain-item emphasized">
+              <span class="chain-index">05</span>
               <div>
                 <strong>SETTLEMENT</strong>
                 <p>The explicit decision about what happens next.</p>
@@ -164,10 +214,11 @@
         </div>
 
         <p class="chapter-statement inverse-statement">
-          Activity is not completion.
-          Evidence is not a Verdict.
-          A Verdict is not acceptance.
-          Acceptance is not integration.
+          Claim is not Evidence.
+          Evidence is not Reconciliation.
+          Reconciliation is not Verdict.
+          Verdict is not Settlement.
+          Settlement is not Git reality.
         </p>
       </div>
     </section>
@@ -386,6 +437,7 @@
               <div>
                 <h3>VERIFY</h3>
                 <dl>
+                  <div><dt>reconcile</dt><dd>Git commit confirmed</dd></div>
                   <div><dt>verdict</dt><dd><span class="receipt-stamp">SUPPORTED</span></dd></div>
                   <div><dt>criteria</dt><dd>7 / 7</dd></div>
                   <div><dt>confidence</dt><dd>high</dd></div>
@@ -401,7 +453,7 @@
             </section>
 
             <footer class="receipt-foot">
-              <span>claim ≠ evidence ≠ verdict ≠ decision ≠ Git reality</span>
+              <span>claim ≠ evidence ≠ reconciliation ≠ verdict ≠ decision ≠ Git reality</span>
             </footer>
           </article>
 
@@ -420,12 +472,12 @@
             </div>
 
             <div class="boundary-pair">
-              <p class="side-label">TALLYBACK REPORTS</p>
+              <p class="side-label">EXECUTION BOUNDARY</p>
               <dl>
-                <div><dt>task</dt><dd>your system executes it</dd></div>
-                <div><dt>evidence</dt><dd>your tools produce it</dd></div>
-                <div><dt>verdict</dt><dd>your checker evaluates</dd></div>
-                <div><dt>Git reality</dt><dd>Git proves it</dd></div>
+                <div><dt>delegate</dt><dd>your agent system</dd></div>
+                <div><dt>execute</dt><dd>your workers / subagents</dd></div>
+                <div><dt>accountability</dt><dd>Tallyback</dd></div>
+                <div><dt>integrate</dt><dd>your Git workflow</dd></div>
               </dl>
             </div>
 
@@ -465,7 +517,7 @@
 
   <footer class="footer">
     <div class="shell footer-inner">
-      <span>Tallyback · 0.1.x pre-release · v1 contract frozen</span>
+      <span>Tallyback · 0.1.0 pre-release · v1 contract frozen</span>
       <div>
         <a href="https://github.com/FoFxjc/tallyback">Repository</a>
         <a href="https://github.com/FoFxjc/tallyback/blob/main/README.md">README</a>

@@ -11,40 +11,44 @@ Local, Git-native accountability for delegated agent work.
 [![CI](https://github.com/FoFxjc/tallyback/actions/workflows/ci.yml/badge.svg)](https://github.com/FoFxjc/tallyback/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 ![Contract](https://img.shields.io/badge/contract-v1%20frozen-6f42c1)
-![Status](https://img.shields.io/badge/status-0.1.x%20pre--release-orange)
+![Status](https://img.shields.io/badge/status-0.1.0%20pre--release-orange)
 
 </div>
 
 ---
 
-Agent systems are good at sending work out. Tallyback gives delegated work a durable return path.
-
-An agent saying **"done"** is a claim, not a fact. Tallyback keeps the important boundaries separate:
+Subagents already solve delegation. Agent teams already solve coordination. Tallyback starts where coordination stops: the return path.
 
 ```text
-what you asked for
-        ↓
-   Declaration
+Human
+  ↓ intent / oversight
+Primary / Coordinating Agent
+  ↓ Declare + Dispatch
+Worker / Subagent
+  ↓ Claim + Evidence
+Tallyback
+  ↓ Reconciliation + Verdict
+Primary / Coordinating Agent
+  ↓ explicit Settlement
+Tallyback ledger
+```
 
-who tried it
-        ↓
-     Attempt
+The coordinating agent is Tallyback's primary operational user. Human oversight stays upstream; Tallyback models one delegated-work accountability boundary, not a recursive agent hierarchy.
 
-what came back
-        ↓
-      Claim
+A worker saying **"done"** is a Claim, not a fact:
 
-what supports it
-        ↓
-    Evidence
-
-what an independent check concludes
-        ↓
-    Verdict
-
-what you decide next
-        ↓
-   Settlement
+```text
+Claim
+  ≠
+Evidence
+  ≠
+Reconciliation
+  ≠
+Verdict
+  ≠
+Settlement
+  ≠
+Git reality
 ```
 
 The stable identity is the **Task**. Agents, sessions, models, branches, and worktrees are replaceable execution underneath it.
@@ -54,12 +58,27 @@ The stable identity is the **Task**. Agents, sessions, models, branches, and wor
 - **Durable delegated-work state** — keep the accountability trail in a local, Git-friendly `.tallyback/` ledger.
 - **Explicit acceptance criteria** — declare what would count as done before execution starts.
 - **Attempt ownership** — associate each run with an executor, repository, workspace, and branch.
-- **Claim ≠ Evidence ≠ Verdict** — record what was said, what can be inspected, and what an independent check concluded as separate objects.
+- **Claim ≠ Evidence ≠ Reconciliation ≠ Verdict** — keep worker assertions, inspectable evidence, factual reconciliation, and semantic judgment separate.
 - **Explicit settlements** — `accept`, `retry`, `abandon`, or `land`; nothing silently completes itself.
 - **Cold-session recovery** — reconstruct task state without replaying the original conversation.
 - **Git-aware Land** — report live integration readiness, overlap, and already-integrated work without mutating Git.
 - **Machine-readable validation** — validate ledger consistency in CI or automation.
-- **Host-neutral core** — use the CLI directly or integrate through a host bridge; one Claude Code bridge is included.
+- **Host-neutral core** — coordinating agents can use the CLI directly or integrate through a thin host bridge without changing the accountability model.
+
+## Coordination vs accountability
+
+Tallyback does not replace subagents, agent teams, or orchestration. Those systems answer **who is doing what**. Tallyback answers **what you actually know when the work comes back**.
+
+| Coordination layer | Tallyback accountability layer |
+| --- | --- |
+| delegate work | record the Claim |
+| parallelize execution | bind inspectable Evidence |
+| share progress | reconcile Evidence against repository / Git facts |
+| return results | issue a Verdict against declared criteria |
+| manage worker activity | explicitly settle: `accept`, `retry`, `abandon`, or `land` |
+| keep the workflow moving | reconstruct ledger state and current Git integration reality |
+
+If delegation and coordination are enough for your workflow, you may not need Tallyback. It becomes useful when **"the worker said it was done"** is no longer sufficient as the durable return record.
 
 ## Quick start
 
@@ -102,7 +121,7 @@ The complete copy-pasteable flow — including Workspace binding, Claims, Eviden
 - **Declare** — the Task objective and acceptance criteria.
 - **Dispatch** — the Attempt, executor, repository, workspace, and branch.
 - **Observe** — Claims, Evidence, blockers, and attempt outcomes.
-- **Verify** — per-criterion Verdicts with confidence and rationale.
+- **Verify** — reconcile Evidence against inspectable reality, then record per-criterion Verdicts with confidence and rationale.
 - **Settle** — the explicit decision: `accept`, `retry`, `abandon`, or `land`.
 
 This is not a mandatory linear state machine. A Task can have several Attempts, and records can arrive over time. The loop defines **accountability boundaries**, not an orchestrator.
@@ -215,15 +234,46 @@ For the exact current flag surface, use `tallyback --help` and the source-pre-re
 
 ## Project status
 
-Tallyback is a **0.1.x pre-release**.
+Tallyback is currently **0.1.0 pre-release**.
 
 - The **v1 wire-format contract is frozen and implemented**.
+- The current implementation supports the **Primary Agent → Worker/Subagent** lifecycle end to end, including typed Git Evidence, factual Reconciliation, Verdict, Settlement, and Land.
 - CLI ergonomics and read-only report shapes may still evolve before 1.0.
 - `package.json` is intentionally `private`; there is **no npm release yet**.
 - The current supported install path is a source clone.
-- The project is suitable for real dogfood, but does not claim production-hardening for every environment.
 
 Known limitations and behavior details live in the component docs rather than being hidden behind the README.
+
+## Roadmap
+
+Tallyback's core accountability model is intentionally small. The roadmap focuses on making that model easier to adopt across agent environments without turning Tallyback into an orchestration framework.
+
+### Now
+
+- Keep the **Primary Agent → Worker/Subagent** usage path explicit across the CLI, Bridge, and documentation.
+- Improve installation, documentation, and release readiness for public use.
+- Keep View, Watch, and Land small, read-only, and consistent with the frozen v1 contract.
+
+### Next
+
+- Add a thin **Pi** integration built on the existing host-neutral Bridge.
+- Add **OMP / Oh My Pi** support while reusing the same semantic workflow where possible.
+- Publish an installable package for supported agent hosts.
+- Keep the accountability model portable across hosts without introducing host-specific state models.
+
+### Later
+
+Potential additions, driven by demonstrated user needs:
+
+- Additional agent-host adapters.
+- Simpler installation and distribution.
+- Richer read-only views and reporting.
+- Evidence retention and archival ergonomics.
+- Additional checker and evidence-provider integrations.
+
+Tallyback does **not** aim to become an agent orchestrator, scheduler, workflow engine, autonomous merger, model-routing system, or recursive agent-topology model.
+
+The **Task** remains the stable unit of responsibility; agents remain replaceable executors.
 
 ## Documentation
 

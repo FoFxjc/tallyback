@@ -383,7 +383,7 @@ pre,
 .return-track {
   min-width: 0;
   display: grid;
-  grid-template-columns: auto 1fr auto 1fr auto 1fr auto;
+  grid-template-columns: auto 1fr auto 1fr auto 1fr auto 1fr auto;
   align-items: center;
   gap: 0.55rem;
   direction: rtl;
@@ -503,6 +503,101 @@ pre,
 
   .inbound .endpoint.right {
     order: 1;
+  }
+}
+
+/* -------------------------------------------------------- coordination boundary */
+
+.boundary-band {
+  padding: 4.75rem 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule-strong);
+  background: var(--paper-raised);
+}
+
+.boundary-head {
+  max-width: 58rem;
+}
+
+.boundary-head h2 {
+  margin: 0.55rem 0 0;
+  font-size: clamp(2rem, 4.5vw, 4.2rem);
+  line-height: 1.03;
+  letter-spacing: -0.045em;
+}
+
+.boundary-grid {
+  margin-top: 3.5rem;
+  display: grid;
+  grid-template-columns: 1fr 4rem 1fr;
+  align-items: stretch;
+  border-top: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--rule-strong);
+}
+
+.boundary-column {
+  padding: 1.6rem 0 1.8rem;
+}
+
+.boundary-column.accountable {
+  border-left: 2px solid var(--signal);
+  padding-left: 1.5rem;
+}
+
+.boundary-column > strong {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.boundary-lines {
+  margin-top: 1.4rem;
+  display: grid;
+}
+
+.boundary-lines span {
+  padding: 0.65rem 0;
+  border-top: 1px solid var(--rule);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.accountable .boundary-lines span {
+  color: var(--ink);
+}
+
+.boundary-divider {
+  display: grid;
+  place-items: center;
+  color: var(--signal);
+  font-size: 1.5rem;
+}
+
+.boundary-note {
+  margin: 1.5rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 700px) {
+  .boundary-band {
+    padding: 3.5rem 0;
+  }
+
+  .boundary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .boundary-divider {
+    justify-content: start;
+    padding: 0.2rem 0;
+    transform: rotate(90deg);
+    width: 1.5rem;
+  }
+
+  .boundary-column.accountable {
+    margin-top: 0.4rem;
   }
 }
 
