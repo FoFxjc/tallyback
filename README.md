@@ -1,299 +1,249 @@
+<div align="center">
+
 # Tallyback
 
-> **Delegate work. Know what came back.**
+**Delegate work. Know what came back.**
 
-Tallyback is local, Git-native accountability infrastructure for delegated agent work.
-It keeps a durable account of what was assigned, what an executor claims happened, what
-the repository can prove, and whether the result is ready to land — as a plain
-`.tallyback/` directory on your own machine, no server or cloud account required.
+Local, Git-native accountability for delegated agent work.
 
-## Why Tallyback exists
+[Quick Start](docs/quick-start-walkthrough.md) · [Contract](contract/SPEC.md) · [Docs](docs/) · [Changelog](CHANGELOG.md)
 
-A common agent-assisted development workflow looks like this:
+[![CI](https://github.com/FoFxjc/tallyback/actions/workflows/ci.yml/badge.svg)](https://github.com/FoFxjc/tallyback/actions/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+![Contract](https://img.shields.io/badge/contract-v1%20frozen-6f42c1)
+![Status](https://img.shields.io/badge/status-0.1.x%20pre--release-orange)
+
+</div>
+
+---
+
+Agent systems are good at sending work out. Tallyback gives delegated work a durable return path.
+
+An agent saying **"done"** is a claim, not a fact. Tallyback keeps the important boundaries separate:
 
 ```text
-goal discussed in conversation
+what you asked for
         ↓
-task delegated to an agent/subagent/human
+   Declaration
+
+who tried it
         ↓
-worker edits a branch or worktree
+     Attempt
+
+what came back
         ↓
-worker claims completion ("done")
+      Claim
+
+what supports it
         ↓
-PM later has to reconstruct what actually happened
+    Evidence
+
+what an independent check concludes
+        ↓
+    Verdict
+
+what you decide next
+        ↓
+   Settlement
 ```
 
-The expensive part is not dispatching the work — it's reconstructing its state.
-Progress ends up scattered across chat threads, checkpoint files, working trees,
-commits, test output, and agent-written summaries. Rebuilding a project report or
-planning the final merge means rereading all of it, and one ambiguity remains no
-matter how carefully you reread:
+The stable identity is the **Task**. Agents, sessions, models, branches, and worktrees are replaceable execution underneath it.
 
-**An agent saying "done" is a claim, not a fact.**
+## Highlights
 
-Activity is not completion, and a claim is not evidence. Tallyback externalizes the
-small amount of structured state needed to tell the two apart:
+- **Durable delegated-work state** — keep the accountability trail in a local, Git-friendly `.tallyback/` ledger.
+- **Explicit acceptance criteria** — declare what would count as done before execution starts.
+- **Attempt ownership** — associate each run with an executor, repository, workspace, and branch.
+- **Claim ≠ Evidence ≠ Verdict** — record what was said, what can be inspected, and what an independent check concluded as separate objects.
+- **Explicit settlements** — `accept`, `retry`, `abandon`, or `land`; nothing silently completes itself.
+- **Cold-session recovery** — reconstruct task state without replaying the original conversation.
+- **Git-aware Land** — report live integration readiness, overlap, and already-integrated work without mutating Git.
+- **Machine-readable validation** — validate ledger consistency in CI or automation.
+- **Host-neutral core** — use the CLI directly or integrate through a host bridge; one Claude Code bridge is included.
 
-- What was promised?
-- Who or what attempted it, and where?
-- What does the executor claim?
-- What evidence supports that claim?
-- What did an independent check conclude?
-- What is blocked, stale, ready to retry, or ready to land?
+## Quick start
 
-## The core loop
+Tallyback currently ships as a source pre-release. It requires **Node.js 20+** and **Git**.
+
+```bash
+git clone https://github.com/FoFxjc/tallyback.git
+cd tallyback
+npm ci
+npm run build
+npm link
+
+tallyback --help
+tallyback handshake
+```
+
+Create a demo ledger:
+
+```bash
+PROJ=/tmp/tallyback-demo
+mkdir -p "$PROJ"
+cd "$PROJ"
+
+tallyback init \
+  --topic "Demo" \
+  --goal "try the accountability loop" \
+  --repository demo
+```
+
+Then walk a Task through:
 
 ```text
 Declare → Dispatch → Observe → Verify → Settle
 ```
 
-| Stage        | Question                                                       |
-| ------------ | -------------------------------------------------------------- |
-| **Declare**  | What is the task, and what would count as done?                |
-| **Dispatch** | Which attempt, executor, session, worktree, and branch own it? |
-| **Observe**  | What progress, claims, blockers, and evidence came back?       |
-| **Verify**   | Do repository reality, tests, and Git support those claims?    |
-| **Settle**   | Should the result be accepted, retried, abandoned, or landed?  |
+The complete copy-pasteable flow — including Workspace binding, Claims, Evidence, Verdicts, Settlements, View, Watch, and Land — is in the **[Quick Start walkthrough](docs/quick-start-walkthrough.md)**.
 
-This defines record boundaries, not a mandatory linear state machine — a Task can have
-multiple Attempts, and a Blocker or a Claim can arrive at any point. A task never
-becomes complete merely because an executor stops, edits files, commits, or reports
-success; completion is an explicit judgment recorded after the fact.
+## The accountability loop
 
-## What Tallyback records
+| Stage | What it records |
+| --- | --- |
+| **Declare** | the Task objective and acceptance criteria |
+| **Dispatch** | the Attempt, executor, repository, workspace, and branch |
+| **Observe** | Claims, Evidence, blockers, and attempt outcomes |
+| **Verify** | per-criterion Verdicts with confidence and rationale |
+| **Settle** | the explicit decision: `accept`, `retry`, `abandon`, or `land` |
+
+This is not a mandatory linear state machine. A Task can have several Attempts, and records can arrive over time. The loop defines **accountability boundaries**, not an orchestrator.
+
+## Task survives the executor
 
 ```text
-Topic
-└── Task                          the stable unit of responsibility
-    ├── Declaration + Criteria    what would count as done
-    ├── Attempt                   one execution of the task
-    │   ├── Executor               a replaceable agent, subagent, process, or human
-    │   └── Workspace / Branch     the worktree an attempt owns
-    ├── Claim                     a statement about progress or completion
-    ├── Evidence                  a pointer to tests, commits, artifacts, observations
-    ├── Verdict                   an independent per-criterion assessment
-    └── Settlement                the explicit accept / retry / abandon / land decision
+Task
+ ├─ Attempt 1 → executor A → workspace A
+ │      └─ blocked
+ │
+ ├─ Attempt 2 → executor B → workspace B
+ │      └─ Claim + Evidence
+ │
+ └─ Verdict → Settlement
 ```
 
-The Task is the stable identity. Agents, models, sessions, and worktrees are
-replaceable executors underneath it — a Task can survive several Attempts across
-several of them without losing continuity.
+Sessions can end. Models can change. Worktrees can disappear. The Task remains the durable unit of responsibility.
 
-A **tallyback** (`tallyback view`) is the compact structured return from delegated
-work: current state, claims, evidence pointers, blockers, verification status, next
-action, and integration readiness. It is not a transcript and does not duplicate the
-repository.
+## View and Land answer different questions
 
-## What it can do today
+| | **View** | **Land** |
+| --- | --- | --- |
+| Source | ledger | ledger + live Git |
+| Question | What was declared, attempted, claimed, verified, and settled? | What is currently actionable for integration? |
+| Live Git | no | yes |
+| Mutates Git | never | never |
 
-Every item below is exercised by the in-tree test suite (440+ tests) against the
-frozen v1 contract, not aspirational:
+A `land` Settlement is authorization to integrate; it is **not** proof that integration happened.
 
-- **Durable delegated-work state** — a Git-friendly `.tallyback/` ledger (JSON +
-  append log) that survives a cold session with no conversation replay.
-- **Explicit acceptance criteria** — a `TaskDeclaration` states the objective and a set
-  of named criteria before work starts.
-- **Attempt / executor / workspace ownership** — each `Attempt` records who ran it,
-  under which Declaration, and which repository/workspace/branch it owns.
-- **Claims separated from evidence** — a `Claim` is a statement; `Evidence` is what
-  backs it. Neither is treated as a fact on its own.
-- **Per-criterion verification** — `tallyback verdict` records an independent
-  `supported` / `partially_supported` / `unsupported` / `contradicted` judgment against
-  each declared criterion, with confidence, rationale, uncertainty, and limitations.
-- **Explicit settlements** — `accept`, `retry`, `abandon`, or `land`, each an
-  attributed, immutable decision. Nothing settles itself.
-- **Cold-session recovery** — a new session/agent can resume a Task from `tallyback
-view` without replaying the original conversation.
-- **Git-aware integration readiness** (`tallyback land`) — cross-checks the ledger's
-  `ready_to_land` projection against live Git state: does the branch exist, is it ahead
-  of the target, has it already been merged?
-- **Conflict / overlap awareness** — `land` flags candidates whose ready branches touch
-  an overlapping file set as a potential integration conflict, by heuristic file-path
-  comparison (not merge simulation).
-- **Stale/lost-work observation** (`tallyback watch`) — flags open Attempts whose
-  workspace has disappeared, or whose Claim shows no branch advance since dispatch.
-- **Machine-readable validation** (`tallyback validate`) — a CI gate that reports
-  ledger problems and forked-lineage conflicts, and exits non-zero until resolved.
-- **Host bridges** — a host-neutral adapter description (`src/bridge/`) plus one
-  concrete Claude Code plugin (`bridge/claude-code/`) that walks a model through the
-  loop via the same CLI.
+```text
+Verdict
+   ≠
+acceptance
+   ≠
+landing authorization
+   ≠
+actual Git integration
+```
+
+`tallyback land` reports live Git reality such as:
+
+- `git_ready` — currently actionable for integration.
+- `git_behind` — branch resolves, but there is nothing ahead of the current target to land yet.
+- `git_unresolved` — Git reality could not be resolved from the available workspace, binding, or ref.
+- `git_integrated` — Git already proves the candidate is in the target history.
+
+Land is read-only. It never merges, rebases, pushes, fetches, or writes to the ledger.
 
 ## Trust model
 
 ```text
 repository / tests
-        ↓
+        >
      Git facts
-        ↓
+        >
  Tallyback records
-        ↓
+        >
    model memory
 ```
 
-Tallyback records declarations and judgments; it does not become the source of truth
-simply by storing them. Concretely:
+Tallyback preserves declarations, claims, evidence, judgments, and decisions. It does not become truth merely because something was written into the ledger.
 
-- Agent-provided content is treated as untrusted data, never as fact.
-- Completion is never inferred solely from activity (a commit, an edited file, elapsed
-  time).
-- Claims stay separate from Evidence and from Verdicts.
-- Consequential claims are reconciled against repository/Git reality before they carry
-  weight.
-- Uncertainty is preserved rather than smoothed into false confidence.
+## What Tallyback does not do
 
-## `land` versus `view`
+Tallyback deliberately does **not**:
 
-Both are read-only, but they answer different questions:
+- run or choose your agents;
+- orchestrate or schedule execution;
+- merge, rebase, or push branches;
+- replace tests, CI, or code review;
+- store conversation transcripts as the source of truth;
+- turn model claims into facts;
+- require a cloud service or database server.
 
-|                   | **View**                                            | **Land**                                                 |
-| ----------------- | --------------------------------------------------- | -------------------------------------------------------- |
-| Reality checked   | Ledger only                                         | Ledger **and** live Git                                  |
-| Question          | What has been declared, claimed, verified, settled? | What is currently actionable for integration, right now? |
-| Live Git required | No                                                  | Yes                                                      |
-| Writes anything   | Never                                               | Never — advisory only, never merges/rebases/pushes       |
+It sits beside your execution system and records the accountability trail coming back from it.
 
-And within Settlement, `accept` and `land` are two different decisions, not synonyms:
+## CLI surface
 
-- `accept` records that a result was judged acceptable. It does **not** authorize
-  integration.
-- `land` records explicit authorization to integrate. Only an **effective**
-  (non-superseded) `land` Settlement enters the `ready_to_land` projection that
-  `tallyback land` reads.
-
-`Verdict != acceptance != landing authorization != actual Git integration.` Even after
-a `land` Settlement, `tallyback land` only reports readiness — a human or PM agent still
-performs the actual Git integration outside Tallyback.
-
-## Quick Start
-
-Requires Node.js `>= 20` and `git` on `$PATH`.
+Start with:
 
 ```bash
-git clone https://github.com/FoFxjc/tallyback.git
-cd tallyback
-npm ci && npm run build && npm link   # exposes the `tallyback` command
-
-tallyback --help        # command list, no ledger required
-tallyback handshake     # capability handshake, always safe
-
-PROJ=/tmp/tallyback-demo && mkdir -p "$PROJ" && cd "$PROJ"
-tallyback init --topic "Demo" --goal "try the loop" --repository demo
-# capture topics[0].topic_id and repositories[0].repository_id from the output
+tallyback --help
 ```
 
-From there, `declare` → `dispatch` → `evidence`/`claim` → `verdict` → `settle` walks
-one Task through the full loop; `tallyback view` and `tallyback validate` are read-only
-reports over it. The complete, copy-pasteable walkthrough — including binding a
-Workspace for `land`/`watch` — lives in
-[docs/quick-start-walkthrough.md](docs/quick-start-walkthrough.md).
-
-Every command prints machine-readable JSON to stdout and a one-line human summary to
-stderr, so the same commands work in a terminal and in a pipeline. For the full flag
-surface, see [`src/cli.ts`](src/cli.ts); for the underlying API, see
-[`src/index.ts`](src/index.ts).
-
-## A real workflow
+The main read/report commands are:
 
 ```text
-Task A ── dispatched to worktree A (branch feature/a)
-Task B ── dispatched to worktree B (branch feature/b)
-             ↓
-   both return Claims + Evidence
-             ↓
-        PM verifies each (tallyback verdict)
-             ↓
-        land authorization (settle --decision land)
-             ↓
-        tallyback land: both git_ready, but flags an
-        overlapping-file conflict between A and B
-             ↓
-   a human/agent resolves the order and performs the
-   ordinary Git merge — outside Tallyback
+view       ledger-derived task/project state
+watch      execution drift / loss observations
+land       live Git integration-readiness report
+validate   ledger and lineage validation
 ```
 
-Tallyback never orchestrates the workers or performs the merge; it makes the
-integration-readiness picture visible before Git integration happens.
+The mutation side records the loop:
+
+```text
+task · declare · dispatch · claim · evidence · verdict · settle
+```
+
+For the exact current flag surface, use `tallyback --help` and the source-pre-release walkthrough.
 
 ## Components
 
-| Component  | Responsibility                                                                                                                     | Status                                                |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| **Store**  | Sole ledger writer: append, supersession, projections, snapshot persistence, cross-process locking, forked-lineage reconciliation  | v1 implemented (`src/ledger/`)                        |
-| **Check**  | Claim → Verdict verification boundary: `begin-check`/`record-check`, the ergonomic `verdict` command                               | v1 implemented (`src/check/`)                         |
-| **Watch**  | On-demand detection of `lost` and `claim_without_branch_advance` over open Attempts                                                | v1 implemented (`src/watch/`)                         |
-| **Land**   | Read-only Git integration-readiness, ordering, and file-overlap conflict report over `ready_to_land`                               | v1 implemented (`src/land/`)                          |
-| **View**   | One compact per-task projection: declaration, attempts, claims, evidence pointers, blockers, verification, settlement, next action | v1 implemented (`src/view/`)                          |
-| **Bridge** | Host-neutral adapter description + one Claude Code plugin                                                                          | v1 implemented (`src/bridge/`, `bridge/claude-code/`) |
+| Component | Responsibility |
+| --- | --- |
+| **Store** | durable ledger, locking, supersession, projections, reconciliation |
+| **Check** | Claim → Verdict verification boundary |
+| **Watch** | on-demand execution drift / loss observation |
+| **Land** | read-only Git integration readiness and overlap reporting |
+| **View** | compact ledger projection |
+| **Bridge** | host-neutral adapter boundary |
 
-Store and Check unify the model first explored in two predecessor projects
-([claude-task-store](https://github.com/FoFxjc/claude-task-store),
-[done-or-not](https://github.com/FoFxjc/done-or-not)); the v1 contract and every
-component above are now implemented and tested in this repository, not delegated to
-those repos.
+## Project status
 
-Possible adoption levels — no component requires the whole stack merely to be useful:
+Tallyback is a **0.1.x pre-release**.
 
-```text
-Store                                    → compact execution continuity
-Store + Check                            → continuity plus claim verification
-Store + Check + Watch + Land + View      → full delegated-work accountability,
-                                            dispatch through integration
-```
+- The **v1 wire-format contract is frozen and implemented**.
+- CLI ergonomics and read-only report shapes may still evolve before 1.0.
+- `package.json` is intentionally `private`; there is **no npm release yet**.
+- The current supported install path is a source clone.
+- The project is suitable for real dogfood, but does not claim production-hardening for every environment.
 
-## What Tallyback deliberately does not do
+Known limitations and behavior details live in the component docs rather than being hidden behind the README.
 
-- It does not choose or run your agents — it is not an agent runtime or model router.
-- It does not orchestrate execution or schedule work — no workflow engine, no automatic
-  status progression.
-- It does not merge, rebase, or push Git branches — `land` is read-only and advisory.
-- It does not replace tests, CI, or code review.
-- It does not turn a model's claim into a fact merely by recording it.
-- It does not require a cloud account, database server, or network round-trip — it
-  runs entirely on the local filesystem, with `git` for the live-Git checks.
-- It is not a transcript archive or a generic memory/RAG system.
+## Documentation
 
-## Status / maturity
+- **[Quick Start](docs/quick-start-walkthrough.md)** — end-to-end CLI walkthrough
+- **[Contract specification](contract/SPEC.md)** — normative accountability model
+- **[Contract bundle](docs/contract-bundle.md)** — schemas, invariants, fixtures, manifest
+- **[Land](docs/land-design.md)** — Git-aware integration-readiness behavior
+- **[View](docs/view-design.md)** — ledger projection behavior
+- **[Watch](docs/watch-design.md)** — observation behavior
+- **[Bridge](docs/bridge-design.md)** — host integration boundary
+- **[Branch workflow](docs/branch-workflow.md)** — branch / reconciliation model
+- **[Migration](docs/migration.md)** — migration mapping
+- **[Security](SECURITY.md)**
+- **[Changelog](CHANGELOG.md)**
 
-Tallyback is a **0.1.x public pre-release**:
+## License
 
-- The v1 wire-format contract under [`contract/`](contract/) is **frozen and
-  implemented** — schemas, canonicalization rules, invariant catalog, fixtures, and the
-  reference validator all exist and pass the conformance suite.
-- Everything outside the contract — CLI flag ergonomics, the JSON shape of read-only
-  reports (`view`/`land`/`watch`), internal module layout — is pre-1.0 and may change
-  between 0.1.x releases without a contract version bump.
-- `package.json` is marked `private`; there is no npm-published tarball yet. The
-  supported install path is a source clone (see Quick Start above).
-- Suitable for experimentation and real delegated-work dogfood, including as the
-  persistence layer for an agent host. Not claiming production-hardening for every
-  environment — see [Known limitations](#known-limitations).
-
-### Known limitations
-
-- **Advisory only.** `tallyback land` never merges, rebases, pushes, or writes to the
-  ledger.
-- **No remote fetch.** `land`/`watch` operate on the local Workspace's current state
-  only; there is no `git fetch` anywhere in the loop.
-- **Deleted branch refs can block historical proof.** If every Workspace bound to a
-  candidate's repository has lost the branch ref, `land` reports `git_unresolved`
-  rather than inferring integration.
-- **Sibling fallback is positive-proof only.** `land` may consult a sibling Workspace
-  when the original worktree is gone, but only when that Workspace positively resolves
-  the query — it never copies refs or assumes a shared object database.
-- **View does not filter active vs. historical.** Every Task is surfaceable regardless
-  of Settlement decision; there is no `--archived`/`--active` flag yet.
-- **Local-first bindings.** Workspace roots live in `runtime/bindings.json`, which is
-  gitignored on purpose; multi-machine collaboration re-binds locally after clone.
-
-## Documentation map
-
-- [Normative specification](contract/SPEC.md) — the accountability model, identity,
-  record graph, state model, Store↔Check boundary, and conformance model.
-- [`contract/schemas/`](contract/schemas/), [`contract/invariants.json`](contract/invariants.json),
-  [`contract/fixtures/`](contract/fixtures/) — the machine-checkable contract bundle.
-- [Contract bundle structure](docs/contract-bundle.md)
-- [Land behavior](docs/land-design.md) · [View behavior](docs/view-design.md) ·
-  [Watch behavior](docs/watch-design.md) · [Bridge design](docs/bridge-design.md)
-- [Migration mapping](docs/migration.md) · [Branch workflow](docs/branch-workflow.md)
-- [Full Quick Start walkthrough](docs/quick-start-walkthrough.md)
-- [CHANGELOG.md](CHANGELOG.md) · [SECURITY.md](SECURITY.md)
+Tallyback is licensed under the **[Apache License 2.0](LICENSE)**.
