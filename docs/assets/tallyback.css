@@ -921,11 +921,9 @@ pre,
 
 .chapter-reality {
   background: linear-gradient(
-    to right,
-    var(--paper) 0,
-    var(--paper) 50%,
-    color-mix(in srgb, var(--signal-pale) 52%, var(--paper) 48%) 50%,
-    color-mix(in srgb, var(--signal-pale) 52%, var(--paper) 48%) 100%
+    180deg,
+    var(--paper) 0%,
+    color-mix(in srgb, var(--signal-pale) 18%, var(--paper) 82%) 100%
   );
 }
 
