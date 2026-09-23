@@ -8,15 +8,29 @@
  * the canonical section of `state.json` (only into the discardable `projections` slot).
  */
 
-import type { Projections, Settlement, Snapshot, Verdict } from '../contract/index.js';
+import type {
+  Projections,
+  Settlement,
+  Snapshot,
+  TaskDeclaration,
+  Verdict,
+} from '../contract/index.js';
 import { DEFAULT_PROJECTION_POLICY } from './snapshot.js';
 import { effectiveRecords } from './supersession.js';
 
 export interface ProjectionValues {
   /** task_id -> unresolved blocker_ids (a Blocker with no effective BlockerResolution). */
   blocked: Record<string, string[]>;
-  /** task_id -> applicable verdict_ids (via the verdict's claim subject). */
+  /** task_id -> applicable verdict_ids (via the verdict's claim subject), of ANY conclusion. */
   verified: Record<string, string[]>;
+  /**
+   * task_id -> applicable verdict_ids that individually clear `isPositiveVerification` —
+   * the subset of `verified` that is actually positive verification, not merely "a Verdict
+   * exists." `status.verified` (View) reads this, never the bare presence check on
+   * `verified` above; existence of a Verdict is not positive verification (see
+   * `isPositiveVerification`'s docstring).
+   */
+  verified_positive: Record<string, string[]>;
   /** task_id -> effective (non-superseded) settlement_ids. */
   settled: Record<string, string[]>;
   /** task_ids with at least one Attempt. */
@@ -45,27 +59,90 @@ function claimToTask(snapshot: Snapshot): Map<string, string> {
 }
 
 /**
+ * The ONE shared predicate for "this Verdict is positive verification" — used by both
+ * `isLandSettlementVerificationReady` (Land / `ready_to_land`) and View's `status.verified`
+ * so the two surfaces cannot silently drift into different rules for the same question.
+ *
+ * Fails closed (`false`) for anything that has not been positively established:
+ *
+ * - no Verdict at all;
+ * - `finality !== 'final'` (SPEC §5.10: "Absence must never mean final" — a `preliminary`
+ *   Verdict is explicitly not done judging yet);
+ * - `conclusion !== 'supported'` — `partially_supported`, `unsupported`, and
+ *   `contradicted` are all real, distinct conclusions (SPEC §5.10's table), never
+ *   collapsed into a pass merely because they are not a hard rejection.
+ *   `partially_supported` is deliberately excluded: the frozen contract does not
+ *   anywhere define it as sufficient for readiness, only that it means "material
+ *   portions ... unresolved or unsatisfied."
+ * - `confidence.level === 'low'` — SPEC §5.10 states this explicitly: "`supported` with
+ *   low confidence remains weak and should not silently become settlement-ready." Medium
+ *   and high are accepted as-is; the contract defines no further threshold to invent.
+ * - the Verdict leaves a `required: true` Criterion of its own cited declaration
+ *   unevaluated (`scope.unevaluated_criteria`) — a required criterion that was never
+ *   checked is not "supported," whatever the overall `conclusion` says.
+ *
+ * An explicit `verification_exception` (SPEC §5.11) is a SEPARATE authorization path, not
+ * a second way to satisfy this predicate — see `isLandSettlementVerificationReady`. It
+ * authorizes `accept`/`land`; it never makes this function return `true`, and it never
+ * retroactively makes an underlying Verdict positive.
+ */
+export function isPositiveVerification(
+  verdict: Verdict | undefined,
+  declaration?: TaskDeclaration,
+): boolean {
+  if (!verdict) return false;
+  if (verdict.finality !== 'final') return false;
+  if (verdict.conclusion !== 'supported') return false;
+  if (verdict.confidence.level === 'low') return false;
+  if (declaration) {
+    const requiredCriteriaIds = new Set(
+      declaration.criteria.filter((c) => c.required).map((c) => c.criterion_id),
+    );
+    for (const id of verdict.scope.unevaluated_criteria) {
+      if (requiredCriteriaIds.has(id)) return false;
+    }
+  }
+  return true;
+}
+
+/**
  * Whether a single `land` Settlement's own basis clears the verification bar (SPEC §5.10 /
- * §5.11) — a final Verdict, or an explicit `verification_exception` when there is no
- * Verdict at all. Exported so a host layer classifying individual land candidates (Land,
- * `src/land/report.ts`) applies the identical per-settlement rule this projection uses to
- * decide `ready_to_land` at the task level — a task can have more than one effective
- * `land` Settlement (distinct attempts), and only the ones that individually clear this
- * bar are actually ready, not every settlement of a task that has at least one that is.
+ * §5.11) — positive verification per `isPositiveVerification`, OR an explicit
+ * `verification_exception` when there is no Verdict at all. Exported so a host layer
+ * classifying individual land candidates (Land, `src/land/report.ts`) applies the
+ * identical per-settlement rule this projection uses to decide `ready_to_land` at the task
+ * level — a task can have more than one effective `land` Settlement (distinct attempts),
+ * and only the ones that individually clear this bar are actually ready, not every
+ * settlement of a task that has at least one that is.
+ *
+ * The exception path is a distinct `authorization_override`, never synthesized proof: a
+ * Settlement whose `basis.verdict_id` cites a real but negative/preliminary Verdict does
+ * NOT fall back to the exception path just because one is absent from that citation —
+ * TB-LC-005 already requires `verdict_id` XOR `verification_exception`, so a Settlement
+ * that cited a verdict and got a negative answer is not "ready" merely because Store
+ * accepted the record as a valid decision. Only a Settlement that explicitly invoked the
+ * override field is treated as authorized-without-proof.
  */
 export function isLandSettlementVerificationReady(
   settlement: Settlement,
   verdictById: ReadonlyMap<string, Verdict>,
+  declarationById?: ReadonlyMap<string, TaskDeclaration>,
 ): boolean {
   const verdictId = settlement.basis.verdict_id;
-  return verdictId !== null && verdictId !== undefined
-    ? verdictById.get(verdictId)?.finality === 'final'
-    : settlement.verification_exception !== null && settlement.verification_exception !== undefined;
+  if (verdictId !== null && verdictId !== undefined) {
+    const verdict = verdictById.get(verdictId);
+    const declaration = verdict ? declarationById?.get(verdict.declaration_id) : undefined;
+    return isPositiveVerification(verdict, declaration);
+  }
+  return (
+    settlement.verification_exception !== null && settlement.verification_exception !== undefined
+  );
 }
 
 export function computeProjectionValues(snapshot: Snapshot, stale?: StalePolicy): ProjectionValues {
   const blocked: Record<string, string[]> = {};
   const verified: Record<string, string[]> = {};
+  const verified_positive: Record<string, string[]> = {};
   const settled: Record<string, string[]> = {};
   const dispatched: string[] = [];
   const ready_to_land: string[] = [];
@@ -78,13 +155,24 @@ export function computeProjectionValues(snapshot: Snapshot, stale?: StalePolicy)
     pushInto(blocked, blocker.task_id, blocker.blocker_id);
   }
 
-  // Verified: each Verdict judges a Claim; map the verdict to the claim's task.
+  // Declaration lookup for isPositiveVerification's "unevaluated required criterion"
+  // check: a Verdict cites the exact declaration_id its scope was evaluated against, which
+  // may since have been superseded — look it up by that exact id, not the current head.
+  const declarationById = new Map(snapshot.declarations.map((d) => [d.declaration_id, d]));
+
+  // Verified: each Verdict judges a Claim; map the verdict to the claim's task. `verified`
+  // tracks every applicable Verdict regardless of conclusion (SPEC §7.2's literal text);
+  // `verified_positive` is the strict subset that also clears `isPositiveVerification` —
+  // existence of a Verdict is not the same claim as positive verification.
   const claimTask = claimToTask(snapshot);
   for (const verdict of snapshot.verdicts) {
     if (verdict.subject.kind !== 'claim') continue;
     const taskId = claimTask.get(verdict.subject.id);
     if (!taskId) continue;
     pushInto(verified, taskId, verdict.verdict_id);
+    if (isPositiveVerification(verdict, declarationById.get(verdict.declaration_id))) {
+      pushInto(verified_positive, taskId, verdict.verdict_id);
+    }
   }
 
   // Settled + ready_to_land: effective (non-superseded) settlements.
@@ -107,7 +195,7 @@ export function computeProjectionValues(snapshot: Snapshot, stale?: StalePolicy)
     pushInto(settled, settlement.task_id, settlement.settlement_id);
     if (settlement.decision !== 'land') continue;
     if (
-      isLandSettlementVerificationReady(settlement, verdictById) &&
+      isLandSettlementVerificationReady(settlement, verdictById, declarationById) &&
       !ready_to_land.includes(settlement.task_id)
     ) {
       ready_to_land.push(settlement.task_id);
@@ -119,7 +207,14 @@ export function computeProjectionValues(snapshot: Snapshot, stale?: StalePolicy)
     if (!dispatched.includes(attempt.task_id)) dispatched.push(attempt.task_id);
   }
 
-  const values: ProjectionValues = { blocked, verified, settled, dispatched, ready_to_land };
+  const values: ProjectionValues = {
+    blocked,
+    verified,
+    verified_positive,
+    settled,
+    dispatched,
+    ready_to_land,
+  };
   if (stale) values.stale = staleTaskIds(snapshot, stale);
   return values;
 }

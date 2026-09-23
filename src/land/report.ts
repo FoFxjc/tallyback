@@ -14,7 +14,14 @@
  * `git`; `src/land/git.ts` supplies the real, Git-backed implementation.
  */
 
-import type { Attempt, Settlement, Snapshot, Verdict, Workspace } from '../contract/index.js';
+import type {
+  Attempt,
+  Settlement,
+  Snapshot,
+  TaskDeclaration,
+  Verdict,
+  Workspace,
+} from '../contract/index.js';
 import {
   computeProjectionValues,
   isLandSettlementVerificationReady,
@@ -145,12 +152,13 @@ function findEffectiveLandSettlements(
   snapshot: Snapshot,
   taskId: string,
   verdictById: ReadonlyMap<string, Verdict>,
+  declarationById: ReadonlyMap<string, TaskDeclaration>,
 ): Settlement[] {
   return effectiveRecords(snapshot.settlements).filter(
     (s) =>
       s.task_id === taskId &&
       s.decision === 'land' &&
-      isLandSettlementVerificationReady(s, verdictById),
+      isLandSettlementVerificationReady(s, verdictById, declarationById),
   );
 }
 
@@ -360,9 +368,10 @@ export async function buildLandReport(
   const { ready_to_land } = computeProjectionValues(snapshot);
   const taskIds = [...ready_to_land].sort();
   const verdictById = new Map(snapshot.verdicts.map((v) => [v.verdict_id, v]));
+  const declarationById = new Map(snapshot.declarations.map((d) => [d.declaration_id, d]));
 
   const settlements = taskIds.flatMap((taskId) =>
-    findEffectiveLandSettlements(snapshot, taskId, verdictById),
+    findEffectiveLandSettlements(snapshot, taskId, verdictById, declarationById),
   );
   const candidates = await Promise.all(
     settlements.map((settlement) => classify(snapshot, settlement, targetBranch, resolve)),

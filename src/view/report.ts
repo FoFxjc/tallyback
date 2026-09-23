@@ -252,7 +252,12 @@ function buildTaskView(snapshot: Snapshot, task: Task, projections: ProjectionVa
 
   const status: TaskViewStatus = {
     blocked: (projections.blocked[task.task_id]?.length ?? 0) > 0,
-    verified: (projections.verified[task.task_id]?.length ?? 0) > 0,
+    // `verified` means positive verification (isPositiveVerification), never merely
+    // "a Verdict was recorded" — a preliminary/unsupported/contradicted/low-confidence
+    // Verdict must not read as `verified: true`. `projections.verified` (all applicable
+    // Verdicts regardless of conclusion) still backs `TaskView.verification` above, so a
+    // consumer can always see the full judgment history even when none of it is positive.
+    verified: (projections.verified_positive[task.task_id]?.length ?? 0) > 0,
     settled: (projections.settled[task.task_id]?.length ?? 0) > 0,
     dispatched: projections.dispatched.includes(task.task_id),
     ready_to_land: projections.ready_to_land.includes(task.task_id),

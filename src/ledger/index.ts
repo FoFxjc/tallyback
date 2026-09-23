@@ -48,6 +48,7 @@ export {
   computeProjections,
   computeProjectionValues,
   isLandSettlementVerificationReady,
+  isPositiveVerification,
   isTaskStale,
   lastActivityAt,
   staleTaskIds,

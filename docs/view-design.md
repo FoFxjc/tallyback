@@ -77,7 +77,12 @@ one):
 - Its unresolved Blockers (no effective `BlockerResolution`) — reuse
   `computeProjectionValues(snapshot).blocked`, do not re-derive resolution status.
 - Applicable Verdicts (via `computeProjectionValues(snapshot).verified`, mapping through
-  each Claim's subject) — `conclusion`, `finality`, `confidence`.
+  each Claim's subject) — `conclusion`, `finality`, `confidence`. `status.verified` reads
+  the stricter `computeProjectionValues(snapshot).verified_positive` instead: existence of
+  a Verdict is not positive verification, so a task with only a preliminary, unsupported,
+  contradicted, or low-confidence-supported Verdict reports `verified: false` even though
+  `verification` (above) still lists it. See `isPositiveVerification` in
+  `src/ledger/projections.ts` for the exact rule, which `ready_to_land` also uses.
 - Its effective Settlement, if any (`decision`, `verification_exception`,
   `rationale`) — reuse `effectiveRecords`.
 - `ready_to_land` / `stale` membership — both already computed by

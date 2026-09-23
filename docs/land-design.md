@@ -20,8 +20,9 @@ half, "current Git … facts," is deliberately **not** computed there:
 > never fabricated here."
 
 Land *is* that host layer. It takes the ledger's `ready_to_land` task list (already
-correct per the verdict-finality / verification-exception matrix — Land does not
-re-derive or second-guess it) and cross-checks it against live Git state to answer:
+correct per `isPositiveVerification` / the verification-exception override —
+`src/ledger/projections.ts`; Land does not re-derive or second-guess it) and cross-checks
+it against live Git state to answer:
 
 - of the tasks the ledger says are ready to land, which ones' worktrees are actually
   landable right now (branch exists, has commits ahead of the target, no missing ref)?
