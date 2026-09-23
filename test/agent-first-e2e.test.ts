@@ -25,6 +25,7 @@ import { promisify } from 'node:util';
 
 import { describe, expect, it } from 'vitest';
 
+import { buildReconciliation, reconcileGitObject } from '../src/check/reconcile.js';
 import { tempRoot } from './helpers/ledger.js';
 
 const execFileAsync = promisify(execFile);
@@ -48,7 +49,12 @@ async function git(root: string, ...args: string[]): Promise<void> {
   await execFileAsync('git', ['-C', root, ...args]);
 }
 
-async function initGitRepo(): Promise<{ root: string; newFile: string }> {
+async function gitText(root: string, ...args: string[]): Promise<string> {
+  const { stdout } = await execFileAsync('git', ['-C', root, ...args]);
+  return stdout.trim();
+}
+
+async function initGitRepo(): Promise<{ root: string; newFile: string; featureCommit: string }> {
   const root = await tempRoot('tallyback-agent-first-git-');
   await git(root, 'init', '-q', '-b', 'main');
   await git(root, 'config', 'user.email', 'a@b.c');
@@ -62,9 +68,10 @@ async function initGitRepo(): Promise<{ root: string; newFile: string }> {
   await writeFile(join(root, newFile), 'worker output', 'utf8');
   await git(root, 'add', '.');
   await git(root, 'commit', '-q', '-m', 'feature: worker commit');
+  const featureCommit = await gitText(root, 'rev-parse', 'HEAD');
   await git(root, 'checkout', '-q', 'main');
 
-  return { root, newFile };
+  return { root, newFile, featureCommit };
 }
 
 async function stateOf(projectRoot: string): Promise<{
@@ -74,9 +81,24 @@ async function stateOf(projectRoot: string): Promise<{
     dispatched_by: { kind: string; id: string };
     executor: { kind: string; id: string };
   }[];
-  evidence: { evidence_id: string; submitted_by: { kind: string; id: string } }[];
+  evidence: {
+    evidence_id: string;
+    kind: string;
+    payload: Record<string, unknown>;
+    submitted_by: { kind: string; id: string };
+  }[];
   claims: { claim_id: string; claimed_by: { kind: string; id: string } }[];
-  verdicts: { verdict_id: string; issued_by: { kind: string; id: string } }[];
+  reconciliations: {
+    reconciliation_id: string;
+    evidence_id: string;
+    checked_by: { kind: string; id: string };
+    checks: { predicate: string; outcome: string; observed?: Record<string, unknown> }[];
+  }[];
+  verdicts: {
+    verdict_id: string;
+    issued_by: { kind: string; id: string };
+    basis: { evidence_ids: string[]; reconciliation_ids: string[] };
+  }[];
   settlements: { settlement_id: string; decided_by: { kind: string; id: string } }[];
 }> {
   const raw = await readFile(join(projectRoot, '.tallyback', 'state.json'), 'utf8');
@@ -101,7 +123,7 @@ describe('agent-first acceptance — coordinator dispatches worker, no human act
     const repositoryId = init.repositories[0]!.repository_id;
     const topicId = init.topics[0]!.topic_id;
 
-    const { root: gitRoot, newFile } = await initGitRepo();
+    const { root: gitRoot, newFile, featureCommit } = await initGitRepo();
 
     const workspace = (await tb(
       projectRoot,
@@ -145,7 +167,7 @@ describe('agent-first acceptance — coordinator dispatches worker, no human act
       '--objective',
       'Implement the delegated change.',
       '--criterion',
-      'done:The work is present on the feature branch.',
+      'done:The worker-submitted commit is the current feature branch head.',
       '--actor',
       COORDINATOR,
     )) as unknown as { declaration: { declaration_id: string } };
@@ -170,14 +192,20 @@ describe('agent-first acceptance — coordinator dispatches worker, no human act
     )) as unknown as { attempt: { attempt_id: string } };
     const attemptId = dispatched.attempt.attempt_id;
 
-    // Worker: Evidence.
+    // Worker: typed Git evidence — the exact commit produced on the feature branch.
     const evidence = (await tb(
       projectRoot,
       'evidence',
       '--kind',
-      'observation',
+      'git_commit',
       '--payload',
-      '{"text":"worker committed to feature branch"}',
+      JSON.stringify({
+        repository_id: repositoryId,
+        object_id: featureCommit,
+        object_format: 'sha1',
+      }),
+      '--note',
+      'Worker-submitted commit for the delegated change.',
       '--actor',
       WORKER,
     )) as unknown as { evidence: { evidence_id: string } };
@@ -200,7 +228,65 @@ describe('agent-first acceptance — coordinator dispatches worker, no human act
       WORKER,
     )) as unknown as { claim: { claim_id: string } };
 
-    // Checker: Verdict.
+    // Checker: mechanically reconcile the worker's Git evidence against the real repo.
+    const objectCheck = await reconcileGitObject(gitRoot, featureCommit);
+    expect(objectCheck).toMatchObject({
+      predicate: 'git.object.exists',
+      outcome: 'confirmed',
+      observed: { object_id: featureCommit, object_type: 'commit' },
+    });
+    const featureHead = await gitText(gitRoot, 'rev-parse', 'feature');
+    expect(featureHead).toBe(featureCommit);
+    const currentHead = await gitText(gitRoot, 'rev-parse', 'HEAD');
+    const reconciliation = buildReconciliation({
+      evidence_id: evidence.evidence.evidence_id,
+      method: { name: 'git-object-and-ref-inspection', version: '1' },
+      observed_context: {
+        repository_id: repositoryId,
+        workspace_id: workspaceId,
+        head_oid: currentHead,
+        working_tree: 'clean',
+      },
+      checks: [
+        objectCheck,
+        {
+          predicate: 'git.head.matches',
+          outcome: 'confirmed',
+          observed: { ref: 'feature', object_id: featureHead },
+        },
+      ],
+      checked_by: { kind: 'tool', id: 'tallyback-check' },
+    });
+
+    // Record the factual reconciliation first. A separate semantic Verdict then cites it.
+    const begun = (await tb(
+      projectRoot,
+      'begin-check',
+      '--claim-id',
+      claim.claim.claim_id,
+      '--checker-id',
+      'tallyback-check',
+      '--checker-version',
+      '1',
+      '--actor',
+      CHECKER,
+    )) as unknown as { invocation: { check_invocation_id: string } };
+    await tb(
+      projectRoot,
+      'record-check',
+      '--invocation-id',
+      begun.invocation.check_invocation_id,
+      '--outcome',
+      'verdict_withheld',
+      '--diagnostic',
+      'check.reconciliation_only:Git facts reconciled; semantic verdict follows separately',
+      '--reconciliation',
+      JSON.stringify(reconciliation),
+      '--actor',
+      CHECKER,
+    );
+
+    // Checker: semantic Verdict, explicitly grounded in the recorded Git reconciliation.
     const verdict = (await tb(
       projectRoot,
       'verdict',
@@ -209,10 +295,18 @@ describe('agent-first acceptance — coordinator dispatches worker, no human act
       '--criterion',
       // The declared criterion's code is `done`; `verdict` resolves it by code.
       'done=supported',
+      '--evidence',
+      evidence.evidence.evidence_id,
+      '--reconciliation',
+      reconciliation.reconciliation_id,
       '--rationale',
-      'Feature branch carries the committed change.',
+      'The submitted commit exists and is the feature branch head.',
       '--confidence',
       'high',
+      '--checker-id',
+      'tallyback-check',
+      '--checker-version',
+      '1',
       '--actor',
       CHECKER,
     )) as unknown as { bundle: { verdict: { verdict_id: string } } };
@@ -243,15 +337,36 @@ describe('agent-first acceptance — coordinator dispatches worker, no human act
     const attempt = state.attempts.find((a) => a.attempt_id === attemptId)!;
     const ev = state.evidence.find((e) => e.evidence_id === evidence.evidence.evidence_id)!;
     const cl = state.claims.find((c) => c.claim_id === claim.claim.claim_id)!;
+    const rec = state.reconciliations.find(
+      (r) => r.reconciliation_id === reconciliation.reconciliation_id,
+    )!;
     const vd = state.verdicts.find((v) => v.verdict_id === verdictId)!;
     const settlement = state.settlements.find((s) => s.decided_by.id === 'coordinator')!;
 
     expect(declaration.declared_by).toEqual({ kind: 'executor', id: 'coordinator' });
     expect(attempt.dispatched_by).toEqual({ kind: 'executor', id: 'coordinator' });
     expect(attempt.executor).toEqual({ kind: 'subagent', id: 'worker-1' });
+    expect(ev.kind).toBe('git_commit');
+    expect(ev.payload).toMatchObject({
+      repository_id: repositoryId,
+      object_id: featureCommit,
+      object_format: 'sha1',
+    });
     expect(ev.submitted_by).toEqual({ kind: 'subagent', id: 'worker-1' });
     expect(cl.claimed_by).toEqual({ kind: 'subagent', id: 'worker-1' });
+    expect(rec.checked_by).toEqual({ kind: 'tool', id: 'tallyback-check' });
+    expect(rec.evidence_id).toBe(evidence.evidence.evidence_id);
+    expect(rec.checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ predicate: 'git.object.exists', outcome: 'confirmed' }),
+        expect.objectContaining({ predicate: 'git.head.matches', outcome: 'confirmed' }),
+      ]),
+    );
     expect(vd.issued_by).toEqual({ kind: 'tool', id: 'tallyback-check' });
+    expect(vd.basis).toEqual({
+      evidence_ids: [evidence.evidence.evidence_id],
+      reconciliation_ids: [reconciliation.reconciliation_id],
+    });
     expect(settlement.decided_by).toEqual({ kind: 'executor', id: 'coordinator' });
 
     for (const actor of [
@@ -260,6 +375,7 @@ describe('agent-first acceptance — coordinator dispatches worker, no human act
       attempt.executor,
       ev.submitted_by,
       cl.claimed_by,
+      rec.checked_by,
       vd.issued_by,
       settlement.decided_by,
     ]) {
