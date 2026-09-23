@@ -920,8 +920,13 @@ pre,
 /* ---------------------------------------------------------------- chapter 03 */
 
 .chapter-reality {
-  background:
-    linear-gradient(to right, transparent 0, transparent 50%, color-mix(in srgb, var(--paper-raised) 55%, transparent) 50%, color-mix(in srgb, var(--paper-raised) 55%, transparent) 100%);
+  background: linear-gradient(
+    to right,
+    var(--paper) 0,
+    var(--paper) 50%,
+    color-mix(in srgb, var(--signal-pale) 52%, var(--paper) 48%) 50%,
+    color-mix(in srgb, var(--signal-pale) 52%, var(--paper) 48%) 100%
+  );
 }
 
 .reality-split {
