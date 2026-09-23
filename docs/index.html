@@ -4,397 +4,467 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tallyback — Delegate work. Know what came back.</title>
-  <meta name="description" content="Local, Git-native accountability infrastructure for delegated agent work." />
+  <meta
+    name="description"
+    content="A local, Git-native accountability layer for delegated agent work."
+  />
   <link rel="stylesheet" href="assets/tallyback.css" />
 </head>
 <body>
-  <header class="top">
-    <div class="wrap">
-      <a class="mark" href="#top">Tallyback</a>
-      <nav>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="#top">Tallyback</a>
+      <nav aria-label="Primary navigation">
+        <a href="#done">Why</a>
+        <a href="#task">Task</a>
+        <a href="#reality">Reality</a>
+        <a href="#return">Return</a>
         <a href="https://github.com/FoFxjc/tallyback">GitHub</a>
-        <a href="https://github.com/FoFxjc/tallyback/blob/main/contract/SPEC.md">Contract</a>
-        <a href="#try-it">Quick Start</a>
       </nav>
     </div>
   </header>
 
   <main id="top">
-    <!-- 01 HERO -->
-    <section class="hero" style="border-top: none;">
-      <div class="wrap">
-        <div class="grid">
+    <section class="hero">
+      <div class="shell">
+        <div class="hero-copy">
+          <p class="eyebrow">Accountability for delegated agent work</p>
+          <h1>
+            <span>Delegate work.</span>
+            <span>Know what came back.</span>
+          </h1>
+          <p class="hero-lede">
+            Agent systems are getting very good at sending work out.
+            Tallyback gives delegated work a durable, inspectable return path.
+          </p>
+          <div class="hero-actions">
+            <a class="action-primary" href="#return">See the return path</a>
+            <a href="https://github.com/FoFxjc/tallyback">GitHub</a>
+            <a href="https://github.com/FoFxjc/tallyback/blob/main/contract/SPEC.md">Contract</a>
+          </div>
+        </div>
+
+        <div class="journey" aria-label="Delegated work goes out to an agent and accountability comes back through Tallyback">
+          <div class="journey-labels" aria-hidden="true">
+            <span>PRINCIPAL</span>
+            <span>EXECUTOR</span>
+          </div>
+
+          <div class="journey-row outbound">
+            <div class="endpoint">
+              <span class="endpoint-name">You</span>
+              <span class="endpoint-note">“Build the mutation API.”</span>
+            </div>
+            <div class="route">
+              <span class="route-label">delegate</span>
+              <span class="route-line"></span>
+              <span class="route-arrow">→</span>
+            </div>
+            <div class="endpoint right">
+              <span class="endpoint-name">Agent</span>
+              <span class="endpoint-note">worktree · tools · code</span>
+            </div>
+          </div>
+
+          <div class="executor-event">
+            <span class="event-mark">“Done.”</span>
+            <span class="event-note">one statement returns</span>
+          </div>
+
+          <div class="journey-row inbound">
+            <div class="endpoint">
+              <span class="endpoint-name">You</span>
+              <span class="endpoint-note">now know what came back</span>
+            </div>
+            <div class="return-track" aria-label="Claim to settlement return path">
+              <span>CLAIM</span>
+              <i></i>
+              <span>EVIDENCE</span>
+              <i></i>
+              <span>VERDICT</span>
+              <i></i>
+              <span>SETTLEMENT</span>
+            </div>
+            <div class="endpoint right">
+              <span class="endpoint-name">Tallyback</span>
+              <span class="endpoint-note">durable return record</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="hero-thesis">
+          Tallyback is the accountability layer between
+          <strong>“I delegated the work”</strong> and
+          <strong>“I know what came back.”</strong>
+        </p>
+      </div>
+    </section>
+
+    <section id="done" class="chapter chapter-dark">
+      <div class="shell">
+        <div class="chapter-head inverse">
+          <span class="chapter-num">01</span>
           <div>
-            <h1>
-              <span class="line">Delegate work.</span>
-              <span class="line accent">Know what came back.</span>
-            </h1>
-            <p class="sub">
-              Local, Git-native accountability for delegated agent work — a durable
-              record of what was assigned, what an executor claims, what the
-              repository can prove, and whether it's ready to land.
-            </p>
-            <div class="actions">
-              <a class="primary" href="https://github.com/FoFxjc/tallyback">View on GitHub</a>
-              <a href="#try-it">Quick Start</a>
-              <a href="https://github.com/FoFxjc/tallyback/blob/main/contract/SPEC.md">Read the contract</a>
+            <p class="chapter-kicker">“Done” is not a fact</p>
+            <h2>One sentence comes back. Tallyback refuses to collapse everything into it.</h2>
+          </div>
+        </div>
+
+        <div class="done-layout">
+          <div class="done-claim">
+            <span class="speaker">AGENT</span>
+            <blockquote>“I finished the task.”</blockquote>
+            <div class="not-equal">≠</div>
+            <p>completion</p>
+          </div>
+
+          <div class="epistemic-chain" aria-label="Claim, evidence, verdict and settlement are distinct records">
+            <div class="chain-item">
+              <span class="chain-index">01</span>
+              <div>
+                <strong>CLAIM</strong>
+                <p>What the executor says happened.</p>
+                <code>implementation complete</code>
+              </div>
+            </div>
+            <div class="chain-link">↓</div>
+            <div class="chain-item">
+              <span class="chain-index">02</span>
+              <div>
+                <strong>EVIDENCE</strong>
+                <p>Something inspectable that may support the claim.</p>
+                <code>commit b45b504 · pytest 13 passed</code>
+              </div>
+            </div>
+            <div class="chain-link">↓</div>
+            <div class="chain-item emphasized">
+              <span class="chain-index">03</span>
+              <div>
+                <strong>VERDICT</strong>
+                <p>An independent assessment against the declared criteria.</p>
+                <code>supported · 7 / 7 · confidence high</code>
+              </div>
+            </div>
+            <div class="chain-link">↓</div>
+            <div class="chain-item emphasized">
+              <span class="chain-index">04</span>
+              <div>
+                <strong>SETTLEMENT</strong>
+                <p>The explicit decision about what happens next.</p>
+                <code>accept · retry · abandon · land</code>
+              </div>
             </div>
           </div>
-
-          <div class="record" aria-label="Example Tallyback record">
-            <div class="bar"><span>tallyback view --task-id tsk_8f2c</span><span>rev 41</span></div>
-            <dl>
-              <div class="row">
-                <dt>TASK</dt>
-                <dd>add todo mutation path</dd>
-              </div>
-              <div class="row">
-                <dt>DECLARATION</dt>
-                <dd>7 acceptance criteria</dd>
-              </div>
-              <div class="row">
-                <dt>ATTEMPT</dt>
-                <dd>worker-a <span class="dim">on</span> feature/todo-mutation</dd>
-              </div>
-              <div class="row">
-                <dt>CLAIM</dt>
-                <dd>"implementation complete"</dd>
-              </div>
-              <div class="row">
-                <dt>EVIDENCE</dt>
-                <dd>commit <span class="dim">·</span> tests <span class="dim">·</span> observation</dd>
-              </div>
-              <div class="row">
-                <dt>VERDICT</dt>
-                <dd><span class="pill good">SUPPORTED</span> <span class="dim">7 / 7 criteria</span></dd>
-              </div>
-              <div class="row">
-                <dt>SETTLEMENT</dt>
-                <dd><span class="pill good">LAND</span></dd>
-              </div>
-              <div class="row">
-                <dt>GIT REALITY</dt>
-                <dd><span class="pill ready">READY</span> <span class="dim">overlap: app/main.py</span></dd>
-              </div>
-            </dl>
-          </div>
         </div>
-      </div>
-    </section>
 
-    <!-- 02 WHY TALLYBACK -->
-    <section id="why">
-      <div class="wrap">
-        <p class="num">02 — Why Tallyback</p>
-        <h2>An agent finishing is not the same event as a task being done.</h2>
-        <div class="contrast">
-          <div class="side">
-            <p class="label">WHAT THE AGENT SAYS</p>
-            <p class="claim">
-              "I finished the task."
-              <span class="q">↓<br />?</span>
-            </p>
-          </div>
-          <div class="side">
-            <p class="label">WHAT TALLYBACK RECORDS</p>
-            <dl class="qa">
-              <div><dt>What was promised?</dt><dd>Declaration</dd></div>
-              <div><dt>Who attempted it?</dt><dd>Attempt</dd></div>
-              <div><dt>Where did it run?</dt><dd>Workspace</dd></div>
-              <div><dt>What came back?</dt><dd>Claim</dd></div>
-              <div><dt>What supports it?</dt><dd>Evidence</dd></div>
-              <div><dt>Was it verified?</dt><dd>Verdict</dd></div>
-              <div><dt>What happens next?</dt><dd>Settlement</dd></div>
-            </dl>
-          </div>
-        </div>
-        <p class="statement" style="margin-top: 2.75rem;">
-          An agent saying <span class="accent">"done"</span> is a claim, not a fact.
+        <p class="chapter-statement inverse-statement">
+          Activity is not completion.
+          Evidence is not a Verdict.
+          A Verdict is not acceptance.
+          Acceptance is not integration.
         </p>
       </div>
     </section>
 
-    <!-- 03 THE ACCOUNTABILITY LOOP -->
-    <section id="loop-section">
-      <div class="wrap">
-        <p class="num">03 — The accountability loop</p>
-        <h2>Five record boundaries. One durable Task underneath them.</h2>
-        <p class="lede">
-          The loop is not a state machine a Task marches through once — it is where each
-          kind of record is allowed to attach. A Task can carry several Attempts; a
-          Blocker or a Claim can arrive at any point.
+    <section id="task" class="chapter">
+      <div class="shell">
+        <div class="chapter-head">
+          <span class="chapter-num">02</span>
+          <div>
+            <p class="chapter-kicker">The responsibility survives</p>
+            <h2>Sessions end. Models change. Worktrees disappear. The Task remains.</h2>
+          </div>
+        </div>
+
+        <p class="chapter-lede">
+          The stable identity in Tallyback is the Task. Agents, sessions, models and worktrees
+          are replaceable executors underneath it.
         </p>
 
-        <div class="loop">
-          <div class="rail">
-            <div class="stage">
-              <span class="name">DECLARE</span>
-              <span class="field">objective + criteria</span>
-              <div class="sub">what would count as done</div>
-            </div>
-            <div class="stage">
-              <span class="name">DISPATCH</span>
-              <span class="field">attempt</span>
-              <div class="sub">executor<br />workspace / branch</div>
-            </div>
-            <div class="stage">
-              <span class="name">OBSERVE</span>
-              <span class="field">claim + evidence</span>
-              <div class="sub">what came back, and what backs it</div>
-            </div>
-            <div class="stage">
-              <span class="name">VERIFY</span>
-              <span class="field">verdict</span>
-              <div class="sub">per-criterion, independent</div>
-            </div>
-            <div class="stage">
-              <span class="name">SETTLE</span>
-              <span class="field">decision</span>
-              <div class="sub">accept · retry · abandon · land</div>
-            </div>
+        <div class="task-spine" aria-label="One Task survives multiple attempts">
+          <div class="spine-title">
+            <span>TASK</span>
+            <strong>tsk_8f2c</strong>
+            <em>add todo mutation path</em>
           </div>
-          <div class="spine">
-            <strong>Task</strong>
-            <span>tsk_8f2c — durable across every Attempt, executor, and worktree above</span>
+          <div class="spine-line"></div>
+          <div class="attempts">
+            <article class="attempt attempt-one">
+              <span class="attempt-dot"></span>
+              <span class="attempt-label">ATTEMPT 01</span>
+              <strong>Claude</strong>
+              <code>workspace/a</code>
+              <p>blocked</p>
+            </article>
+            <article class="attempt attempt-two">
+              <span class="attempt-dot"></span>
+              <span class="attempt-label">ATTEMPT 02</span>
+              <strong>MiniMax</strong>
+              <code>feature/todo-mutation</code>
+              <p>claim + evidence</p>
+            </article>
+            <article class="attempt attempt-three">
+              <span class="attempt-dot"></span>
+              <span class="attempt-label">ATTEMPT 03</span>
+              <strong>Codex</strong>
+              <code>workspace/final-fix</code>
+              <p>superseding result</p>
+            </article>
           </div>
+        </div>
+
+        <div class="loop-strip" aria-label="Declare, dispatch, observe, verify, settle">
+          <span>DECLARE<small>criteria</small></span>
+          <b>→</b>
+          <span>DISPATCH<small>attempt</small></span>
+          <b>→</b>
+          <span>OBSERVE<small>claim + evidence</small></span>
+          <b>→</b>
+          <span>VERIFY<small>verdict</small></span>
+          <b>→</b>
+          <span>SETTLE<small>decision</small></span>
         </div>
       </div>
     </section>
 
-    <!-- 04 WHAT A TALLYBACK CONTAINS -->
-    <section id="model-section">
-      <div class="wrap">
-        <p class="num">04 — What a tallyback actually contains</p>
-        <h2>Claim, Evidence, and Verdict are three different kinds of statement.</h2>
-        <p class="lede">
-          Conflating them is the failure mode Tallyback exists to prevent. Each record
-          below is a distinct, separately attributed statement — not a synonym for the one
-          above it.
-        </p>
-
-        <div class="model">
-          <div class="chain">
-            <div class="link">
-              <span class="tag dim">SAYS</span>
-              <div class="body">
-                <p><strong>Claim</strong> — the executor's own statement about progress.</p>
-                <span class="ex">"Implemented and verified"</span>
-              </div>
-            </div>
-            <div class="link">
-              <span class="tag dim">SUPPORTS</span>
-              <div class="body">
-                <p><strong>Evidence</strong> — a pointer to something checkable: a commit, a test run, an observation.</p>
-                <span class="ex">commit a3f9c1 · pytest: 23 passed</span>
-              </div>
-            </div>
-            <div class="link">
-              <span class="tag">EVALUATES</span>
-              <div class="body">
-                <p><strong>Verdict</strong> — an independent, per-criterion judgment against the Declaration, with confidence and rationale.</p>
-                <span class="ex">supported · confidence: high</span>
-              </div>
-            </div>
-            <div class="link">
-              <span class="tag">DECIDES</span>
-              <div class="body">
-                <p><strong>Settlement</strong> — the explicit, attributed, immutable decision: accept, retry, abandon, or land.</p>
-                <span class="ex">decision: land · by tool:pm</span>
-              </div>
-            </div>
-          </div>
-
-          <aside class="trust">
-            <p class="cap">Trust ordering</p>
-            <ol>
-              <li>Repository / tests</li>
-              <li>Git facts</li>
-              <li>Tallyback records</li>
-              <li>Model memory</li>
-            </ol>
-            <p class="note">
-              A record in the ledger is a stored judgment, not proof. It only outranks
-              model memory — repository and Git reality outrank it.
-            </p>
-          </aside>
-        </div>
-      </div>
-    </section>
-
-    <!-- 05 PARALLEL WORK + LAND -->
-    <section id="land-section">
-      <div class="wrap">
-        <p class="num">05 — Parallel work and Land</p>
-        <h2>Two Attempts, two branches, one integration-readiness report.</h2>
-        <p class="lede">
-          <code>tallyback land</code> cross-checks the ledger's settled, land-authorized
-          Tasks against live Git state — read-only, and it never performs the merge.
-        </p>
-
-        <div class="gitviz">
-          <svg viewBox="0 0 940 210" role="img" aria-labelledby="gitviz-title gitviz-desc">
-            <title id="gitviz-title">Two Attempts branching from main</title>
-            <desc id="gitviz-desc">
-              Task A on feature/todo-mutation and Task B on feature/read-ui both branch
-              from main and both touch app/main.py, the overlapping file Land flags.
-            </desc>
-            <line x1="20" y1="105" x2="920" y2="105" stroke="var(--rule-strong)" stroke-width="2" />
-            <circle cx="120" cy="105" r="5" fill="var(--ink-soft)" />
-            <circle cx="640" cy="105" r="5" fill="var(--ink-soft)" />
-            <text x="20" y="130" class="mono" font-size="13" fill="var(--stone)">main</text>
-
-            <path d="M120,105 C 260,105 260,45 400,45" fill="none" stroke="var(--signal)" stroke-width="2" />
-            <circle cx="400" cy="45" r="5" fill="var(--signal)" />
-            <circle cx="560" cy="45" r="5" fill="var(--signal)" />
-            <line x1="400" y1="45" x2="560" y2="45" stroke="var(--signal)" stroke-width="2" />
-            <text x="400" y="28" class="mono" font-size="13" fill="var(--signal)">feature/todo-mutation — Task A</text>
-
-            <path d="M120,105 C 260,105 260,165 400,165" fill="none" stroke="var(--signal-soft)" stroke-width="2" />
-            <circle cx="400" cy="165" r="5" fill="var(--signal-soft)" />
-            <circle cx="560" cy="165" r="5" fill="var(--signal-soft)" />
-            <line x1="400" y1="165" x2="560" y2="165" stroke="var(--signal-soft)" stroke-width="2" />
-            <text x="400" y="185" class="mono" font-size="13" fill="var(--signal-soft)">feature/read-ui — Task B</text>
-
-            <line x1="640" y1="45" x2="640" y2="165" stroke="var(--rule-strong)" stroke-width="1" stroke-dasharray="3 4" />
-            <text x="655" y="108" class="mono" font-size="12" fill="var(--ink)">overlap: app/main.py</text>
-          </svg>
-
-          <div class="legend">
-            <span>● target: main</span>
-            <span>— Task A: git_ready</span>
-            <span>— Task B: git_ready</span>
-            <span>┄ overlapping file flagged by Land</span>
+    <section id="reality" class="chapter chapter-reality">
+      <div class="shell">
+        <div class="chapter-head">
+          <span class="chapter-num">03</span>
+          <div>
+            <p class="chapter-kicker">Ledger ≠ reality</p>
+            <h2>A decision can be recorded without pretending Git already agrees.</h2>
           </div>
         </div>
 
-        <p class="land-note">
-          Both Attempts are individually <code>git_ready</code>. Because their ready
-          branches touch the same file, Land reports them as a conflict group instead of
-          silently ordering one ahead of the other.
-        </p>
-
-        <div class="states">
-          <div class="st">
-            <span class="name">git_ready</span>
-            <p>Branch exists, ahead of target, currently actionable.</p>
-          </div>
-          <div class="st">
-            <span class="name">git_behind</span>
-            <p>Actionable, but the target moved since — Git can't yet resolve it.</p>
-          </div>
-          <div class="st">
-            <span class="name">git_integrated</span>
-            <p>Git already proves the branch landed. Historical, not actionable.</p>
-          </div>
-          <div class="st">
-            <span class="name">git_unresolved</span>
-            <p>No branch ref to check — reported, never inferred.</p>
-          </div>
-        </div>
-
-        <p class="land-note">
-          If Task A merges first, its next report becomes <code>git_integrated</code>; Task
-          B — unchanged, now behind a moved target — becomes <code>git_behind</code> until
-          it's rebased or its own merge is checked again. Land observes and reports each
-          state; it does not guarantee this exact sequence for every pair, and it never
-          performs the merge itself.
-        </p>
-
-        <div class="split">
-          <div class="col">
-            <h3>VIEW</h3>
-            <p class="sub">ledger reality</p>
-            <table>
-              <tr><td>Checks</td><td>declared / claimed / verified / settled</td></tr>
-              <tr><td>Live Git</td><td>no</td></tr>
-              <tr><td>Scope</td><td>every Task, regardless of Settlement</td></tr>
-            </table>
-          </div>
-          <div class="col">
-            <h3>LAND</h3>
-            <p class="sub">Git reality</p>
-            <table>
-              <tr><td>Checks</td><td>branch state, target relation, overlap</td></tr>
-              <tr><td>Live Git</td><td>yes</td></tr>
-              <tr><td>Scope</td><td>land-authorized Tasks only, read-only</td></tr>
-            </table>
-          </div>
-        </div>
-
-        <p class="neq">
-          Verdict <strong>≠</strong> acceptance <strong>≠</strong> landing authorization
-          <strong>≠</strong> actual Git integration.
-        </p>
-      </div>
-    </section>
-
-    <!-- 06 TRUST, BOUNDARIES, TRY IT -->
-    <section id="try-it">
-      <div class="wrap">
-        <p class="num">06 — Boundaries, and trying it</p>
-        <h2>What Tallyback deliberately leaves alone.</h2>
-
-        <div class="closing">
-          <div class="bounds">
+        <div class="reality-split">
+          <div class="ledger-pane">
+            <div class="pane-head">
+              <span>LEDGER REALITY</span>
+              <code>tallyback view</code>
+            </div>
+            <div class="ledger-row">
+              <span>Task A</span>
+              <span class="stamp">LAND</span>
+              <small>settled</small>
+            </div>
+            <div class="ledger-row">
+              <span>Task B</span>
+              <span class="stamp">LAND</span>
+              <small>settled</small>
+            </div>
             <p>
-              Every item below is a boundary the product is designed around, not a
-              missing feature.
+              View answers what was declared, attempted, claimed, verified and settled.
+              It does not read live Git.
             </p>
-            <ul>
-              <li>Run your agents, or choose them</li>
-              <li>Orchestrate or schedule execution</li>
-              <li>Merge, rebase, or push Git branches</li>
-              <li>Replace tests, CI, or code review</li>
-              <li>Turn a model's claim into a fact by recording it</li>
-              <li>Require a cloud account or database server</li>
-            </ul>
           </div>
 
-          <div class="try">
-            <div class="terminal">
-<span class="p">$</span> <span class="c">git clone https://github.com/FoFxjc/tallyback.git</span>
-<span class="p">$</span> <span class="c">cd tallyback && npm ci && npm run build && npm link</span>
+          <div class="reality-divider">
+            <span>≠</span>
+          </div>
 
-<span class="p">$</span> <span class="c">tallyback --help</span>
-<span class="o">tallyback — Git-native accountability ledger for delegated agent work</span>
-
-<span class="p">$</span> <span class="c">tallyback handshake</span>
-<span class="o">{ "contract": "tallyback", "supported_contract_versions": ["1.0.0"] }</span>
+          <div class="git-pane">
+            <div class="pane-head">
+              <span>LIVE GIT REALITY</span>
+              <code>tallyback land</code>
             </div>
-            <p class="try-more">
-              <a href="https://github.com/FoFxjc/tallyback/blob/main/docs/quick-start-walkthrough.md">Full Quick Start walkthrough →</a>
-            </p>
+            <div class="git-visual">
+              <svg viewBox="0 0 720 245" role="img" aria-labelledby="git-title git-desc">
+                <title id="git-title">Two land-authorized tasks with overlapping branches</title>
+                <desc id="git-desc">
+                  Task A and Task B both branch from main. Both are git-ready and touch app/main.py.
+                </desc>
+                <line x1="35" y1="122" x2="680" y2="122" class="git-main" />
+                <circle cx="155" cy="122" r="5" class="git-node-main" />
+                <text x="35" y="148" class="git-label">main</text>
 
-            <div class="status-line">
-              <div><strong>Implementation</strong><span>0.1.x pre-release</span></div>
-              <div><strong>Contract</strong><span>v1, frozen</span></div>
-              <div><strong>npm</strong><span>not published — source clone</span></div>
+                <path d="M155 122 C 250 122, 245 52, 350 52" class="git-branch-a" />
+                <line x1="350" y1="52" x2="510" y2="52" class="git-branch-a" />
+                <circle cx="350" cy="52" r="5" class="git-node-a" />
+                <circle cx="510" cy="52" r="5" class="git-node-a" />
+                <text x="350" y="35" class="git-label signal">Task A · feature/mutation</text>
+
+                <path d="M155 122 C 250 122, 245 192, 350 192" class="git-branch-b" />
+                <line x1="350" y1="192" x2="510" y2="192" class="git-branch-b" />
+                <circle cx="350" cy="192" r="5" class="git-node-b" />
+                <circle cx="510" cy="192" r="5" class="git-node-b" />
+                <text x="350" y="220" class="git-label signal-soft">Task B · feature/read-ui</text>
+
+                <line x1="560" y1="52" x2="560" y2="192" class="git-overlap-line" />
+                <text x="575" y="125" class="git-label overlap">overlap · app/main.py</text>
+              </svg>
+            </div>
+            <div class="git-status">
+              <span><b>Task A</b><strong>git_ready</strong></span>
+              <span><b>Task B</b><strong>git_ready</strong></span>
+              <span><b>Conflict group</b><strong>app/main.py</strong></span>
             </div>
           </div>
         </div>
 
-        <div class="index">
-          <p class="cap">Components — supporting architecture, not the story</p>
-          <dl>
-            <div class="entry"><dt>STORE</dt><dd>durable ledger</dd></div>
-            <div class="entry"><dt>CHECK</dt><dd>verification boundary</dd></div>
-            <div class="entry"><dt>WATCH</dt><dd>external drift / loss observation</dd></div>
-            <div class="entry"><dt>LAND</dt><dd>Git integration readiness</dd></div>
-            <div class="entry"><dt>VIEW</dt><dd>ledger projection</dd></div>
-            <div class="entry"><dt>BRIDGE</dt><dd>host adapters</dd></div>
-          </dl>
+        <div class="target-moves">
+          <div class="move-label">merge Task A outside Tallyback</div>
+          <div class="move-arrow">↓</div>
+          <div class="move-result">
+            <span><b>Task A</b><strong>git_integrated</strong></span>
+            <span><b>Task B</b><strong>git_behind</strong></span>
+          </div>
+          <p>
+            Land reports the new Git reality. It does not merge, rebase, push, or silently
+            promote anything.
+          </p>
+        </div>
+
+        <div class="truth-equation">
+          Verdict <b>≠</b> acceptance <b>≠</b> landing authorization <b>≠</b> actual Git integration
+        </div>
+      </div>
+    </section>
+
+    <section id="return" class="chapter chapter-return">
+      <div class="shell">
+        <div class="chapter-head">
+          <span class="chapter-num">04</span>
+          <div>
+            <p class="chapter-kicker">The return packet</p>
+            <h2>When work comes back, the answer is more useful than “done.”</h2>
+          </div>
+        </div>
+
+        <div class="return-layout">
+          <article class="receipt" aria-label="Example Tallyback return receipt">
+            <header class="receipt-head">
+              <div>
+                <span>TALLYBACK / RETURN RECORD</span>
+                <strong>TASK-021</strong>
+              </div>
+              <span class="receipt-rev">rev 41</span>
+            </header>
+
+            <section class="receipt-section">
+              <h3>DECLARATION</h3>
+              <p class="receipt-primary">Build the todo mutation path.</p>
+              <ol class="criteria">
+                <li>create todo</li>
+                <li>edit title</li>
+                <li>toggle completed</li>
+                <li>delete todo</li>
+                <li>persist to SQLite</li>
+                <li>404 invalid ids</li>
+                <li>tests</li>
+              </ol>
+            </section>
+
+            <section class="receipt-section receipt-grid">
+              <div>
+                <h3>EXECUTION</h3>
+                <dl>
+                  <div><dt>attempt</dt><dd>att_4390</dd></div>
+                  <div><dt>executor</dt><dd>worker-a</dd></div>
+                  <div><dt>workspace</dt><dd>tiny-todo-task-a</dd></div>
+                  <div><dt>branch</dt><dd>task-a-mutation</dd></div>
+                </dl>
+              </div>
+              <div>
+                <h3>RETURN</h3>
+                <dl>
+                  <div><dt>claim</dt><dd>implementation complete</dd></div>
+                  <div><dt>evidence</dt><dd>commit b45b504</dd></div>
+                  <div><dt></dt><dd>pytest 13 passed</dd></div>
+                  <div><dt></dt><dd>live observation</dd></div>
+                </dl>
+              </div>
+            </section>
+
+            <section class="receipt-section receipt-grid">
+              <div>
+                <h3>VERIFY</h3>
+                <dl>
+                  <div><dt>verdict</dt><dd><span class="receipt-stamp">SUPPORTED</span></dd></div>
+                  <div><dt>criteria</dt><dd>7 / 7</dd></div>
+                  <div><dt>confidence</dt><dd>high</dd></div>
+                </dl>
+              </div>
+              <div>
+                <h3>DECISION</h3>
+                <dl>
+                  <div><dt>settlement</dt><dd><span class="receipt-stamp">LAND</span></dd></div>
+                  <div><dt>git</dt><dd>reported separately by Land</dd></div>
+                </dl>
+              </div>
+            </section>
+
+            <footer class="receipt-foot">
+              <span>claim ≠ evidence ≠ verdict ≠ decision ≠ Git reality</span>
+            </footer>
+          </article>
+
+          <div class="return-side">
+            <div class="trust-order">
+              <p class="side-label">TRUST ORDER</p>
+              <ol>
+                <li><strong>Repository / tests</strong></li>
+                <li>Git facts</li>
+                <li>Tallyback records</li>
+                <li>Model memory</li>
+              </ol>
+              <p>
+                Tallyback preserves judgments without pretending the ledger outranks reality.
+              </p>
+            </div>
+
+            <div class="boundary-pair">
+              <p class="side-label">TALLYBACK REPORTS</p>
+              <dl>
+                <div><dt>task</dt><dd>your system executes it</dd></div>
+                <div><dt>evidence</dt><dd>your tools produce it</dd></div>
+                <div><dt>verdict</dt><dd>your checker evaluates</dd></div>
+                <div><dt>Git reality</dt><dd>Git proves it</dd></div>
+              </dl>
+            </div>
+
+            <div class="try-block">
+              <p class="side-label">TRY IT</p>
+              <pre><code><span>$</span> git clone https://github.com/FoFxjc/tallyback.git
+<span>$</span> cd tallyback
+<span>$</span> npm ci && npm run build && npm link
+
+<span>$</span> tallyback --help
+<span>$</span> tallyback handshake</code></pre>
+              <p>
+                <a href="https://github.com/FoFxjc/tallyback/blob/main/docs/quick-start-walkthrough.md">
+                  Full Quick Start →
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="closing-line">
+          <span>Delegate work.</span>
+          <strong>Know what came back.</strong>
+        </div>
+
+        <div class="component-index">
+          <span>STORE <small>durable ledger</small></span>
+          <span>CHECK <small>verification boundary</small></span>
+          <span>WATCH <small>execution drift</small></span>
+          <span>LAND <small>Git readiness</small></span>
+          <span>VIEW <small>ledger projection</small></span>
+          <span>BRIDGE <small>host adapters</small></span>
         </div>
       </div>
     </section>
   </main>
 
-  <footer>
-    <div class="wrap">
-      <p>
-        <a href="https://github.com/FoFxjc/tallyback">Repository</a> ·
-        <a href="https://github.com/FoFxjc/tallyback/blob/main/contract/SPEC.md">Contract spec</a> ·
+  <footer class="footer">
+    <div class="shell footer-inner">
+      <span>Tallyback · 0.1.x pre-release · v1 contract frozen</span>
+      <div>
+        <a href="https://github.com/FoFxjc/tallyback">Repository</a>
         <a href="https://github.com/FoFxjc/tallyback/blob/main/README.md">README</a>
-      </p>
+        <a href="https://github.com/FoFxjc/tallyback/blob/main/contract/SPEC.md">Contract</a>
+      </div>
     </div>
   </footer>
 </body>
