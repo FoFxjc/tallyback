@@ -99,13 +99,11 @@ The complete copy-pasteable flow — including Workspace binding, Claims, Eviden
 
 ## The accountability loop
 
-| Stage | What it records |
-| --- | --- |
-| **Declare** | the Task objective and acceptance criteria |
-| **Dispatch** | the Attempt, executor, repository, workspace, and branch |
-| **Observe** | Claims, Evidence, blockers, and attempt outcomes |
-| **Verify** | per-criterion Verdicts with confidence and rationale |
-| **Settle** | the explicit decision: `accept`, `retry`, `abandon`, or `land` |
+- **Declare** — the Task objective and acceptance criteria.
+- **Dispatch** — the Attempt, executor, repository, workspace, and branch.
+- **Observe** — Claims, Evidence, blockers, and attempt outcomes.
+- **Verify** — per-criterion Verdicts with confidence and rationale.
+- **Settle** — the explicit decision: `accept`, `retry`, `abandon`, or `land`.
 
 This is not a mandatory linear state machine. A Task can have several Attempts, and records can arrive over time. The loop defines **accountability boundaries**, not an orchestrator.
 
@@ -126,12 +124,11 @@ Sessions can end. Models can change. Worktrees can disappear. The Task remains t
 
 ## View and Land answer different questions
 
-| | **View** | **Land** |
-| --- | --- | --- |
-| Source | ledger | ledger + live Git |
-| Question | What was declared, attempted, claimed, verified, and settled? | What is currently actionable for integration? |
-| Live Git | no | yes |
-| Mutates Git | never | never |
+**View** reads ledger reality: what was declared, attempted, claimed, verified,
+and settled. It does not read live Git.
+
+**Land** adds live Git reality: what is currently actionable for integration.
+Both are read-only; neither mutates Git.
 
 A `land` Settlement is authorization to integrate; it is **not** proof that integration happened.
 
@@ -209,14 +206,12 @@ For the exact current flag surface, use `tallyback --help` and the source-pre-re
 
 ## Components
 
-| Component | Responsibility |
-| --- | --- |
-| **Store** | durable ledger, locking, supersession, projections, reconciliation |
-| **Check** | Claim → Verdict verification boundary |
-| **Watch** | on-demand execution drift / loss observation |
-| **Land** | read-only Git integration readiness and overlap reporting |
-| **View** | compact ledger projection |
-| **Bridge** | host-neutral adapter boundary |
+- **Store** — durable ledger, locking, supersession, projections, reconciliation.
+- **Check** — Claim → Verdict verification boundary.
+- **Watch** — on-demand execution drift / loss observation.
+- **Land** — read-only Git integration readiness and overlap reporting.
+- **View** — compact ledger projection.
+- **Bridge** — host-neutral adapter boundary.
 
 ## Project status
 
