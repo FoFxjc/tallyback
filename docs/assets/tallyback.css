@@ -266,6 +266,28 @@ pre,
   font-weight: 650;
 }
 
+.hero-meta {
+  margin-top: 1.35rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1rem;
+  color: var(--stone);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+}
+
+.hero-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-meta span:not(:last-child)::after {
+  content: "·";
+  color: var(--rule-strong);
+}
+
 .journey {
   margin-top: 6rem;
   border-top: 1px solid var(--rule-strong);
