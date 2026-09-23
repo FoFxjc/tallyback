@@ -69,14 +69,14 @@ The stable identity is the **Task**. Agents, sessions, models, branches, and wor
 
 Tallyback does not replace subagents, agent teams, or orchestration. Those systems answer **who is doing what**. Tallyback answers **what you actually know when the work comes back**.
 
-| Coordination layer | Tallyback accountability layer |
-| --- | --- |
-| delegate work | record the Claim |
-| parallelize execution | bind inspectable Evidence |
-| share progress | reconcile Evidence against repository / Git facts |
-| return results | issue a Verdict against declared criteria |
-| manage worker activity | record an explicit Settlement: `accept`, `retry`, `abandon`, or `land` |
-| keep the workflow moving | reconstruct ledger state and current Git integration reality |
+| Coordination layer        | Tallyback accountability layer                                           |
+| ------------------------- | ------------------------------------------------------------------------ |
+| delegate work             | record the Claim                                                         |
+| parallelize execution     | bind inspectable Evidence                                                 |
+| share progress            | reconcile Evidence against repository / Git facts                        |
+| return results            | issue a Verdict against declared criteria                                |
+| manage worker activity    | record an explicit Settlement: `accept`, `retry`, `abandon`, or `land` |
+| keep the workflow moving  | reconstruct ledger state and current Git integration reality             |
 
 If delegation and coordination are enough for your workflow, you may not need Tallyback. It becomes useful when **"the worker said it was done"** is no longer sufficient as the durable return record.
 
