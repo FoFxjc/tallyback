@@ -406,18 +406,20 @@ pre,
 
 .hero-visual {
   margin: 4.5rem 0 0;
-  padding: 0.45rem;
-  border: 1px solid var(--rule);
-  border-radius: 0.9rem;
-  background: #ffffff;
-  box-shadow: 0 24px 70px rgba(48, 71, 135, 0.1);
 }
 
 .hero-visual img {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 0.55rem;
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent, black 2%, black 94%, transparent),
+    linear-gradient(to right, transparent, black 3%, black 97%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent, black 2%, black 94%, transparent),
+    linear-gradient(to right, transparent, black 3%, black 97%, transparent);
+  mask-composite: intersect;
 }
 
 .hero-thesis {
@@ -453,8 +455,6 @@ pre,
 
   .hero-visual {
     margin-top: 3rem;
-    padding: 0.3rem;
-    border-radius: 0.65rem;
   }
 
   .journey {
