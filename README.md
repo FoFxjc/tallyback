@@ -1,6 +1,6 @@
 <div align="center">
 
-# Tallyback
+<img src="docs/assets/tallyback-logo.webp" alt="Tallyback" width="360" />
 
 **Delegate work. Know what came back.**
 
@@ -11,9 +11,11 @@ Local, Git-native accountability for delegated agent work.
 [![CI](https://github.com/FoFxjc/tallyback/actions/workflows/ci.yml/badge.svg)](https://github.com/FoFxjc/tallyback/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 ![Contract](https://img.shields.io/badge/contract-v1%20frozen-6f42c1)
-![Status](https://img.shields.io/badge/status-0.1.0%20pre--release-orange)
+![Version](https://img.shields.io/badge/version-0.1.0-2f6feb)
 
 </div>
+
+![Tallyback — accountability after delegation](docs/assets/tallyback-hero.jpg)
 
 ---
 
@@ -83,7 +85,7 @@ If delegation and coordination are enough for your workflow, you may not need Ta
 
 ## Quick start
 
-Tallyback currently ships as a source pre-release. It requires **Node.js 20+** and **Git**.
+Tallyback currently ships from source. It requires **Node.js 20+** and **Git**.
 
 ```bash
 git clone https://github.com/FoFxjc/tallyback.git
@@ -222,7 +224,7 @@ The mutation side records the loop:
 task · declare · dispatch · claim · evidence · verdict · settle
 ```
 
-For the exact current flag surface, use `tallyback --help` and the source-pre-release walkthrough.
+For the exact current flag surface, use `tallyback --help` and the **Quick Start walkthrough**.
 
 ## Components
 
@@ -235,7 +237,7 @@ For the exact current flag surface, use `tallyback --help` and the source-pre-re
 
 ## Project status
 
-Tallyback is currently **0.1.0 pre-release**.
+Tallyback is currently **0.1.0**.
 
 - The **v1 wire-format contract is frozen and implemented**.
 - The current implementation supports the **Primary Agent → Worker/Subagent** lifecycle end to end, including typed Git Evidence, factual Reconciliation, Verdict, Settlement, and Land.
@@ -252,7 +254,7 @@ Tallyback's core accountability model is intentionally small. The roadmap focuse
 ### Now
 
 - Keep the **Primary Agent → Worker/Subagent** usage path explicit across the CLI, Bridge, and documentation.
-- Improve installation, documentation, and release readiness for public use.
+- Improve installation, documentation, and distribution readiness.
 - Keep View, Watch, and Land small, read-only, and consistent with the frozen v1 contract.
 
 ### Next

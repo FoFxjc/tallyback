@@ -8,12 +8,22 @@
     name="description"
     content="A local, Git-native accountability layer for delegated agent work: claims, evidence, reconciliation, verdicts, settlements, and live Git reality."
   />
+  <meta property="og:title" content="Tallyback — Accountability after delegation" />
+  <meta
+    property="og:description"
+    content="Subagents solve delegation. Agent teams solve coordination. Tallyback starts where coordination stops."
+  />
+  <meta property="og:image" content="assets/tallyback-hero.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="assets/tallyback-hero.jpg" />
   <link rel="stylesheet" href="assets/tallyback.css" />
 </head>
 <body>
   <header class="topbar">
     <div class="shell topbar-inner">
-      <a class="brand" href="#top">Tallyback</a>
+      <a class="brand" href="#top" aria-label="Tallyback home">
+        <img src="assets/tallyback-logo.webp" alt="Tallyback" />
+      </a>
       <nav aria-label="Primary navigation">
         <a href="#boundary">Why</a>
         <a href="#task">Task</a>
@@ -46,60 +56,17 @@
             <span>local-first</span>
             <span>Git-native</span>
             <span>Apache-2.0</span>
-            <span>0.1.0 pre-release</span>
+            <span>0.1.0</span>
             <span>no daemon</span>
           </div>
         </div>
 
-        <div class="journey" aria-label="A coordinating agent delegates to a worker or subagent and accountability returns through Tallyback">
-          <div class="journey-labels" aria-hidden="true">
-            <span>COORDINATOR</span>
-            <span>WORKER</span>
-          </div>
-
-          <div class="journey-row outbound">
-            <div class="endpoint">
-              <span class="endpoint-name">Primary Agent</span>
-              <span class="endpoint-note">declare · dispatch · oversee</span>
-            </div>
-            <div class="route">
-              <span class="route-label">delegate</span>
-              <span class="route-line"></span>
-              <span class="route-arrow">→</span>
-            </div>
-            <div class="endpoint right">
-              <span class="endpoint-name">Worker / Subagent</span>
-              <span class="endpoint-note">worktree · tools · code</span>
-            </div>
-          </div>
-
-          <div class="executor-event">
-            <span class="event-mark">“Done.”</span>
-            <span class="event-note">the worker returns a Claim</span>
-          </div>
-
-          <div class="journey-row inbound">
-            <div class="endpoint">
-              <span class="endpoint-name">Primary Agent</span>
-              <span class="endpoint-note">reviews Verdict · records Settlement</span>
-            </div>
-            <div class="return-track" aria-label="Claim through settlement accountability path">
-              <span>CLAIM</span>
-              <i></i>
-              <span>EVIDENCE</span>
-              <i></i>
-              <span>RECONCILIATION</span>
-              <i></i>
-              <span>VERDICT</span>
-              <i></i>
-              <span>SETTLEMENT</span>
-            </div>
-            <div class="endpoint right">
-              <span class="endpoint-name">Tallyback</span>
-              <span class="endpoint-note">durable accountability records</span>
-            </div>
-          </div>
-        </div>
+        <figure class="hero-visual">
+          <img
+            src="assets/tallyback-hero.jpg"
+            alt="Tallyback accountability flow from Primary Agent through Worker, Claim, Evidence, Reconciliation, Verdict, Settlement, and Git reality"
+          />
+        </figure>
 
         <p class="hero-thesis">
           Coordination tells the primary agent <strong>who is doing what.</strong>
@@ -517,7 +484,7 @@
 
   <footer class="footer">
     <div class="shell footer-inner">
-      <span>Tallyback · 0.1.0 pre-release · v1 contract frozen</span>
+      <span>Tallyback · 0.1.0 · v1 contract frozen</span>
       <div>
         <a href="https://github.com/FoFxjc/tallyback">Repository</a>
         <a href="https://github.com/FoFxjc/tallyback/blob/main/README.md">README</a>
