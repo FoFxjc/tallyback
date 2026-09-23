@@ -69,6 +69,7 @@ The stable identity is the **Task**. Agents, sessions, models, branches, and wor
 
 Tallyback does not replace subagents, agent teams, or orchestration. Those systems answer **who is doing what**. Tallyback answers **what you actually know when the work comes back**.
 
+<!-- prettier-ignore -->
 | Coordination layer        | Tallyback accountability layer                                           |
 | ------------------------- | ------------------------------------------------------------------------ |
 | delegate work             | record the Claim                                                         |
