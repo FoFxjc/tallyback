@@ -1113,8 +1113,8 @@ pre,
 }
 
 .target-moves {
-  width: calc((100% - 4rem) / 2);
-  margin: 3.5rem 0 0 auto;
+  width: min(100%, 42rem);
+  margin: 3.5rem auto 0;
   text-align: center;
 }
 
@@ -1173,7 +1173,7 @@ pre,
 
   .target-moves {
     width: 100%;
-    margin-left: 0;
+    margin: 2.5rem 0 0;
   }
 }
 
