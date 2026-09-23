@@ -237,14 +237,13 @@ describe('agent-first acceptance — coordinator dispatches worker, no human act
     });
     const featureHead = await gitText(gitRoot, 'rev-parse', 'feature');
     expect(featureHead).toBe(featureCommit);
-    const currentHead = await gitText(gitRoot, 'rev-parse', 'HEAD');
     const reconciliation = buildReconciliation({
       evidence_id: evidence.evidence.evidence_id,
       method: { name: 'git-object-and-ref-inspection', version: '1' },
       observed_context: {
         repository_id: repositoryId,
         workspace_id: workspaceId,
-        head_oid: currentHead,
+        head_oid: featureHead,
         working_tree: 'clean',
       },
       checks: [
