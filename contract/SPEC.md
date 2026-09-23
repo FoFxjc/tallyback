@@ -76,6 +76,14 @@ A **tallyback** is the compact structured return from delegated work: current st
 claims, evidence references, blockers, next action, verification status, and
 integration readiness. It is not a transcript and does not duplicate the repository.
 
+Actor provenance does not imply required human involvement. Every provenance field
+(`declared_by`, `dispatched_by`, `claimed_by`, `submitted_by`, `invoked_by`, `issued_by`,
+`decided_by`, …) takes the same generic Actor (`kind` one of `human`, `subagent`,
+`executor`, `tool`, plus the legacy `unknown`/`migrated` variants — see
+`contract/schemas/*.json`). A coordinating agent may declare, dispatch, verify, and
+settle work it delegates to another executor; nothing in this contract requires a
+`human` actor anywhere in the loop.
+
 ### 2.3 Trust model
 
 ```text
@@ -304,8 +312,11 @@ prove execution actually started; it records that work was assigned and where:
 { "attempt_id": "att_…", "task_id": "tsk_…", "declaration_id": "dcl_…",
   "repository_id": "repo_…", "workspace_id": "wsp_…",
   "executor": { "kind": "subagent", "id": "…" }, "session_id": "…",
-  "dispatched_by": { "kind": "human", "id": "…" }, "dispatched_at": "…" }
+  "dispatched_by": { "kind": "executor", "id": "…" }, "dispatched_at": "…" }
 ```
+
+`dispatched_by` names whichever actor authorized the dispatch — a coordinating agent
+(`kind: "executor"`) as readily as a human; see §2.2.
 
 An **AttemptEnd** is a separate record (`ate_`) that terminates the Attempt:
 

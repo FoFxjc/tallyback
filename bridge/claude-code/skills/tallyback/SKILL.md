@@ -66,7 +66,7 @@ the real gate.
 
 These never mutate the ledger. Reach for them like this:
 
-- **`tallyback land`** — cross-checks the ledger's `ready_to_land` projection against live Git state. Use before proposing a Settle with `--decision land`, to confirm the branch is actually mergeable and see any file-level conflicts with other ready tasks.
+- **`tallyback land`** — cross-checks the ledger's `ready_to_land` projection against live Git state. A task only enters `ready_to_land` once an explicit `tallyback settle --decision land` has been recorded for it, so run `land` _after_ that Settle, not before — it reports on already-authorized work, confirming the branch is actually mergeable and surfacing any file-level conflicts with other ready tasks. Land itself never merges; the actual Git integration happens outside Tallyback.
 - **`tallyback view`** — the compact per-task tallyback: declaration, attempts, claims, evidence pointers, blockers, verification, settlement, status, and next_action. Use this to resume or report on a task without rereading its whole history.
 - **`tallyback watch`** — cross-checks every open Attempt against live workspace/Git state for lost / claim_without_branch_advance / unresolved conditions plus the ledger's own stale projection. Use this to sweep for attempts that have gone quiet or diverged before deciding what to do next.
 

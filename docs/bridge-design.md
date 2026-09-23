@@ -140,7 +140,9 @@ bridge/claude-code/
   v1 — a `scripts/render-claude-code-skill.ts` that emits `SKILL.md` from the registry is a
   reasonable fast-follow, not required for v1): handshake-first instruction, one section
   per loop phase naming its precondition/command/guardrail, one section listing the
-  read-only reports and when to reach for each (e.g. "before proposing settle: land").
+  read-only reports and when to reach for each (e.g. "after `settle --decision land`,
+  before relying on integration: land" — `land` reports on already-authorized work, it
+  does not precede or substitute for the Settle that authorizes it).
 - `README.md` in `bridge/claude-code/` — states the plugin format was current as of this
   writing per code.claude.com/docs/en/plugins and /skills, and that a maintainer should
   re-check those docs before assuming the manifest shape is still accurate (SPEC §16's own
