@@ -56,7 +56,8 @@ a {
   color: inherit;
 }
 
-a:focus-visible {
+a:focus-visible,
+.git-visual:focus-visible {
   outline: 2px solid var(--signal);
   outline-offset: 4px;
 }
@@ -1017,6 +1018,10 @@ pre,
 
 .git-visual {
   overflow-x: auto;
+  /* `--max` (1240px) caps `.shell`, so even the widest desktop window only ever gives
+     this pane ~520-590px of content width — short of the SVG's 560px legibility floor
+     below. Local horizontal scroll is the normal, expected state here, not a narrow-
+     viewport edge case; `.git-visual-hint` below makes that discoverable. */
 }
 
 .git-visual svg {
@@ -1024,6 +1029,15 @@ pre,
   height: auto;
   min-width: 560px;
   display: block;
+}
+
+.git-visual-hint {
+  margin: 0.6rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--stone);
+  text-align: center;
 }
 
 .git-main,
@@ -1276,7 +1290,7 @@ pre,
 
 .receipt dl div {
   display: grid;
-  grid-template-columns: 5.2rem 1fr;
+  grid-template-columns: 5.2rem minmax(0, 1fr);
   gap: 0.75rem;
   padding: 0.3rem 0;
   font-family: var(--font-mono);
@@ -1358,7 +1372,7 @@ pre,
 
 .boundary-pair dl div {
   display: grid;
-  grid-template-columns: 7rem 1fr;
+  grid-template-columns: 7rem minmax(0, 1fr);
   gap: 1rem;
   padding: 0.6rem 0;
   border-bottom: 1px solid var(--rule);
@@ -1437,7 +1451,12 @@ pre,
 
 @media (max-width: 1000px) {
   .return-layout {
-    grid-template-columns: 1fr;
+    /* `minmax(0, 1fr)`, not bare `1fr` (= `minmax(auto, 1fr)`): without the explicit 0
+       floor, the track's automatic minimum is its content's natural (unwrapped) size, so
+       a single wide descendant (e.g. `.boundary-pair`'s `7rem 1fr` rows) forces this
+       single-column track — and with it `.receipt` and `.return-side`, which share the
+       column — wider than the viewport instead of shrinking and wrapping text. */
+    grid-template-columns: minmax(0, 1fr);
     gap: 3rem;
   }
 
@@ -1457,7 +1476,7 @@ pre,
   }
 
   .receipt dl div {
-    grid-template-columns: 4.5rem 1fr;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
   }
 
   .component-index {
@@ -1482,6 +1501,7 @@ pre,
 
 .footer-inner div {
   display: flex;
+  flex-wrap: wrap;
   gap: 1.2rem;
 }
 
