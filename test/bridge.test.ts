@@ -160,4 +160,37 @@ describe('bridge: Claude Code skill file', () => {
   it('mentions the handshake command', () => {
     expect(raw).toContain('tallyback handshake');
   });
+
+  describe('Execution Fit Check', () => {
+    const fit = raw.slice(raw.indexOf('### Execution Fit Check'), raw.indexOf('### Observe'));
+
+    it('is a section of its own with the three labels', () => {
+      expect(fit.length).toBeGreaterThan(0);
+      for (const label of ['`FIT`', '`CONDITIONAL`', '`NOT_FIT`']) expect(fit).toContain(label);
+    });
+
+    it('asks the four concrete questions', () => {
+      for (const q of [
+        'Hardest part',
+        'Evidence',
+        'Not authorised / not equipped',
+        'Stop signal',
+      ]) {
+        expect(fit).toContain(q);
+      }
+    });
+
+    it('records Fit as an execution_choice Decision on the Attempt, using real flags', () => {
+      expect(fit).toContain('tallyback decision --subject-kind attempt');
+      expect(fit).toContain('--role execution_choice');
+      expect(CLI_SOURCE).toContain("case 'decision':");
+    });
+
+    it('never lets a new executor inherit a Fit: it must supersede the one view shows', () => {
+      expect(fit).toContain('A Fit belongs to the executor that made it.');
+      expect(fit).toContain('never inherits another executor');
+      expect(fit).toContain('attempts[].execution_fit');
+      expect(fit).toContain('--supersedes <that decision_id>');
+    });
+  });
 });

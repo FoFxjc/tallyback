@@ -49,6 +49,34 @@ export interface TaskViewAttempt {
   repository_id: string;
   dispatched_at: Timestamp;
   ended: boolean;
+  /** The Attempt's latest effective Execution Fit Decision, or null when none exists. */
+  execution_fit: TaskViewExecutionFit | null;
+}
+
+/** The labels the Bridge skill's Execution Fit Check records as a Decision's `choice` prefix. */
+export const EXECUTION_FIT_ASSESSMENTS = ['FIT', 'CONDITIONAL', 'NOT_FIT'] as const;
+export type ExecutionFitAssessment = (typeof EXECUTION_FIT_ASSESSMENTS)[number];
+
+/**
+ * Read-only projection of the effective `execution_choice` Decision on one Attempt — the
+ * record the Bridge skill writes for its Execution Fit Check. Core never reads it: no
+ * status, next action, or readiness depends on it. `assessment` is parsed from the
+ * `choice` prefix and is null when the choice does not start with a known label.
+ */
+export interface TaskViewExecutionFit {
+  decision_id: string;
+  decided_by: Actor;
+  decided_at: Timestamp;
+  assessment: ExecutionFitAssessment | null;
+  choice: string;
+  rationale: string;
+  /** The earlier Fit Decision this one replaced (e.g. a previous executor's), if any. */
+  supersedes: string | null;
+  /**
+   * Other unsuperseded Fit Decisions on the same Attempt. Normally empty; non-empty only in
+   * a forked lineage (e.g. after a merge), which `tallyback validate` reports.
+   */
+  concurrent: string[];
 }
 
 export interface TaskViewClaim {
@@ -163,6 +191,35 @@ function pickLatest<T>(
     }
   }
   return best;
+}
+
+function parseFitAssessment(choice: string): ExecutionFitAssessment | null {
+  const m = /^\s*(NOT_FIT|CONDITIONAL|FIT)(?![A-Za-z0-9_])/.exec(choice);
+  return m ? (m[1] as ExecutionFitAssessment) : null;
+}
+
+function buildExecutionFit(snapshot: Snapshot, attemptId: string): TaskViewExecutionFit | null {
+  const lineage = snapshot.decisions.filter(
+    (d) =>
+      d.role === 'execution_choice' && d.subject.kind === 'attempt' && d.subject.id === attemptId,
+  );
+  const heads = effectiveRecords(lineage);
+  const latest = pickLatest(
+    heads,
+    (d) => d.decided_at,
+    (d) => d.decision_id,
+  );
+  if (!latest) return null;
+  return {
+    decision_id: latest.decision_id,
+    decided_by: latest.decided_by,
+    decided_at: latest.decided_at,
+    assessment: parseFitAssessment(latest.choice),
+    choice: latest.choice,
+    rationale: latest.rationale,
+    supersedes: latest.supersedes ?? null,
+    concurrent: heads.filter((d) => d !== latest).map((d) => d.decision_id),
+  };
 }
 
 function deriveNextAction(snapshot: Snapshot, task: Task, projections: ProjectionValues): string {
@@ -452,6 +509,7 @@ function buildTaskView(snapshot: Snapshot, task: Task, projections: ProjectionVa
       repository_id: a.repository_id,
       dispatched_at: a.dispatched_at,
       ended: endedAttemptIds.has(a.attempt_id),
+      execution_fit: buildExecutionFit(snapshot, a.attempt_id),
     })),
     claims: claims.map((c) => ({
       claim_id: c.claim_id,

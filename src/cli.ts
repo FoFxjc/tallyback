@@ -606,6 +606,14 @@ function cliHint(command: string, outcome: RejectedOutcome): string | null {
       return '--verification-exception is only for accept/land; retry and abandon take --attempt-end-id and/or --blocker.';
     }
   }
+  if (command === 'decision' && outcome.code === 'invariant.supersession_conflict') {
+    return (
+      'a Decision with this subject and role already exists; Decisions are revised, never ' +
+      'duplicated. Record yours with --supersedes <dec_…> (the current one is ' +
+      '`attempts[].execution_fit.decision_id` in `tallyback view` for a Fit, or in `tallyback show`). ' +
+      'A Fit belongs to the executor that made it: record your own, do not reuse it.'
+    );
+  }
   if (command === 'evidence' && /payload|evidence kind/.test(message)) {
     const kind = EVIDENCE_KINDS.find((k) => k === currentKind);
     return (

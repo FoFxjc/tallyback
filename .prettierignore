@@ -13,3 +13,4 @@ coverage/
 dogfood/runs/
 dogfood/integration-check/*/
 dogfood/fit/runs/
+dogfood/fit2/runs/

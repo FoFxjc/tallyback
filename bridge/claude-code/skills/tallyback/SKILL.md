@@ -84,11 +84,19 @@ Check only:
 4. **Tools and authority** — do I have what I need, and am I allowed? (Committing, merging,
    or settling `land` without being asked is usually beyond an executor's authority.)
 
-Answer exactly one:
+Answer these concretely — they are the evidence; the label is only a summary:
+
+- **Hardest part** — what is most likely to go wrong or be missed?
+- **Evidence** — what would demonstrate the important criteria, and can I get it here?
+- **Not authorised / not equipped** — what will I explicitly not do (e.g. commit, merge,
+  `land`, reach production, touch a frozen contract)?
+- **Stop signal** — what observation would make me stop, retry, or escalate?
+
+Then pick one:
 
 - `FIT` — a credible path to do and verify it.
-- `CONDITIONAL` — proceed, but a named limit (capability, evidence, tooling, or authority)
-  stays visible.
+- `CONDITIONAL` — useful work is possible, but a named limit (capability, evidence,
+  tooling, or authority) means some criterion cannot be fully verified or done here.
 - `NOT_FIT` — it would need guessing, bypassing a guardrail, exceeding authority, or
   claiming verification I cannot get.
 
@@ -97,21 +105,31 @@ Record it on the Attempt (a Decision has no lifecycle effect):
 ```
 tallyback decision --subject-kind attempt --subject-id <att_…> --role execution_choice \
   --question "Execution fit" --choice "<FIT|CONDITIONAL|NOT_FIT>: <one line>" \
-  --rationale "criteria: …; capability: …; verification: …; tools/authority: …" --actor <you>
+  --rationale "criteria: …; capability: …; hardest: …; evidence: …; not authorised/equipped: …; stop if: …" \
+  --actor <you>
 ```
 
 - Fit is an assessment — not permission, Evidence, a Verdict, or a Settlement. `FIT` does
   not mean it will work.
-- `CONDITIONAL`: carry the limit into your Claim, your Verdict (`--limitation`,
-  `--uncertainty`), and your final report.
-- `NOT_FIT`: do not fabricate progress. `tallyback end --attempt-id <att_…> --outcome returned
---reason "NOT_FIT: …"`, raise `tallyback block` for what is missing, and report back.
+- `CONDITIONAL`: do what can be done, then carry the named limit into your Claim, your
+  Verdict (`--limitation`, `--uncertainty`, and not `supported` for a criterion you could
+  not verify), and your final report. Never let "tested locally" become "verified".
+- `NOT_FIT`: no speculative implementation, no Evidence for work not done.
+  `tallyback end --attempt-id <att_…> --outcome returned --reason "NOT_FIT: …"`, raise
+  `tallyback block` naming what is missing, and report what a person or later executor
+  would need to supply.
 - **Re-assess when reality disagrees** (e.g. a check fails after you believed you were
   done): record a new Decision with `--supersedes <dec_…>` instead of settling over it. If
-  more work is needed, `end` the Attempt, `settle --decision retry --attempt-end-id <ate_…>`,
-  and dispatch a new Attempt.
-- Every executor — including a new session resuming this task — does its own Fit Check.
-  An earlier one does not carry over (earlier Decisions are in `tallyback show`).
+  more work is needed, `end` the Attempt, `settle --decision retry --attempt-end-id <ate_…>`
+  (add `--supersedes <set_…>` if the Attempt was already settled), and dispatch a new Attempt.
+
+**A Fit belongs to the executor that made it.** A new executor or a fresh session resuming
+this task never inherits another executor's Fit — not even a `FIT` on the same Attempt.
+`tallyback view` shows the current one as `attempts[].execution_fit`. If it exists, record
+your own over it: the same `tallyback decision …` with `--supersedes <that decision_id>`.
+Without `--supersedes` the ledger refuses a second one; that refusal means "supersede it",
+never "a Fit already exists, so skip mine". Also check `git status`/`git diff`: uncommitted
+changes may be the earlier executor's unverified work.
 
 ### Observe
 
@@ -137,7 +155,7 @@ tallyback decision --subject-kind attempt --subject-id <att_…> --role executio
 These never mutate the ledger. Reach for them like this:
 
 - **`tallyback land`** — cross-checks the ledger's `ready_to_land` projection against live Git state. A task only enters `ready_to_land` once an explicit `tallyback settle --decision land` has been recorded for it, so run `land` _after_ that Settle, not before — it reports on already-authorized work, confirming the branch is actually mergeable and surfacing any file-level conflicts with other ready tasks. Land itself never merges; the actual Git integration happens outside Tallyback.
-- **`tallyback view`** — the compact per-task tallyback: declaration, attempts, claims, evidence pointers, blockers, verification, settlement, status, and next_action. Use this to resume or report on a task without rereading its whole history.
+- **`tallyback view`** — the compact per-task tallyback: declaration, attempts (with each one's current `execution_fit`), claims, evidence pointers, blockers, verification, settlement, status, and next_action. Use this to resume or report on a task without rereading its whole history.
 - **`tallyback watch`** — cross-checks every open Attempt against live workspace/Git state for lost / claim_without_branch_advance / unresolved conditions plus the ledger's own stale projection. Use this to sweep for attempts that have gone quiet or diverged before deciding what to do next.
 
 ## What this skill will not do

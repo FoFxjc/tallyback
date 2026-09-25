@@ -266,6 +266,81 @@ describe('View — every Settlement decision is presentable; no Task-lifecycle f
     );
   });
 
+  it('execution_fit: a new executor sees the prior Fit and must supersede it, never share it', async () => {
+    const fixture = await buildLedger('tallyback-view-execution-fit-');
+    const before = buildTaskViews(fixture.store.currentSnapshot())[0]!;
+    expect(before.attempts[0]!.execution_fit).toBeNull();
+
+    const fit = (choice: string, decided_by: typeof AGENT, supersedes?: string) =>
+      fixture.store.recordDecision({
+        subject: { kind: 'attempt', id: fixture.attempt_id },
+        role: 'execution_choice',
+        question: 'Execution fit',
+        choice,
+        rationale: 'criteria: ok; capability: ok; verification: pytest; tools/authority: no land',
+        decided_by,
+        ...(supersedes ? { supersedes } : {}),
+      });
+    const first = await fit('FIT: small local fix', AGENT);
+    expect(first.ok, JSON.stringify(first)).toBe(true);
+    const firstId = first.ok ? first.decision.decision_id : 'unreachable';
+
+    let view = buildTaskViews(fixture.store.currentSnapshot())[0]!;
+    expect(view.attempts[0]!.execution_fit).toMatchObject({
+      decision_id: firstId,
+      decided_by: AGENT,
+      assessment: 'FIT',
+      choice: 'FIT: small local fix',
+      supersedes: null,
+      concurrent: [],
+    });
+
+    // A second executor cannot silently add a parallel Fit: the lineage refuses a second head.
+    const NEXT = { kind: 'executor', id: 'resumed-session' } as const;
+    const parallel = await fit('CONDITIONAL: cannot reach staging', NEXT);
+    expect(parallel.ok).toBe(false);
+    expect(parallel.ok ? '' : parallel.code).toBe('invariant.supersession_conflict');
+
+    await new Promise((r) => setTimeout(r, 5));
+    const own = await fit('CONDITIONAL: cannot reach staging', NEXT, firstId);
+    expect(own.ok, JSON.stringify(own)).toBe(true);
+    view = buildTaskViews(fixture.store.currentSnapshot())[0]!;
+    expect(view.attempts[0]!.execution_fit).toMatchObject({
+      decided_by: NEXT,
+      assessment: 'CONDITIONAL',
+      supersedes: firstId,
+      concurrent: [],
+    });
+    // Projection only: Fit never changes lifecycle guidance.
+    expect(view.next_action).toBe(before.next_action);
+    expect(view.status).toEqual(before.status);
+  });
+
+  it('execution_fit: assessment parses NOT_FIT and leaves unlabelled choices null', async () => {
+    const fixture = await buildLedger('tallyback-view-execution-fit-labels-');
+    const decide = (choice: string, supersedes?: string) =>
+      fixture.store.recordDecision({
+        subject: { kind: 'attempt', id: fixture.attempt_id },
+        role: 'execution_choice',
+        question: 'Execution fit',
+        choice,
+        rationale: 'r',
+        decided_by: AGENT,
+        ...(supersedes ? { supersedes } : {}),
+      });
+    const a = await decide('NOT_FIT: needs a production secret');
+    expect(a.ok).toBe(true);
+    expect(
+      buildTaskViews(fixture.store.currentSnapshot())[0]!.attempts[0]!.execution_fit?.assessment,
+    ).toBe('NOT_FIT');
+    await new Promise((r) => setTimeout(r, 5));
+    const b = await decide('FITTING the cache first', a.ok ? a.decision.decision_id : undefined);
+    expect(b.ok).toBe(true);
+    expect(
+      buildTaskViews(fixture.store.currentSnapshot())[0]!.attempts[0]!.execution_fit?.assessment,
+    ).toBeNull();
+  });
+
   it('`abandon`-settled task is still surfaced by default View; `next_action` echoes the decision', async () => {
     const fixture = await buildLedger('tallyback-view-abandon-present-');
     const settled = await fixture.store.settle({
