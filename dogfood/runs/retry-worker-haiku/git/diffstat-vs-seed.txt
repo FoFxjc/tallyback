@@ -1,0 +1,6 @@
+ .tallyback/history.jsonl         |  5 +++
+ .tallyback/project.json          |  9 ++++++
+ .tallyback/runtime/bindings.json |  3 ++
+ .tallyback/state.json            | 66 ++++++++++++++++++++++++++++++++++++++++
+ batcher/chunk.py                 | 22 +++++++++-----
+ 5 files changed, 98 insertions(+), 7 deletions(-)

@@ -1,0 +1,2 @@
+4a9ff990802b7586dda0177752a23786d1f3c58d Claude Fix chunk batching bug: handle oversized items
+5fe6f0cb15dd5e0a3dc4d03b1f99a58e0adf1c71 Tallyback Dogfood seed: retry-worker

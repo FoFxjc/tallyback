@@ -1,0 +1,75 @@
+diff --git a/batcher/chunk.py b/batcher/chunk.py
+index 47c0ab0..37b3961 100644
+--- a/batcher/chunk.py
++++ b/batcher/chunk.py
+@@ -23,17 +23,17 @@ def chunk(items: Iterable[bytes], max_items: int, max_bytes: int) -> list[list[b
+ 
+     for item in items:
+         size = len(item)
+-        next_size = current_size + size
+ 
+-        if next_size > max_bytes:
++        # Close the open batch if this item would push it past either limit.
++        # An oversized item always closes it, so it never shares a batch.
++        if current and (current_size + size > max_bytes or len(current) >= max_items):
+             batches.append(current)
+             current, current_size = [], 0
+-            if size > max_bytes:
+-                continue
+ 
+-        if len(current) >= max_items:
+-            batches.append(current)
+-            current, current_size = [], 0
++        # Never drop an item larger than max_bytes: emit it alone in its own batch.
++        if size > max_bytes:
++            batches.append([item])
++            continue
+ 
+         current.append(item)
+         current_size += size
+diff --git a/tests/test_chunk.py b/tests/test_chunk.py
+index 69b495b..6c72745 100644
+--- a/tests/test_chunk.py
++++ b/tests/test_chunk.py
+@@ -42,6 +42,41 @@ def test_oversized_first_item():
+     assert chunk([big, small], max_items=10, max_bytes=10) == [[big], [small]]
+ 
+ 
++def test_consecutive_oversized_items_each_emitted_alone():
++    big1, big2 = b(20, "X"), b(30, "Y")
++    assert chunk([big1, big2], max_items=10, max_bytes=10) == [[big1], [big2]]
++
++
++def test_oversized_item_after_full_batch_is_kept():
++    items = [b(1, "a"), b(1, "b")]
++    big, tail = b(50, "B"), b(1, "t")
++    assert chunk([*items, big, tail], max_items=2, max_bytes=10) == [items, [big], [tail]]
++
++
++def test_byte_limit_splits_each_near_limit_item():
++    items = [b(9, "a"), b(9, "b"), b(9, "c")]
++    assert chunk(items, max_items=10, max_bytes=10) == [[x] for x in items]
++
++
++def test_properties_hold_on_random_inputs():
++    import random
++
++    rng = random.Random(1234)
++    for _ in range(2000):
++        max_items = rng.randint(1, 5)
++        max_bytes = rng.randint(1, 20)
++        items = [b(rng.randint(0, 30), chr(97 + i % 26)) for i in range(rng.randint(0, 15))]
++        batches = chunk(items, max_items=max_items, max_bytes=max_bytes)
++        assert [x for batch in batches for x in batch] == items  # order, nothing lost
++        for batch in batches:
++            assert batch  # no empty batches
++            assert len(batch) <= max_items
++            if any(len(x) > max_bytes for x in batch):
++                assert len(batch) == 1  # oversized items travel alone
++            else:
++                assert sum(map(len, batch)) <= max_bytes
++
++
+ @pytest.mark.parametrize("max_items,max_bytes", [(0, 10), (1, 0)])
+ def test_rejects_invalid_limits(max_items, max_bytes):
+     with pytest.raises(ValueError):

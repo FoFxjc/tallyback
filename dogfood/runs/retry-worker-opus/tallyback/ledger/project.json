@@ -1,0 +1,9 @@
+{
+  "project_id": "prj_01a0d756-cbe2-705c-9250-992761d2d797",
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d756-cbe2-705c-9250-9d29e9d9d8d6",
+      "alias": "main"
+    }
+  ]
+}

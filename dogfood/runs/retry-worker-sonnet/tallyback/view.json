@@ -1,0 +1,133 @@
+{
+  "generated_from_revision": 20,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d757-93cb-768a-9c51-2a9a1df412d9",
+      "title": "Fix chunk() dropping oversized items",
+      "topic_id": "top_01a0d757-7e96-76cc-bebc-65dfb3dc1471",
+      "declaration": {
+        "declaration_id": "dcl_01a0d75b-4888-7534-a2b9-6ed6dcb9af75",
+        "objective": "Fix batcher.chunk so oversized items are never dropped",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d75b-4889-7502-a3bf-e9b74afabc98",
+            "code": "max_items",
+            "statement": "A batch contains at most max_items items.",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d75b-4889-7502-a3bf-ed6b1ce02e07",
+            "code": "max_bytes",
+            "statement": "A batch of normal items contains at most max_bytes bytes in total.",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d75b-4889-7502-a3bf-f0eae05ad471",
+            "code": "oversized_alone",
+            "statement": "An item larger than max_bytes is never dropped; it is emitted alone, in its own batch.",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d75b-4889-7502-a3bf-f76f5c7b975e",
+            "code": "no_empty_batches",
+            "statement": "No empty batches are produced.",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d75b-4889-7502-a3bf-f9d115c32d1a",
+            "code": "order_preserved",
+            "statement": "Order is preserved: concatenating the batches yields the input items in order.",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d75b-4889-7502-a3bf-fc93aa115f90",
+            "code": "regression_tests",
+            "statement": "Regression tests are added for the defects fixed and the full test suite passes.",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d758-9ddb-771a-8c5b-1277259d0ae0",
+          "executor": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "workspace_id": "wsp_01a0d758-9032-71de-bf70-08908e34afd1",
+          "repository_id": "repo_01a0d756-d392-72fb-8f6c-e7447a9c9c86",
+          "dispatched_at": "2026-09-25T06:55:04.155Z",
+          "ended": true
+        },
+        {
+          "attempt_id": "att_01a0d75b-edea-7042-81a9-fd17ba627cdf",
+          "executor": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "workspace_id": "wsp_01a0d758-9032-71de-bf70-08908e34afd1",
+          "repository_id": "repo_01a0d756-d392-72fb-8f6c-e7447a9c9c86",
+          "dispatched_at": "2026-09-25T06:58:41.258Z",
+          "ended": false
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d758-e658-737f-a0f5-948933a2d68c",
+          "statement": "Fixed chunk() in batcher/chunk.py: an item larger than max_bytes was flushed from the current batch but never appended anywhere, silently dropping it. Now an oversized item flushes the current batch (if non-empty) then is emitted alone as its own batch. Added regression test test_consecutive_oversized_items_each_emitted_alone. All 10 tests in tests/test_chunk.py pass.",
+          "evidence_ids": [],
+          "claimed_by": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "claimed_at": "2026-09-25T06:55:22.712Z"
+        },
+        {
+          "claim_id": "clm_01a0d75c-03fb-773f-9b5a-07371b08b5ee",
+          "statement": "chunk() in batcher/chunk.py fixed: an oversized item (len > max_bytes) now flushes the current batch (if non-empty) and is emitted alone in its own batch, instead of being silently dropped as before. Normal batches still respect max_items and max_bytes, no empty batches are produced, and order is preserved. Regression tests: test_oversized_item_is_emitted_alone, test_oversized_first_item (pre-existing, previously failing), plus new test_consecutive_oversized_items_each_emitted_alone. Full suite: 10/10 pass via python -m pytest -v.",
+          "evidence_ids": [],
+          "claimed_by": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "claimed_at": "2026-09-25T06:58:46.907Z"
+        }
+      ],
+      "evidence": [],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d75c-bbb9-707e-84bc-87786bff27ee",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "Read the fixed batcher/chunk.py: oversized items (len>max_bytes) now flush the current batch then are emitted alone, instead of being dropped. Traced the flush conditions to confirm current is never appended empty (max_items/max_bytes are validated >=1). Ran python -m pytest -v: 10/10 pass, including test_respects_max_items, test_respects_max_bytes, test_exact_byte_boundary_fits_in_one_batch, test_preserves_order, test_oversized_item_is_emitted_alone, test_oversized_first_item, and the new test_consecutive_oversized_items_each_emitted_alone."
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d75d-2557-724a-b91f-8ab80c008a18",
+        "decision": "land",
+        "verification_exception": null,
+        "rationale": "Verdict ver_01a0d75c-bbb9-707e-84bc-87786bff27ee (high confidence) found all 6 declared acceptance criteria supported: batch max_items/max_bytes limits respected, oversized items emitted alone rather than dropped, no empty batches, order preserved, and regression tests added with full suite passing (10/10 via python -m pytest -v)."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": true,
+        "stale": false
+      },
+      "next_action": "settled: land"
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 1,
+    "stale": 0,
+    "settled": 1
+  }
+}

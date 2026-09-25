@@ -1,0 +1,12 @@
+{
+  "run_id": "retry-worker-opus",
+  "fixture": "retry-worker",
+  "model_alias": "opus",
+  "model_requested": "claude-opus-5-5",
+  "seed_sha": "5fe6f0cb15dd5e0a3dc4d03b1f99a58e0adf1c71",
+  "workspace": "/tmp/claude-0/-home-user-tallyback/01b763c0-69a7-5ad2-94c6-b173155321d2/scratchpad/bench/w/S2GIX6Iq/repo",
+  "started_at": "2026-09-25T06:52:54Z",
+  "ended_at": "2026-09-25T06:55:37Z",
+  "wall_clock_seconds": 163,
+  "claude_exit_code": 0
+}

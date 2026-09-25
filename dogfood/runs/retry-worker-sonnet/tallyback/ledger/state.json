@@ -1,0 +1,437 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 20,
+  "included_through": 20,
+  "project": {
+    "project_id": "prj_01a0d756-d392-72fb-8f6c-e3e97826400d",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d756-d392-72fb-8f6c-e7447a9c9c86",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d756-d392-72fb-8f6c-e7447a9c9c86",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d758-9032-71de-bf70-08908e34afd1",
+      "repository_id": "repo_01a0d756-d392-72fb-8f6c-e7447a9c9c86"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d757-7e96-76cc-bebc-65dfb3dc1471",
+      "project_id": "prj_01a0d756-d392-72fb-8f6c-e3e97826400d",
+      "name": "Fix batcher.chunk dropping oversized payloads",
+      "goal": "",
+      "created_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "created_at": "2026-09-25T06:53:50.615Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d757-93cb-768a-9c51-2a9a1df412d9",
+      "topic_id": "top_01a0d757-7e96-76cc-bebc-65dfb3dc1471",
+      "title": "Fix chunk() dropping oversized items"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d757-cc01-7100-947e-84a5263c23f1",
+      "task_id": "tsk_01a0d757-93cb-768a-9c51-2a9a1df412d9",
+      "declared_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "declared_at": "2026-09-25T06:54:10.433Z",
+      "objective": "Fix batcher.chunk so oversized items are never dropped",
+      "criteria": []
+    },
+    {
+      "declaration_id": "dcl_01a0d75b-1dda-710b-b15e-fe4199990a18",
+      "task_id": "tsk_01a0d757-93cb-768a-9c51-2a9a1df412d9",
+      "declared_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "declared_at": "2026-09-25T06:57:47.994Z",
+      "objective": "Fix batcher.chunk so oversized items are never dropped",
+      "criteria": [],
+      "supersedes": "dcl_01a0d757-cc01-7100-947e-84a5263c23f1"
+    },
+    {
+      "declaration_id": "dcl_01a0d75b-4888-7534-a2b9-6ed6dcb9af75",
+      "task_id": "tsk_01a0d757-93cb-768a-9c51-2a9a1df412d9",
+      "declared_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "declared_at": "2026-09-25T06:57:58.920Z",
+      "objective": "Fix batcher.chunk so oversized items are never dropped",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d75b-4889-7502-a3bf-e9b74afabc98",
+          "code": "max_items",
+          "statement": "A batch contains at most max_items items.",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d75b-4889-7502-a3bf-ed6b1ce02e07",
+          "code": "max_bytes",
+          "statement": "A batch of normal items contains at most max_bytes bytes in total.",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d75b-4889-7502-a3bf-f0eae05ad471",
+          "code": "oversized_alone",
+          "statement": "An item larger than max_bytes is never dropped; it is emitted alone, in its own batch.",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d75b-4889-7502-a3bf-f76f5c7b975e",
+          "code": "no_empty_batches",
+          "statement": "No empty batches are produced.",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d75b-4889-7502-a3bf-f9d115c32d1a",
+          "code": "order_preserved",
+          "statement": "Order is preserved: concatenating the batches yields the input items in order.",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d75b-4889-7502-a3bf-fc93aa115f90",
+          "code": "regression_tests",
+          "statement": "Regression tests are added for the defects fixed and the full test suite passes.",
+          "required": true
+        }
+      ],
+      "supersedes": "dcl_01a0d75b-1dda-710b-b15e-fe4199990a18"
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d758-9ddb-771a-8c5b-1277259d0ae0",
+      "task_id": "tsk_01a0d757-93cb-768a-9c51-2a9a1df412d9",
+      "declaration_id": "dcl_01a0d757-cc01-7100-947e-84a5263c23f1",
+      "repository_id": "repo_01a0d756-d392-72fb-8f6c-e7447a9c9c86",
+      "workspace_id": "wsp_01a0d758-9032-71de-bf70-08908e34afd1",
+      "executor": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_at": "2026-09-25T06:55:04.155Z"
+    },
+    {
+      "attempt_id": "att_01a0d75b-edea-7042-81a9-fd17ba627cdf",
+      "task_id": "tsk_01a0d757-93cb-768a-9c51-2a9a1df412d9",
+      "declaration_id": "dcl_01a0d75b-4888-7534-a2b9-6ed6dcb9af75",
+      "repository_id": "repo_01a0d756-d392-72fb-8f6c-e7447a9c9c86",
+      "workspace_id": "wsp_01a0d758-9032-71de-bf70-08908e34afd1",
+      "executor": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_at": "2026-09-25T06:58:41.258Z"
+    }
+  ],
+  "attempt_ends": [
+    {
+      "attempt_end_id": "ate_01a0d75b-da84-7419-a083-69fad7e197d1",
+      "attempt_id": "att_01a0d758-9ddb-771a-8c5b-1277259d0ae0",
+      "outcome": "returned",
+      "reported_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "ended_at": "2026-09-25T06:58:36.292Z"
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "clm_01a0d758-e658-737f-a0f5-948933a2d68c",
+      "task_id": "tsk_01a0d757-93cb-768a-9c51-2a9a1df412d9",
+      "attempt_id": "att_01a0d758-9ddb-771a-8c5b-1277259d0ae0",
+      "declaration_id": "dcl_01a0d757-cc01-7100-947e-84a5263c23f1",
+      "statement": "Fixed chunk() in batcher/chunk.py: an item larger than max_bytes was flushed from the current batch but never appended anywhere, silently dropping it. Now an oversized item flushes the current batch (if non-empty) then is emitted alone as its own batch. Added regression test test_consecutive_oversized_items_each_emitted_alone. All 10 tests in tests/test_chunk.py pass.",
+      "evidence_ids": [],
+      "claimed_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "claimed_at": "2026-09-25T06:55:22.712Z"
+    },
+    {
+      "claim_id": "clm_01a0d75c-03fb-773f-9b5a-07371b08b5ee",
+      "task_id": "tsk_01a0d757-93cb-768a-9c51-2a9a1df412d9",
+      "attempt_id": "att_01a0d75b-edea-7042-81a9-fd17ba627cdf",
+      "declaration_id": "dcl_01a0d75b-4888-7534-a2b9-6ed6dcb9af75",
+      "statement": "chunk() in batcher/chunk.py fixed: an oversized item (len > max_bytes) now flushes the current batch (if non-empty) and is emitted alone in its own batch, instead of being silently dropped as before. Normal batches still respect max_items and max_bytes, no empty batches are produced, and order is preserved. Regression tests: test_oversized_item_is_emitted_alone, test_oversized_first_item (pre-existing, previously failing), plus new test_consecutive_oversized_items_each_emitted_alone. Full suite: 10/10 pass via python -m pytest -v.",
+      "evidence_ids": [],
+      "claimed_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "claimed_at": "2026-09-25T06:58:46.907Z"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "artifact",
+      "payload": {},
+      "submitted_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "evidence_id": "evi_01a0d759-6bd9-76d7-80b5-08e1e024333e",
+      "submitted_at": "2026-09-25T06:55:56.889Z"
+    },
+    {
+      "kind": "test_run",
+      "payload": {
+        "exit_code": 0
+      },
+      "submitted_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "evidence_id": "evi_01a0d759-a82f-71bf-b5ed-f78f56efa570",
+      "submitted_at": "2026-09-25T06:56:12.335Z"
+    },
+    {
+      "kind": "test_run",
+      "payload": {
+        "exit_code": 0
+      },
+      "submitted_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "evidence_id": "evi_01a0d75c-28cd-74fc-96f6-b7db31f2afa8",
+      "submitted_at": "2026-09-25T06:58:56.333Z"
+    }
+  ],
+  "reconciliations": [],
+  "check_invocations": [
+    {
+      "check_invocation_id": "chk_01a0d759-e7e8-75a4-b4d6-611c8b1c919a",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d758-e658-737f-a0f5-948933a2d68c"
+      },
+      "checker": {
+        "id": "pytest",
+        "version": "8.3.3"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d756-d392-72fb-8f6c-e3e97826400d",
+        "revision": 8,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "94b2f3c627fc59adc3ef1800111208c0d4f3e922d5904cd3a7382b0a4ea60ced"
+        }
+      },
+      "invoked_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "invoked_at": "2026-09-25T06:56:28.648Z"
+    },
+    {
+      "check_invocation_id": "chk_01a0d75c-3d2c-766e-8cd3-57d1758369dc",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d75c-03fb-773f-9b5a-07371b08b5ee"
+      },
+      "checker": {
+        "id": "pytest",
+        "version": "8.3.3"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d756-d392-72fb-8f6c-e3e97826400d",
+        "revision": 16,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "20f636317e9f810809fd23ffc025617ddb166ce6c28f2def8d15ddcdf4e76c26"
+        }
+      },
+      "invoked_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "invoked_at": "2026-09-25T06:59:01.548Z"
+    },
+    {
+      "check_invocation_id": "chk_01a0d75c-bbbb-768a-a137-b59a39de6f03",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d75c-03fb-773f-9b5a-07371b08b5ee"
+      },
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d756-d392-72fb-8f6c-e3e97826400d",
+        "revision": 17,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "6eaf84a05c6f4215b0658cee55b4d344aefb60325663ae16f1ed526512338cac"
+        }
+      },
+      "invoked_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "invoked_at": "2026-09-25T06:59:33.947Z"
+    }
+  ],
+  "check_results": [
+    {
+      "check_result_id": "ckr_01a0d75a-a1e3-758b-b40c-41f5e7e2bd2c",
+      "check_invocation_id": "chk_01a0d759-e7e8-75a4-b4d6-611c8b1c919a",
+      "outcome": "check_failed",
+      "produced_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "completed_at": "2026-09-25T06:57:16.260Z",
+      "diagnostics": [],
+      "reconciliation_ids": [],
+      "verdict_id": null
+    },
+    {
+      "check_result_id": "ckr_01a0d75c-bbca-731f-bef9-bafaae625c7f",
+      "check_invocation_id": "chk_01a0d75c-bbbb-768a-a137-b59a39de6f03",
+      "outcome": "verdict_emitted",
+      "produced_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "completed_at": "2026-09-25T06:59:33.962Z",
+      "diagnostics": [],
+      "reconciliation_ids": [],
+      "verdict_id": "ver_01a0d75c-bbb9-707e-84bc-87786bff27ee"
+    }
+  ],
+  "verdicts": [
+    {
+      "verdict_id": "ver_01a0d75c-bbb9-707e-84bc-87786bff27ee",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d75c-03fb-773f-9b5a-07371b08b5ee"
+      },
+      "declaration_id": "dcl_01a0d75b-4888-7534-a2b9-6ed6dcb9af75",
+      "scope": {
+        "evaluated_criteria": [
+          "cri_01a0d75b-4889-7502-a3bf-e9b74afabc98",
+          "cri_01a0d75b-4889-7502-a3bf-ed6b1ce02e07",
+          "cri_01a0d75b-4889-7502-a3bf-f0eae05ad471",
+          "cri_01a0d75b-4889-7502-a3bf-f76f5c7b975e",
+          "cri_01a0d75b-4889-7502-a3bf-f9d115c32d1a",
+          "cri_01a0d75b-4889-7502-a3bf-fc93aa115f90"
+        ],
+        "unevaluated_criteria": []
+      },
+      "conclusion": "supported",
+      "finality": "final",
+      "basis": {
+        "evidence_ids": [],
+        "reconciliation_ids": []
+      },
+      "findings": [
+        {
+          "criterion_id": "cri_01a0d75b-4889-7502-a3bf-e9b74afabc98",
+          "assessment": "supported",
+          "summary": "max_items: assessed as supported",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d75b-4889-7502-a3bf-ed6b1ce02e07",
+          "assessment": "supported",
+          "summary": "max_bytes: assessed as supported",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d75b-4889-7502-a3bf-f0eae05ad471",
+          "assessment": "supported",
+          "summary": "oversized_alone: assessed as supported",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d75b-4889-7502-a3bf-f76f5c7b975e",
+          "assessment": "supported",
+          "summary": "no_empty_batches: assessed as supported",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d75b-4889-7502-a3bf-f9d115c32d1a",
+          "assessment": "supported",
+          "summary": "order_preserved: assessed as supported",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d75b-4889-7502-a3bf-fc93aa115f90",
+          "assessment": "supported",
+          "summary": "regression_tests: assessed as supported",
+          "basis_refs": []
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Read the fixed batcher/chunk.py: oversized items (len>max_bytes) now flush the current batch then are emitted alone, instead of being dropped. Traced the flush conditions to confirm current is never appended empty (max_items/max_bytes are validated >=1). Ran python -m pytest -v: 10/10 pass, including test_respects_max_items, test_respects_max_bytes, test_exact_byte_boundary_fits_in_one_batch, test_preserves_order, test_oversized_item_is_emitted_alone, test_oversized_first_item, and the new test_consecutive_oversized_items_each_emitted_alone."
+      },
+      "rationale": "Read the fixed batcher/chunk.py: oversized items (len>max_bytes) now flush the current batch then are emitted alone, instead of being dropped. Traced the flush conditions to confirm current is never appended empty (max_items/max_bytes are validated >=1). Ran python -m pytest -v: 10/10 pass, including test_respects_max_items, test_respects_max_bytes, test_exact_byte_boundary_fits_in_one_batch, test_preserves_order, test_oversized_item_is_emitted_alone, test_oversized_first_item, and the new test_consecutive_oversized_items_each_emitted_alone.",
+      "uncertainty": [],
+      "limitations": [],
+      "issued_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "issued_at": "2026-09-25T06:59:33.945Z",
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      }
+    }
+  ],
+  "settlements": [
+    {
+      "settlement_id": "set_01a0d75d-2557-724a-b91f-8ab80c008a18",
+      "task_id": "tsk_01a0d757-93cb-768a-9c51-2a9a1df412d9",
+      "attempt_id": "att_01a0d75b-edea-7042-81a9-fd17ba627cdf",
+      "decision": "land",
+      "decided_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "decided_at": "2026-09-25T07:00:00.983Z",
+      "basis": {
+        "verdict_id": "ver_01a0d75c-bbb9-707e-84bc-87786bff27ee",
+        "attempt_end_id": null,
+        "blocker_ids": []
+      },
+      "rationale": "Verdict ver_01a0d75c-bbb9-707e-84bc-87786bff27ee (high confidence) found all 6 declared acceptance criteria supported: batch max_items/max_bytes limits respected, oversized items emitted alone rather than dropped, no empty batches, order preserved, and regression tests added with full suite passing (10/10 via python -m pytest -v).",
+      "verification_exception": null
+    }
+  ],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": []
+}

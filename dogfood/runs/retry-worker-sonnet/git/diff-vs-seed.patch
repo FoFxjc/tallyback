@@ -1,0 +1,44 @@
+diff --git a/batcher/chunk.py b/batcher/chunk.py
+index 47c0ab0..938107c 100644
+--- a/batcher/chunk.py
++++ b/batcher/chunk.py
+@@ -23,15 +23,16 @@ def chunk(items: Iterable[bytes], max_items: int, max_bytes: int) -> list[list[b
+ 
+     for item in items:
+         size = len(item)
+-        next_size = current_size + size
+ 
+-        if next_size > max_bytes:
+-            batches.append(current)
+-            current, current_size = [], 0
+-            if size > max_bytes:
+-                continue
++        if size > max_bytes:
++            if current:
++                batches.append(current)
++                current, current_size = [], 0
++            batches.append([item])
++            continue
+ 
+-        if len(current) >= max_items:
++        next_size = current_size + size
++        if next_size > max_bytes or len(current) >= max_items:
+             batches.append(current)
+             current, current_size = [], 0
+ 
+diff --git a/tests/test_chunk.py b/tests/test_chunk.py
+index 69b495b..b9c5e28 100644
+--- a/tests/test_chunk.py
++++ b/tests/test_chunk.py
+@@ -42,6 +42,11 @@ def test_oversized_first_item():
+     assert chunk([big, small], max_items=10, max_bytes=10) == [[big], [small]]
+ 
+ 
++def test_consecutive_oversized_items_each_emitted_alone():
++    first, second = b(50, "A"), b(50, "B")
++    assert chunk([first, second], max_items=10, max_bytes=10) == [[first], [second]]
++
++
+ @pytest.mark.parametrize("max_items,max_bytes", [(0, 10), (1, 0)])
+ def test_rejects_invalid_limits(max_items, max_bytes):
+     with pytest.raises(ValueError):

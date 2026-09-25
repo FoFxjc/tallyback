@@ -1,0 +1,146 @@
+{
+  "generated_from_revision": 15,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d756-e5d8-7169-8109-e04d96df757c",
+      "title": "Fix batcher.chunk dropping oversized payloads",
+      "topic_id": "top_01a0d756-d8a9-73c6-8e1d-45580ce8c9ff",
+      "declaration": {
+        "declaration_id": "dcl_01a0d757-7b7c-70df-8fff-ed3614777586",
+        "objective": "Fix batcher.chunk so the upload worker never loses payloads (ISSUE.md)",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d757-7b7c-70df-8fff-f2821119e1e1",
+            "code": "AC1",
+            "statement": "A batch contains at most max_items items",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d757-7b7c-70df-8fff-f796435d1e32",
+            "code": "AC2",
+            "statement": "A batch of normal items contains at most max_bytes bytes in total",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d757-7b7c-70df-8fff-fb340fc16a2e",
+            "code": "AC3",
+            "statement": "An item larger than max_bytes is never dropped; it is emitted alone in its own batch",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d757-7b7c-70df-8fff-fff0ceee1ef9",
+            "code": "AC4",
+            "statement": "No empty batches are produced",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d757-7b7c-70df-9000-02b593581c99",
+            "code": "AC5",
+            "statement": "Order is preserved; concatenating batches yields the input in order",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d757-7b7c-70df-9000-06f881835650",
+            "code": "AC6",
+            "statement": "Regression tests added for fixed defects; full test suite passes",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d757-9999-736f-bd44-bde1b30b50c1",
+          "executor": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "workspace_id": "wsp_01a0d757-88f4-72a9-80d0-d3ba5a9fccb8",
+          "repository_id": "repo_01a0d756-cbe2-705c-9250-9d29e9d9d8d6",
+          "dispatched_at": "2026-09-25T06:53:57.529Z",
+          "ended": true
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d758-56eb-75ec-bd48-9167741df990",
+          "statement": "chunk() now emits oversized items alone instead of dropping them and never flushes an empty batch; AC1-AC6 addressed with regression + property tests; full suite passes (13)",
+          "evidence_ids": [
+            "evi_01a0d758-3fdf-70cd-a426-c7798b6d3b65",
+            "evi_01a0d758-4152-72bc-92cc-d91572787344",
+            "evi_01a0d758-42c2-703c-a29b-949305f831c1"
+          ],
+          "claimed_by": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "claimed_at": "2026-09-25T06:54:45.995Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d758-3fdf-70cd-a426-c7798b6d3b65",
+          "kind": "git_commit",
+          "submitted_by": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "submitted_at": "2026-09-25T06:54:40.096Z",
+          "note": "Fix + regression tests on fix/chunk-oversized"
+        },
+        {
+          "evidence_id": "evi_01a0d758-4152-72bc-92cc-d91572787344",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "submitted_at": "2026-09-25T06:54:40.466Z",
+          "note": "13 passed at 6f6bc1cf14c7830b0bfda0720b40e9ae76cbaf73"
+        },
+        {
+          "evidence_id": "evi_01a0d758-42c2-703c-a29b-949305f831c1",
+          "kind": "observation",
+          "submitted_by": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "submitted_at": "2026-09-25T06:54:40.834Z"
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d758-a3ac-7299-8cf8-9dcd9a3bc878",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "Fix reviewed line by line; new tests fail on seed code (5 failed) and pass on fix (13); independent 50k-case property check in a clean clone holds for all six criteria."
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d758-df65-70a8-bc72-497168438ee5",
+        "decision": "accept",
+        "verification_exception": null,
+        "rationale": "All six criteria assessed supported with high confidence on independent evidence; accepted on branch fix/chunk-oversized. Merge to main left to the maintainer."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "settled: accept"
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 1
+  }
+}

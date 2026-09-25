@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 7,
+  "included_through": 7,
+  "project": {
+    "project_id": "prj_01a0d756-cf95-770b-b141-e4806740df89",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d756-cf95-770b-b141-e8a6f0bd90ff",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d756-cf95-770b-b141-e8a6f0bd90ff",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d759-039c-77cf-aa30-67bcd174e8cf",
+      "repository_id": "repo_01a0d756-cf95-770b-b141-e8a6f0bd90ff"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d756-e188-7708-9e12-43dde50c0e2d",
+      "project_id": "prj_01a0d756-cf95-770b-b141-e4806740df89",
+      "name": "Fix chunk batching bug",
+      "goal": "",
+      "created_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "created_at": "2026-09-25T06:53:10.408Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d756-f269-7346-8f64-05de9bc48b12",
+      "topic_id": "top_01a0d756-e188-7708-9e12-43dde50c0e2d",
+      "title": "Fix chunk batching bug in batcher.chunk"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d757-f59c-7550-ac71-4f16211c468f",
+      "task_id": "tsk_01a0d756-f269-7346-8f64-05de9bc48b12",
+      "declared_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "declared_at": "2026-09-25T06:54:21.085Z",
+      "objective": "Fix the chunk() function to properly handle oversized items by emitting them in their own batch instead of dropping them",
+      "criteria": []
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d759-1116-7166-889f-aa11b6caa875",
+      "task_id": "tsk_01a0d756-f269-7346-8f64-05de9bc48b12",
+      "declaration_id": "dcl_01a0d757-f59c-7550-ac71-4f16211c468f",
+      "repository_id": "repo_01a0d756-cf95-770b-b141-e8a6f0bd90ff",
+      "workspace_id": "wsp_01a0d759-039c-77cf-aa30-67bcd174e8cf",
+      "executor": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_at": "2026-09-25T06:55:33.654Z"
+    }
+  ],
+  "attempt_ends": [
+    {
+      "attempt_end_id": "ate_01a0d759-fd3c-72f8-8de1-5415b31aca01",
+      "attempt_id": "att_01a0d759-1116-7166-889f-aa11b6caa875",
+      "outcome": "returned",
+      "reported_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "ended_at": "2026-09-25T06:56:34.109Z"
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "clm_01a0d759-3c65-74e6-86d6-55026ceecb4a",
+      "task_id": "tsk_01a0d756-f269-7346-8f64-05de9bc48b12",
+      "attempt_id": "att_01a0d759-1116-7166-889f-aa11b6caa875",
+      "declaration_id": "dcl_01a0d757-f59c-7550-ac71-4f16211c468f",
+      "statement": "All acceptance criteria are satisfied",
+      "evidence_ids": [],
+      "claimed_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "claimed_at": "2026-09-25T06:55:44.741Z"
+    }
+  ],
+  "evidence": [],
+  "reconciliations": [],
+  "check_invocations": [],
+  "check_results": [],
+  "verdicts": [],
+  "settlements": [],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": []
+}

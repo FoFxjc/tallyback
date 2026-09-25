@@ -1,0 +1,60 @@
+{
+  "generated_from_revision": 7,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d756-f269-7346-8f64-05de9bc48b12",
+      "title": "Fix chunk batching bug in batcher.chunk",
+      "topic_id": "top_01a0d756-e188-7708-9e12-43dde50c0e2d",
+      "declaration": {
+        "declaration_id": "dcl_01a0d757-f59c-7550-ac71-4f16211c468f",
+        "objective": "Fix the chunk() function to properly handle oversized items by emitting them in their own batch instead of dropping them",
+        "criteria": []
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d759-1116-7166-889f-aa11b6caa875",
+          "executor": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "workspace_id": "wsp_01a0d759-039c-77cf-aa30-67bcd174e8cf",
+          "repository_id": "repo_01a0d756-cf95-770b-b141-e8a6f0bd90ff",
+          "dispatched_at": "2026-09-25T06:55:33.654Z",
+          "ended": true
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d759-3c65-74e6-86d6-55026ceecb4a",
+          "statement": "All acceptance criteria are satisfied",
+          "evidence_ids": [],
+          "claimed_by": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "claimed_at": "2026-09-25T06:55:44.741Z"
+        }
+      ],
+      "evidence": [],
+      "blockers": [],
+      "verification": [],
+      "settlement": null,
+      "status": {
+        "blocked": false,
+        "verified": false,
+        "settled": false,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "verify (begin-check)"
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 0
+  }
+}

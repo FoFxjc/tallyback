@@ -1,0 +1,49 @@
+.....FFF..                                                               [100%]
+=================================== FAILURES ===================================
+_____________________ test_oversized_item_is_emitted_alone _____________________
+
+    def test_oversized_item_is_emitted_alone():
+        small, big, tail = b(2, "s"), b(50, "B"), b(2, "t")
+>       assert chunk([small, big, tail], max_items=10, max_bytes=10) == [[small], [big], [tail]]
+E       AssertionError: assert [[b'ss'], [b'tt']] == [[b'ss'], [b'...BB'], [b'tt']]
+E         
+E         At index 1 diff: [b'tt'] != [b'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB']
+E         Right contains one more item: [b'tt']
+E         Use -v to get more diff
+
+tests/test_chunk.py:37: AssertionError
+__________________________ test_oversized_first_item ___________________________
+
+    def test_oversized_first_item():
+        big, small = b(50, "B"), b(2, "s")
+>       assert chunk([big, small], max_items=10, max_bytes=10) == [[big], [small]]
+E       AssertionError: assert [[], [b'ss']] == [[b'BBBBBBBBB...BB'], [b'ss']]
+E         
+E         At index 0 diff: [] != [b'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB']
+E         Use -v to get more diff
+
+tests/test_chunk.py:42: AssertionError
+_____________ test_consecutive_oversized_items_each_emitted_alone ______________
+
+    def test_consecutive_oversized_items_each_emitted_alone():
+        first, second = b(50, "A"), b(50, "B")
+>       assert chunk([first, second], max_items=10, max_bytes=10) == [[first], [second]]
+E       AssertionError: assert [[], []] == [[b'AAAAAAAAA...BBBBBBBBBBB']]
+E         
+E         At index 0 diff: [] != [b'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA']
+E         Use -v to get more diff
+
+tests/test_chunk.py:47: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_chunk.py::test_empty_input
+PASSED tests/test_chunk.py::test_respects_max_items
+PASSED tests/test_chunk.py::test_respects_max_bytes
+PASSED tests/test_chunk.py::test_exact_byte_boundary_fits_in_one_batch
+PASSED tests/test_chunk.py::test_preserves_order
+PASSED tests/test_chunk.py::test_rejects_invalid_limits[0-10]
+PASSED tests/test_chunk.py::test_rejects_invalid_limits[1-0]
+FAILED tests/test_chunk.py::test_oversized_item_is_emitted_alone - AssertionE...
+FAILED tests/test_chunk.py::test_oversized_first_item - AssertionError: asser...
+FAILED tests/test_chunk.py::test_consecutive_oversized_items_each_emitted_alone
+3 failed, 7 passed in 0.03s

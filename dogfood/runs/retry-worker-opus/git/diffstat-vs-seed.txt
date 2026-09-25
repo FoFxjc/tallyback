@@ -1,0 +1,3 @@
+ batcher/chunk.py    | 14 +++++++-------
+ tests/test_chunk.py | 35 +++++++++++++++++++++++++++++++++++
+ 2 files changed, 42 insertions(+), 7 deletions(-)

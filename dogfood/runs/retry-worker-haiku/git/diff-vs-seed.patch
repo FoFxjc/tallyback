@@ -1,0 +1,141 @@
+diff --git a/.tallyback/history.jsonl b/.tallyback/history.jsonl
+new file mode 100644
+index 0000000..1520a9a
+--- /dev/null
++++ b/.tallyback/history.jsonl
+@@ -0,0 +1,5 @@
++{"seq":1,"at":"2026-09-25T06:53:06.023Z","kind":"init","revision":0,"project_id":"prj_01a0d756-cf95-770b-b141-e4806740df89"}
++{"seq":2,"at":"2026-09-25T06:53:10.421Z","kind":"append","revision":1,"appended":1,"replayed":false,"record_ids":["top_01a0d756-e188-7708-9e12-43dde50c0e2d"]}
++{"seq":3,"at":"2026-09-25T06:53:14.741Z","kind":"append","revision":2,"appended":1,"replayed":false,"record_ids":["tsk_01a0d756-f269-7346-8f64-05de9bc48b12"]}
++{"seq":4,"at":"2026-09-25T06:54:21.099Z","kind":"append","revision":3,"appended":1,"replayed":false,"record_ids":["dcl_01a0d757-f59c-7550-ac71-4f16211c468f"]}
++{"seq":5,"at":"2026-09-25T06:54:33.952Z","kind":"append_rejected","revision":3,"code":"schema.unknown_property","expected_revision":3}
+diff --git a/.tallyback/project.json b/.tallyback/project.json
+new file mode 100644
+index 0000000..cb4fd34
+--- /dev/null
++++ b/.tallyback/project.json
+@@ -0,0 +1,9 @@
++{
++  "project_id": "prj_01a0d756-cf95-770b-b141-e4806740df89",
++  "repositories": [
++    {
++      "repository_id": "repo_01a0d756-cf95-770b-b141-e8a6f0bd90ff",
++      "alias": "main"
++    }
++  ]
++}
+diff --git a/.tallyback/runtime/bindings.json b/.tallyback/runtime/bindings.json
+new file mode 100644
+index 0000000..25979bf
+--- /dev/null
++++ b/.tallyback/runtime/bindings.json
+@@ -0,0 +1,3 @@
++{
++  "repositories": {}
++}
+diff --git a/.tallyback/state.json b/.tallyback/state.json
+new file mode 100644
+index 0000000..c11c32e
+--- /dev/null
++++ b/.tallyback/state.json
+@@ -0,0 +1,66 @@
++{
++  "schema_version": "1.0.0",
++  "revision": 3,
++  "included_through": 3,
++  "project": {
++    "project_id": "prj_01a0d756-cf95-770b-b141-e4806740df89",
++    "repositories": [
++      {
++        "repository_id": "repo_01a0d756-cf95-770b-b141-e8a6f0bd90ff",
++        "alias": "main"
++      }
++    ]
++  },
++  "repositories": [
++    {
++      "repository_id": "repo_01a0d756-cf95-770b-b141-e8a6f0bd90ff",
++      "alias": "main"
++    }
++  ],
++  "workspaces": [],
++  "topics": [
++    {
++      "topic_id": "top_01a0d756-e188-7708-9e12-43dde50c0e2d",
++      "project_id": "prj_01a0d756-cf95-770b-b141-e4806740df89",
++      "name": "Fix chunk batching bug",
++      "goal": "",
++      "created_by": {
++        "kind": "tool",
++        "id": "tallyback"
++      },
++      "created_at": "2026-09-25T06:53:10.408Z"
++    }
++  ],
++  "tasks": [
++    {
++      "task_id": "tsk_01a0d756-f269-7346-8f64-05de9bc48b12",
++      "topic_id": "top_01a0d756-e188-7708-9e12-43dde50c0e2d",
++      "title": "Fix chunk batching bug in batcher.chunk"
++    }
++  ],
++  "declarations": [
++    {
++      "declaration_id": "dcl_01a0d757-f59c-7550-ac71-4f16211c468f",
++      "task_id": "tsk_01a0d756-f269-7346-8f64-05de9bc48b12",
++      "declared_by": {
++        "kind": "tool",
++        "id": "tallyback"
++      },
++      "declared_at": "2026-09-25T06:54:21.085Z",
++      "objective": "Fix the chunk() function to properly handle oversized items by emitting them in their own batch instead of dropping them",
++      "criteria": []
++    }
++  ],
++  "attempts": [],
++  "attempt_ends": [],
++  "claims": [],
++  "evidence": [],
++  "reconciliations": [],
++  "check_invocations": [],
++  "check_results": [],
++  "verdicts": [],
++  "settlements": [],
++  "blockers": [],
++  "blocker_resolutions": [],
++  "decisions": []
++}
+diff --git a/batcher/chunk.py b/batcher/chunk.py
+index 47c0ab0..2db70fd 100644
+--- a/batcher/chunk.py
++++ b/batcher/chunk.py
+@@ -23,14 +23,22 @@ def chunk(items: Iterable[bytes], max_items: int, max_bytes: int) -> list[list[b
+ 
+     for item in items:
+         size = len(item)
+-        next_size = current_size + size
+-
+-        if next_size > max_bytes:
+-            batches.append(current)
+-            current, current_size = [], 0
+-            if size > max_bytes:
+-                continue
+ 
++        # Handle oversized items: emit current batch and then emit item alone
++        if size > max_bytes:
++            if current:
++                batches.append(current)
++                current, current_size = [], 0
++            batches.append([item])
++            continue
++
++        # Check if adding this item would exceed byte limit
++        if current_size + size > max_bytes:
++            if current:
++                batches.append(current)
++                current, current_size = [], 0
++
++        # Check if we've reached max_items
+         if len(current) >= max_items:
+             batches.append(current)
+             current, current_size = [], 0

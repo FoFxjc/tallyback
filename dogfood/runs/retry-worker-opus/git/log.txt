@@ -1,0 +1,2 @@
+6f6bc1cf14c7830b0bfda0720b40e9ae76cbaf73 Claude Fix batcher.chunk dropping oversized payloads and emitting empty batches
+5fe6f0cb15dd5e0a3dc4d03b1f99a58e0adf1c71 Tallyback Dogfood seed: retry-worker
