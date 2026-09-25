@@ -445,6 +445,24 @@ export async function isLedgerAbsent(projectRoot: string): Promise<boolean> {
   return true;
 }
 
+/**
+ * SPEC §6: `history.jsonl` (local journal) and `runtime/` (bindings with absolute paths,
+ * locks, caches) are never committed. Written into `.tallyback/` when a ledger is created
+ * so a plain `git add -A` cannot commit them (dogfood F11: it did, in 2/9 runs). An existing
+ * `.gitignore` is left untouched — it may be the user's.
+ */
+export const LEDGER_GITIGNORE =
+  '# Machine-local Tallyback state (SPEC §6): never commit.\nhistory.jsonl\nruntime/\n';
+
+export async function ensureLedgerGitignore(root: string): Promise<void> {
+  await mkdir(root, { recursive: true });
+  try {
+    await writeFile(join(root, '.gitignore'), LEDGER_GITIGNORE, { flag: 'wx' });
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== 'EEXIST') throw err;
+  }
+}
+
 /** The machine-local `runtime/` directory (locks, bindings, caches) — never committed. */
 export function runtimeDir(root: string): string {
   return join(root, 'runtime');

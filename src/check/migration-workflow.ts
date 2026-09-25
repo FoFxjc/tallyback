@@ -42,6 +42,7 @@ import { join } from 'node:path';
 
 import {
   snapshotDigest,
+  ensureLedgerGitignore,
   writeProject,
   writeSnapshot,
   type ProjectManifest,
@@ -406,6 +407,7 @@ class MigrationStore extends LedgerStore {
       // Atomic replacement: both portable files go through the temp-file + rename path.
       await writeProject(this.root, plan.manifest);
       await writeSnapshot(this.root, plan.snapshot);
+      await ensureLedgerGitignore(this.root);
       await this.writeJsonFile(MIGRATION_REPORT_FILE, report);
       await rm(join(this.root, MIGRATION_STATE_FILE), { force: true });
     });

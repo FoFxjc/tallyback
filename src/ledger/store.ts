@@ -43,6 +43,7 @@ import {
   recordId,
   SCHEMA_VERSION,
   storeLockPath,
+  ensureLedgerGitignore,
   writeBindings,
   writeProject,
   writeSnapshot,
@@ -313,6 +314,7 @@ export class LedgerStore {
     await writeProject(this.root, manifest);
     await writeSnapshot(this.root, snapshot);
     await writeBindings(this.root, { repositories: {} });
+    await ensureLedgerGitignore(this.root);
     await this.writeJournal({
       seq: this.historySeq++,
       at: nowIso(),

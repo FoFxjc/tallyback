@@ -222,3 +222,19 @@ code"` records the result text.
   hosts or agents actually passing an identity. Self-verification (F12) remains
   indistinguishable when one agent uses one id for everything — deliberately not addressed
   (no delegation evidence in the benchmark).
+
+## R10 — Ledger carries its own `.gitignore` (F11, 2/9 runs; SPEC §6 gap)
+
+- **Reproduced**: `init` + `bind` + `git add -A` staged `.tallyback/runtime/bindings.json`
+  (an absolute path) and `history.jsonl`. Haiku committed both in 2/9 runs.
+- **Root cause**: SPEC §6 marks `history.jsonl` "ignored" and `runtime/` "always ignored",
+  but nothing implemented that — an implementation gap, not a contract change.
+- **Change**: `ensureLedgerGitignore` writes `.tallyback/.gitignore` (`history.jsonl`,
+  `runtime/`) when `init` or `migrate --apply` creates a ledger; an existing file is left
+  untouched.
+- **Regression**: `test/ledger-gitignore.test.ts`.
+- **Dogfood**: in a fresh Git repo, `init` → `workspace` → `bind` → `git add -A` stages only
+  `.gitignore`, `project.json`, `state.json`; `validate` ok; a pre-existing custom
+  `.tallyback/.gitignore` is preserved.
+- **Uncertainty**: ledgers created before this change get no `.gitignore` (only creation
+  paths write it). Whether to commit `state.json` at all remains the user's choice.
