@@ -43,6 +43,10 @@ export interface CommandSpec {
   examples: string[];
   /** Whether the command writes to the ledger (or its machine-local bindings). */
   mutates: boolean;
+  /** Extra usage notes shown by `--help`. */
+  notes?: string[];
+  /** Redirects for flags callers commonly expect here but that belong elsewhere. */
+  flagHints?: Record<string, string>;
 }
 
 /** Evidence kinds accepted by the frozen v1 contract (`records.schema.json#/$defs/evidence_kind`). */
@@ -56,6 +60,60 @@ export const EVIDENCE_KINDS = [
   'observation',
   'extension',
 ] as const;
+
+/**
+ * Payload properties per evidence kind, mirroring the frozen v1 contract
+ * (`records.schema.json#/$defs/payload_<kind>`; `test/cli-evidence.test.ts` guards drift).
+ * Payloads are closed: no other property is accepted.
+ */
+export const EVIDENCE_PAYLOADS: Record<
+  (typeof EVIDENCE_KINDS)[number],
+  { required: string[]; optional: string[] }
+> = {
+  git_commit: { required: ['repository_id', 'object_id', 'object_format'], optional: [] },
+  git_diff: {
+    required: ['repository_id'],
+    optional: ['base_object_id', 'head_object_id', 'path', 'digest'],
+  },
+  file_snapshot: { required: ['repository_id', 'path'], optional: ['object_id', 'digest'] },
+  command_run: {
+    required: ['command', 'exit_code'],
+    optional: [
+      'started_at',
+      'finished_at',
+      'repository_id',
+      'workspace_id',
+      'working_tree',
+      'output_digest',
+    ],
+  },
+  test_run: {
+    required: ['exit_code'],
+    optional: [
+      'command',
+      'started_at',
+      'finished_at',
+      'repository_id',
+      'workspace_id',
+      'working_tree',
+      'output_digest',
+    ],
+  },
+  artifact: { required: [], optional: ['locator', 'digest'] },
+  observation: { required: ['text'], optional: ['observer', 'observed_at'] },
+  extension: { required: ['namespace', 'extension_kind', 'ref'], optional: [] },
+};
+
+/** One line per kind: `test_run: exit_code (required); command, started_at, …`. */
+export function describeEvidencePayload(kind: (typeof EVIDENCE_KINDS)[number]): string {
+  const shape = EVIDENCE_PAYLOADS[kind];
+  const required = shape.required.map((p) => `${p} (required)`);
+  return `${kind}: {${[...required, ...shape.optional].join(', ') || 'no properties'}}`;
+}
+
+const EVIDENCE_LINK_HINT =
+  'Evidence is recorded first and then linked from the Claim: `tallyback claim … --evidence <evi_…>` ' +
+  '(or from a Verdict: `tallyback verdict … --evidence <evi_…>`).';
 
 const ACTOR_HELP =
   'attribute the record to kind:id (kind: human|subagent|executor|tool|unknown|migrated)';
@@ -394,7 +452,19 @@ const commands: CommandSpec[] = [
       { name: 'note', placeholder: 'text', description: 'free-text note' },
       actorFlag('the evidence'),
     ],
+    notes: [
+      'Payloads are closed per kind; no other property is accepted:',
+      ...EVIDENCE_KINDS.map((k) => `  ${describeEvidencePayload(k)}`),
+      'Put the human-readable result (e.g. "11 passed; test_x fails on the unfixed code") in --note.',
+      EVIDENCE_LINK_HINT,
+    ],
+    flagHints: {
+      'claim-id': EVIDENCE_LINK_HINT,
+      'attempt-id': EVIDENCE_LINK_HINT,
+      'task-id': EVIDENCE_LINK_HINT,
+    },
     examples: [
+      `tallyback evidence --kind test_run --payload '{"command":"python -m pytest -q","exit_code":0}' --note "11 passed; new test fails on the unfixed code"`,
       `tallyback evidence --kind observation --payload '{"text":"pytest -q: 11 passed"}'`,
       `tallyback evidence --kind git_commit --payload '{"repository_id":"<repo_…>","object_id":"<sha>","object_format":"sha1"}'`,
     ],
@@ -708,7 +778,8 @@ export function checkUsage(
         code: 'cli.unknown_flag',
         message:
           `\`${command}\` does not accept --${name}; nothing was recorded. ` +
-          (suggestion ? `Did you mean --${suggestion}? ` : '') +
+          (spec.flagHints?.[name] ? `${spec.flagHints[name]} ` : '') +
+          (!spec.flagHints?.[name] && suggestion ? `Did you mean --${suggestion}? ` : '') +
           `Accepted flags: ${accepted}. See \`tallyback ${command} --help\`.`,
       };
     }
@@ -747,6 +818,8 @@ export function renderUsage(spec: CommandSpec): string {
   ];
   if (required.length) parts.push('', 'Required:', ...required.map(line));
   if (optional.length) parts.push('', 'Options:', ...optional.map(line));
+  if (spec.notes?.length)
+    parts.push('', 'Notes:', ...spec.notes.map((n) => (n.startsWith('  ') ? n : `  ${n}`)));
   parts.push('', 'Global:', ...GLOBAL_FLAGS.map(line));
   parts.push('', 'Examples:', ...spec.examples.map((e) => `  ${e}`));
   parts.push('', spec.mutates ? 'Writes to the ledger.' : 'Read-only.');

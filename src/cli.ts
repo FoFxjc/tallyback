@@ -46,7 +46,13 @@ import {
 } from './view/index.js';
 import { buildWatchReport, createWatchResolver } from './watch/index.js';
 import { canMutateContractVersion, handshake } from './version.js';
-import { checkUsage, COMMAND_SPECS, renderUsage } from './cli-spec.js';
+import {
+  checkUsage,
+  COMMAND_SPECS,
+  describeEvidencePayload,
+  EVIDENCE_KINDS,
+  renderUsage,
+} from './cli-spec.js';
 import {
   ACTOR_KINDS,
   ATTEMPT_END_OUTCOMES,
@@ -260,6 +266,8 @@ function taskRefs(store: Store, args: Args, key = 'task-id'): string[] {
 
 /** The command being run, for usage diagnostics raised deep inside argument parsing. */
 let currentCommand = '';
+/** The `--kind` of an `evidence` command, for payload diagnostics. */
+let currentKind = '';
 
 /** A usage error: the command was not run and nothing was written. */
 class CliError extends Error {
@@ -575,6 +583,16 @@ function cliHint(command: string, outcome: RejectedOutcome): string | null {
       return '--verification-exception is only for accept/land; retry and abandon take --attempt-end-id and/or --blocker.';
     }
   }
+  if (command === 'evidence' && /payload|evidence kind/.test(message)) {
+    const kind = EVIDENCE_KINDS.find((k) => k === currentKind);
+    return (
+      (kind
+        ? `--payload for kind ${describeEvidencePayload(kind)}. `
+        : `--kind must be one of ${EVIDENCE_KINDS.join('|')}. `) +
+      'Put the human-readable result (counts, failing tests) in --note. ' +
+      'See `tallyback evidence --help` for every kind.'
+    );
+  }
   if (command === 'record-check') {
     return (
       'record-check takes complete contract records. To judge a Claim, use ' +
@@ -740,6 +758,7 @@ async function dispatch(
 
     case 'evidence': {
       const kind = str(args, 'kind');
+      currentKind = kind;
       return store.observeEvidence({
         kind: kind as never,
         payload: jsonValue(args, 'payload') as never,

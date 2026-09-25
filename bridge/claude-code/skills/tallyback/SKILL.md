@@ -69,6 +69,7 @@ the real gate.
 - **Precondition**: an open Attempt exists to attribute the Claim, Evidence, or Blocker to.
 - **Commands**: `tallyback claim`, `tallyback evidence`, `tallyback block`, `tallyback resolve`
 - **Guardrail**: adding evidence does not create a positive Verdict. Observe records facts — it never renders a verdict.
+- **Order**: record `evidence` first (put the human-readable result, e.g. counts and failing tests, in `--note`), then `claim … --evidence <evi_…>` to link it.
 
 ### Verify
 

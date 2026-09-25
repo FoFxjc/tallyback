@@ -102,3 +102,29 @@ failed after 5 retries`. Benchmark consequences: two false `check_failed` result
 - **Regression**: `test/cli-fail-closed.test.ts` (flags before the command word).
 - **Dogfood**: `--project-root <dir> init`, `--project-root=<dir> view` work; a leading
   `--bogus x` is still `cli.unknown_flag`; bare `tallyback` and `tallyback --help` unchanged.
+
+## R5 — Evidence authoring: say what a kind accepts, and where the result goes (F6, 8/9 runs)
+
+- **Reproduced**: `evidence --kind test_run --payload '{…,"result":"11 passed"}'` →
+  `payload must NOT have additional properties` (no list of accepted properties);
+  `--kind test` → `unknown evidence kind "test"` (no list of kinds);
+  `evidence … --claim-id` → (after R2) rejected, but nothing said how Evidence gets linked.
+  Benchmark outcomes: `{exit_code: 0}`-only evidence, `artifact {}`, explanations smuggled
+  into `command`.
+- **Root cause**: the payload shapes are closed by the frozen contract, and the Evidence
+  record's free-text `note` exists for exactly this — but neither was discoverable from the
+  CLI. No contract defect: the gap is description, not capacity.
+- **Change**: `EVIDENCE_PAYLOADS` (per-kind required/optional properties, drift-guarded
+  against `records.schema.json`); `evidence --help` lists every kind's shape and says to put
+  the human-readable result in `--note`; payload/kind rejections carry a hint with the
+  kind's accepted properties (or the kind list) and `--note`; `--claim-id` / `--attempt-id`
+  / `--task-id` on `evidence` explain that Evidence is linked from `claim --evidence`. The
+  skill's Observe phase states the order.
+- **Regression**: `test/cli-evidence.test.ts` — schema drift guard; hints; no mutation on
+  rejection; `--note` round-trips.
+- **Dogfood**: the three benchmark failure shapes each return an actionable hint with
+  `state.json` unchanged; `test_run` + `--note "11 passed; new test fails on the unfixed
+code"` records the result text.
+- **Uncertainty**: `artifact {}` is still accepted — the contract allows an empty artifact
+  payload; refusing it would be a contract change. Whether agents now use `--note` is for the
+  next benchmark to show.
