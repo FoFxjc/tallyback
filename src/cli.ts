@@ -46,6 +46,7 @@ import {
 } from './view/index.js';
 import { buildWatchReport, createWatchResolver } from './watch/index.js';
 import { canMutateContractVersion, handshake } from './version.js';
+import { COMMAND_SPECS, renderUsage } from './cli-spec.js';
 import {
   ACTOR_KINDS,
   ATTEMPT_END_OUTCOMES,
@@ -93,9 +94,10 @@ const BOOLEAN_FLAGS = new Set([
   'repair-header',
 ]);
 
-function parseArgs(argv: string[]): { command: string; args: Args } {
+function parseArgs(argv: string[]): { command: string; args: Args; positionals: string[] } {
   const [command, ...rest] = argv;
   const args: Args = {};
+  const positionals: string[] = [];
 
   const set = (key: string, value: string): void => {
     // Repeatable flag: collect into an array; single flag: scalar string.
@@ -111,7 +113,10 @@ function parseArgs(argv: string[]): { command: string; args: Args } {
 
   for (let i = 0; i < rest.length; i++) {
     const token = rest[i]!;
-    if (!token.startsWith('--')) continue;
+    if (!token.startsWith('--')) {
+      positionals.push(token);
+      continue;
+    }
 
     // `--key=value` is always unambiguous, whatever the value looks like.
     const eq = token.indexOf('=');
@@ -132,7 +137,7 @@ function parseArgs(argv: string[]): { command: string; args: Args } {
     set(key, next);
     i++;
   }
-  return { command: command ?? 'handshake', args };
+  return { command: command ?? 'handshake', args, positionals };
 }
 
 function str(args: Args, key: string, fallback?: string): string {
@@ -233,7 +238,15 @@ function taskRefs(store: Store, args: Args, key = 'task-id'): string[] {
   return strArray(args, key).map((raw) => resolveTaskRefValue(store, raw, key));
 }
 
-class CliError extends Error {}
+/** A usage error: the command was not run and nothing was written. */
+class CliError extends Error {
+  constructor(
+    message: string,
+    readonly code = 'cli.usage_error',
+  ) {
+    super(message);
+  }
+}
 
 const DEFAULT_ACTOR: Actor = { kind: 'tool', id: 'tallyback' };
 
@@ -350,17 +363,30 @@ Read-only reports / gates:
   show, list, bindings, land, view, watch, validate, reconcile
 
 Run with no command for the capability handshake.
-For full flag-level syntax for each command, see README.md (Quick Start) or src/cli.ts.
+Flags, accepted values, and examples for one command: tallyback <command> --help
 `;
 
 async function run(): Promise<void> {
-  const { command, args } = parseArgs(process.argv.slice(2));
+  const { command, args, positionals } = parseArgs(process.argv.slice(2));
 
   // Top-level help must work before any project-root / Store resolution: a new user
   // reaching for `--help` should never be met with a raw ENOENT for a ledger that
   // doesn't exist yet.
   if (command === '--help' || command === 'help') {
-    process.stdout.write(HELP_TEXT);
+    // `tallyback help <command>` prints that command's usage.
+    const topic = positionals[0];
+    const spec = topic ? COMMAND_SPECS.get(topic) : undefined;
+    if (topic && !spec) throw new CliError(`unknown command "${topic}"`, 'cli.unknown_command');
+    process.stdout.write(spec ? renderUsage(spec) : HELP_TEXT);
+    return;
+  }
+
+  // `tallyback <command> --help` never runs the command — it used to be parsed and then
+  // ignored, so `tallyback task … --help` created a Task.
+  if (args['help'] === 'true') {
+    const spec = COMMAND_SPECS.get(command);
+    if (!spec) throw new CliError(`unknown command "${command}"`, 'cli.unknown_command');
+    process.stdout.write(renderUsage(spec));
     return;
   }
 
@@ -1243,6 +1269,9 @@ async function runMigrate(projectRoot: string, args: Args, submitter: Actor): Pr
     fail(loaded.code, loaded.message);
   }
   const apply = args['apply'] === 'true';
+  if (apply && args['preview'] === 'true') {
+    throw new CliError('--preview and --apply are mutually exclusive; nothing was written');
+  }
   const options = {
     projectRoot,
     legacy: loaded.legacy,

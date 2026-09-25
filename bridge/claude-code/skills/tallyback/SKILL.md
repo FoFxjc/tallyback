@@ -13,6 +13,9 @@ description: Use when driving a Tallyback-tracked task through its lifecycle (de
    never invent any other part of the command.
 3. Repeat after each step.
 
+For any command's required flags, accepted values, and examples, run
+`tallyback <command> --help` — it never runs the command.
+
 If `view` returns `"code": "mutation.ledger_not_initialized"`, this repository has no
 ledger yet: run the `next_action.command` it gives (`tallyback init`), then `view` again.
 Any other `{ "ok": false }` code is a real problem with an existing ledger — report it;
