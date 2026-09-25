@@ -1,0 +1,60 @@
+{
+  "generated_from_revision": 10,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d754-bd94-763b-bbb6-d5681ecd75f4",
+      "title": "Fix: preserve unknown keys during config migration",
+      "topic_id": "top_01a0d754-ae15-75cd-9dfb-0ae92753f227",
+      "declaration": {
+        "declaration_id": "dcl_01a0d754-ddb1-73fb-a808-02c4074906d4",
+        "objective": "Preserve all user-defined keys recursively when migrating v1 config to v2, and add regression test coverage",
+        "criteria": []
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d755-1b78-711f-b309-d5115efd1a5d",
+          "executor": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "workspace_id": "wsp_01a0d755-10f5-775c-b345-b2d49f3d9c11",
+          "repository_id": "repo_01a0d754-9e8e-70db-a29b-febf498fd5fa",
+          "dispatched_at": "2026-09-25T06:51:14.168Z",
+          "ended": true
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d755-73bf-703e-b488-0b5cf53efdcb",
+          "statement": "Migration function updated to preserve all unknown keys",
+          "evidence_ids": [],
+          "claimed_by": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "claimed_at": "2026-09-25T06:51:36.768Z"
+        }
+      ],
+      "evidence": [],
+      "blockers": [],
+      "verification": [],
+      "settlement": null,
+      "status": {
+        "blocked": false,
+        "verified": false,
+        "settled": false,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "settle"
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 0
+  }
+}

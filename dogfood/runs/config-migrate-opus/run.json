@@ -1,0 +1,12 @@
+{
+  "run_id": "config-migrate-opus",
+  "fixture": "config-migrate",
+  "model_alias": "opus",
+  "model_requested": "claude-opus-5-5",
+  "seed_sha": "cfb8d4093b83142257b29caf6726025df0342553",
+  "workspace": "/tmp/claude-0/-home-user-tallyback/01b763c0-69a7-5ad2-94c6-b173155321d2/scratchpad/bench/w/oYheFqwb/repo",
+  "started_at": "2026-09-25T06:50:14Z",
+  "ended_at": "2026-09-25T06:53:12Z",
+  "wall_clock_seconds": 178,
+  "claude_exit_code": 0
+}

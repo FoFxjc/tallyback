@@ -1,0 +1,546 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 28,
+  "included_through": 28,
+  "project": {
+    "project_id": "prj_01a0d754-5e60-71be-bb3d-774492b7f707",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d754-5e60-71be-bb3d-7967d48bcfcd",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d754-5e60-71be-bb3d-7967d48bcfcd",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d755-3718-7368-a316-4dd194addd1f",
+      "repository_id": "repo_01a0d754-5e60-71be-bb3d-7967d48bcfcd"
+    },
+    {
+      "workspace_id": "wsp_01a0d75a-736a-7162-b101-97b60246be01",
+      "repository_id": "repo_01a0d754-5e60-71be-bb3d-7967d48bcfcd",
+      "branch": "fix/config-migration-preserve-keys"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d754-6acb-70dc-a114-9c885df956b1",
+      "project_id": "prj_01a0d754-5e60-71be-bb3d-774492b7f707",
+      "name": "config-migration-fix",
+      "goal": "",
+      "created_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "created_at": "2026-09-25T06:50:28.939Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d754-767f-7305-b41f-56bf31eb4aa0",
+      "topic_id": "top_01a0d754-6acb-70dc-a114-9c885df956b1",
+      "title": "Fix v1->v2 config migration losing custom keys"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d754-d5e0-743d-9861-cc92ea857d4e",
+      "task_id": "tsk_01a0d754-767f-7305-b41f-56bf31eb4aa0",
+      "declared_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "declared_at": "2026-09-25T06:50:56.352Z",
+      "objective": "Fix v1->v2 config migration in cfgmigrate/migrate.py so it preserves unrelated user-defined keys (e.g. 'custom') recursively, renames timeout->request_timeout, sets version=2, and does not mutate the input object; add regression coverage for unknown-key preservation.",
+      "criteria": []
+    },
+    {
+      "declaration_id": "dcl_01a0d757-9981-765e-b08e-4bba667321dd",
+      "task_id": "tsk_01a0d754-767f-7305-b41f-56bf31eb4aa0",
+      "declared_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "declared_at": "2026-09-25T06:53:57.505Z",
+      "objective": "x",
+      "criteria": [],
+      "supersedes": "dcl_01a0d754-d5e0-743d-9861-cc92ea857d4e"
+    },
+    {
+      "declaration_id": "dcl_01a0d757-c568-77c8-bf1b-6b92c446b52b",
+      "task_id": "tsk_01a0d754-767f-7305-b41f-56bf31eb4aa0",
+      "declared_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "declared_at": "2026-09-25T06:54:08.744Z",
+      "objective": "Fix v1->v2 config migration in cfgmigrate/migrate.py so it preserves unrelated user-defined keys (e.g. 'custom') recursively, renames timeout->request_timeout, sets version=2, and does not mutate the input object; add regression coverage for unknown-key preservation.",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d757-c569-73f9-865c-303f7c2cee03",
+          "code": "rename",
+          "statement": "Rename 'timeout' to 'request_timeout'.",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d757-c569-73f9-865c-356cfae23b50",
+          "code": "version",
+          "statement": "Set 'version' to 2.",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d757-c569-73f9-865c-3ac14da92e3a",
+          "code": "preserve",
+          "statement": "Preserve all unrelated user-defined keys recursively.",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d757-c569-73f9-865c-3e547e1ffcc0",
+          "code": "immutable",
+          "statement": "Do not mutate the input object.",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d757-c569-73f9-865c-400dd5bcfcf7",
+          "code": "coverage",
+          "statement": "Add regression coverage for preservation of unknown keys.",
+          "required": true
+        }
+      ],
+      "supersedes": "dcl_01a0d757-9981-765e-b08e-4bba667321dd"
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d755-436e-75c8-8227-e66f0f8fe1d9",
+      "task_id": "tsk_01a0d754-767f-7305-b41f-56bf31eb4aa0",
+      "declaration_id": "dcl_01a0d754-d5e0-743d-9861-cc92ea857d4e",
+      "repository_id": "repo_01a0d754-5e60-71be-bb3d-7967d48bcfcd",
+      "workspace_id": "wsp_01a0d755-3718-7368-a316-4dd194addd1f",
+      "executor": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_at": "2026-09-25T06:51:24.399Z"
+    },
+    {
+      "attempt_id": "att_01a0d758-2892-75df-9c9b-32bca255fb02",
+      "task_id": "tsk_01a0d754-767f-7305-b41f-56bf31eb4aa0",
+      "declaration_id": "dcl_01a0d757-c568-77c8-bf1b-6b92c446b52b",
+      "repository_id": "repo_01a0d754-5e60-71be-bb3d-7967d48bcfcd",
+      "workspace_id": "wsp_01a0d755-3718-7368-a316-4dd194addd1f",
+      "executor": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_at": "2026-09-25T06:54:34.130Z"
+    },
+    {
+      "attempt_id": "att_01a0d75a-a410-765c-9222-11aaf7b03e20",
+      "task_id": "tsk_01a0d754-767f-7305-b41f-56bf31eb4aa0",
+      "declaration_id": "dcl_01a0d757-c568-77c8-bf1b-6b92c446b52b",
+      "repository_id": "repo_01a0d754-5e60-71be-bb3d-7967d48bcfcd",
+      "workspace_id": "wsp_01a0d75a-736a-7162-b101-97b60246be01",
+      "executor": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_at": "2026-09-25T06:57:16.816Z"
+    }
+  ],
+  "attempt_ends": [
+    {
+      "attempt_end_id": "ate_01a0d755-f28b-7008-bafa-38ee73671e31",
+      "attempt_id": "att_01a0d755-436e-75c8-8227-e66f0f8fe1d9",
+      "outcome": "returned",
+      "reported_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "ended_at": "2026-09-25T06:52:09.227Z"
+    },
+    {
+      "attempt_end_id": "ate_01a0d758-322d-75f8-b6a5-dfd9588019f0",
+      "attempt_id": "att_01a0d758-2892-75df-9c9b-32bca255fb02",
+      "outcome": "returned",
+      "reported_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "ended_at": "2026-09-25T06:54:36.590Z"
+    },
+    {
+      "attempt_end_id": "ate_01a0d75a-bbc9-72b7-b93c-6e426123afe0",
+      "attempt_id": "att_01a0d75a-a410-765c-9222-11aaf7b03e20",
+      "outcome": "returned",
+      "reported_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "ended_at": "2026-09-25T06:57:22.889Z"
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "clm_01a0d756-2b01-755a-b2d9-dcac34bdc1d6",
+      "task_id": "tsk_01a0d754-767f-7305-b41f-56bf31eb4aa0",
+      "attempt_id": "att_01a0d755-436e-75c8-8227-e66f0f8fe1d9",
+      "declaration_id": "dcl_01a0d754-d5e0-743d-9861-cc92ea857d4e",
+      "statement": "Rewrote _v1_to_v2 in cfgmigrate/migrate.py to deep-copy the input, rename timeout->request_timeout, set version=2, default plugins to [] if missing, and preserve all other keys (e.g. custom) recursively without mutating the input. Added regression tests for unknown top-level key preservation, nested key preservation, and non-mutation of the input. Full pytest suite (13 tests) passes.",
+      "evidence_ids": [],
+      "claimed_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "claimed_at": "2026-09-25T06:52:23.681Z"
+    },
+    {
+      "claim_id": "clm_01a0d758-439a-75f1-90e7-130c4fc24e2e",
+      "task_id": "tsk_01a0d754-767f-7305-b41f-56bf31eb4aa0",
+      "attempt_id": "att_01a0d758-2892-75df-9c9b-32bca255fb02",
+      "declaration_id": "dcl_01a0d757-c568-77c8-bf1b-6b92c446b52b",
+      "statement": "Rewrote _v1_to_v2 in cfgmigrate/migrate.py to deep-copy the input (no input mutation), rename timeout->request_timeout, set version=2, default plugins to [] if missing, and preserve all other keys (e.g. custom) recursively. Added regression tests (test_preserves_unknown_top_level_keys, test_preserves_nested_unknown_keys_recursively, test_does_not_mutate_input). Full pytest suite (13 tests, including 3 new) passes; manually reproduced the exact example from ISSUE.md and confirmed output matches expected and input dict is untouched.",
+      "evidence_ids": [],
+      "claimed_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "claimed_at": "2026-09-25T06:54:41.050Z"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "test_run",
+      "payload": {
+        "exit_code": 0
+      },
+      "submitted_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "evidence_id": "evi_01a0d756-7f96-70c8-999f-fc565d7de21f",
+      "submitted_at": "2026-09-25T06:52:45.335Z"
+    },
+    {
+      "kind": "test_run",
+      "payload": {
+        "exit_code": 0
+      },
+      "submitted_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "evidence_id": "evi_01a0d756-9875-760f-b12b-c046fd5e815c",
+      "submitted_at": "2026-09-25T06:52:51.702Z"
+    },
+    {
+      "kind": "test_run",
+      "payload": {
+        "exit_code": 0
+      },
+      "submitted_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "evidence_id": "evi_01a0d758-4f60-757d-bc2a-a560ddd0e76d",
+      "submitted_at": "2026-09-25T06:54:44.064Z"
+    }
+  ],
+  "reconciliations": [],
+  "check_invocations": [
+    {
+      "check_invocation_id": "chk_01a0d756-d5b6-77d6-86cd-e7a2b13c4743",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d756-2b01-755a-b2d9-dcac34bdc1d6"
+      },
+      "checker": {
+        "id": "pytest-suite",
+        "version": "pytest-8.3.3"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d754-5e60-71be-bb3d-774492b7f707",
+        "revision": 9,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "9df47f627a61068114a88e6c9756621e0301f0841777e2269d72f42e312d01c7"
+        }
+      },
+      "invoked_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "invoked_at": "2026-09-25T06:53:07.382Z"
+    },
+    {
+      "check_invocation_id": "chk_01a0d758-5d82-76b8-b6f0-b2a96ff0b942",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d758-439a-75f1-90e7-130c4fc24e2e"
+      },
+      "checker": {
+        "id": "pytest-suite",
+        "version": "pytest-8.3.3"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d754-5e60-71be-bb3d-774492b7f707",
+        "revision": 16,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "93fb27b0ea57b38c1c012ac6da2c2778506f0c49b5b962fd70db288415fef1a6"
+        }
+      },
+      "invoked_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "invoked_at": "2026-09-25T06:54:47.682Z"
+    },
+    {
+      "check_invocation_id": "chk_01a0d758-c7f8-7499-b60d-35ac5ad53f29",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d758-439a-75f1-90e7-130c4fc24e2e"
+      },
+      "checker": {
+        "id": "pytest-suite",
+        "version": "pytest-8.3.3"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d754-5e60-71be-bb3d-774492b7f707",
+        "revision": 18,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "6fc970dfc5b43014707926157de574d0c368526976904ba0245852a7a523120e"
+        }
+      },
+      "invoked_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "invoked_at": "2026-09-25T06:55:14.936Z"
+    },
+    {
+      "check_invocation_id": "chk_01a0d759-5327-777c-b5a4-d1e3f82178f0",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d758-439a-75f1-90e7-130c4fc24e2e"
+      },
+      "checker": {
+        "id": "pytest-suite",
+        "version": "pytest-8.3.3"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d754-5e60-71be-bb3d-774492b7f707",
+        "revision": 20,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "9b01e1c43f031b59e680a0fa019895b8f45067aadaca2eeb732c103f89777b90"
+        }
+      },
+      "invoked_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "invoked_at": "2026-09-25T06:55:50.568Z"
+    },
+    {
+      "check_invocation_id": "chk_01a0d759-9a8f-76f4-aa4f-555b04673a27",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d758-439a-75f1-90e7-130c4fc24e2e"
+      },
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d754-5e60-71be-bb3d-774492b7f707",
+        "revision": 21,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "48793714375ce49ac5733b43ff53ba0e22ee7ad6639e566b858ec0e41184b413"
+        }
+      },
+      "invoked_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "invoked_at": "2026-09-25T06:56:08.847Z"
+    }
+  ],
+  "check_results": [
+    {
+      "check_result_id": "ckr_01a0d758-aea3-7072-aab9-c56ad2db46c1",
+      "check_invocation_id": "chk_01a0d758-5d82-76b8-b6f0-b2a96ff0b942",
+      "outcome": "verdict_withheld",
+      "produced_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "completed_at": "2026-09-25T06:55:08.452Z",
+      "diagnostics": [],
+      "reconciliation_ids": [],
+      "verdict_id": null
+    },
+    {
+      "check_result_id": "ckr_01a0d759-17e8-77ea-a988-5be99e98179e",
+      "check_invocation_id": "chk_01a0d758-c7f8-7499-b60d-35ac5ad53f29",
+      "outcome": "check_failed",
+      "produced_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "completed_at": "2026-09-25T06:55:35.401Z",
+      "diagnostics": [],
+      "reconciliation_ids": [],
+      "verdict_id": null
+    },
+    {
+      "check_result_id": "ckr_01a0d759-9aa5-76d5-96b5-8e2866195da0",
+      "check_invocation_id": "chk_01a0d759-9a8f-76f4-aa4f-555b04673a27",
+      "outcome": "verdict_emitted",
+      "produced_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "completed_at": "2026-09-25T06:56:08.869Z",
+      "diagnostics": [],
+      "reconciliation_ids": [],
+      "verdict_id": "ver_01a0d759-9a8e-728b-a205-0fdd8cf4f96b"
+    }
+  ],
+  "verdicts": [
+    {
+      "verdict_id": "ver_01a0d759-9a8e-728b-a205-0fdd8cf4f96b",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d758-439a-75f1-90e7-130c4fc24e2e"
+      },
+      "declaration_id": "dcl_01a0d757-c568-77c8-bf1b-6b92c446b52b",
+      "scope": {
+        "evaluated_criteria": [
+          "cri_01a0d757-c569-73f9-865c-303f7c2cee03",
+          "cri_01a0d757-c569-73f9-865c-356cfae23b50",
+          "cri_01a0d757-c569-73f9-865c-3ac14da92e3a",
+          "cri_01a0d757-c569-73f9-865c-3e547e1ffcc0",
+          "cri_01a0d757-c569-73f9-865c-400dd5bcfcf7"
+        ],
+        "unevaluated_criteria": []
+      },
+      "conclusion": "supported",
+      "finality": "final",
+      "basis": {
+        "evidence_ids": [],
+        "reconciliation_ids": []
+      },
+      "findings": [
+        {
+          "criterion_id": "cri_01a0d757-c569-73f9-865c-303f7c2cee03",
+          "assessment": "supported",
+          "summary": "rename: assessed as supported",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d757-c569-73f9-865c-356cfae23b50",
+          "assessment": "supported",
+          "summary": "version: assessed as supported",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d757-c569-73f9-865c-3ac14da92e3a",
+          "assessment": "supported",
+          "summary": "preserve: assessed as supported",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d757-c569-73f9-865c-3e547e1ffcc0",
+          "assessment": "supported",
+          "summary": "immutable: assessed as supported",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d757-c569-73f9-865c-400dd5bcfcf7",
+          "assessment": "supported",
+          "summary": "coverage: assessed as supported",
+          "basis_refs": []
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "python -m pytest -v: 13/13 passed, including the 3 new regression tests (test_preserves_unknown_top_level_keys, test_preserves_nested_unknown_keys_recursively, test_does_not_mutate_input). Manually reproduced the exact ISSUE.md example: migrating {version:1, timeout:30, plugins:[foo], custom:{owner:peter}} yields {version:2, request_timeout:30, plugins:[foo], custom:{owner:peter}} and confirmed the input dict is unchanged after the call."
+      },
+      "rationale": "python -m pytest -v: 13/13 passed, including the 3 new regression tests (test_preserves_unknown_top_level_keys, test_preserves_nested_unknown_keys_recursively, test_does_not_mutate_input). Manually reproduced the exact ISSUE.md example: migrating {version:1, timeout:30, plugins:[foo], custom:{owner:peter}} yields {version:2, request_timeout:30, plugins:[foo], custom:{owner:peter}} and confirmed the input dict is unchanged after the call.",
+      "uncertainty": [],
+      "limitations": [],
+      "issued_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "issued_at": "2026-09-25T06:56:08.846Z",
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      }
+    }
+  ],
+  "settlements": [
+    {
+      "settlement_id": "set_01a0d75a-0b38-7593-871c-611341316130",
+      "task_id": "tsk_01a0d754-767f-7305-b41f-56bf31eb4aa0",
+      "attempt_id": "att_01a0d758-2892-75df-9c9b-32bca255fb02",
+      "decision": "land",
+      "decided_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "decided_at": "2026-09-25T06:56:37.689Z",
+      "basis": {
+        "verdict_id": "ver_01a0d759-9a8e-728b-a205-0fdd8cf4f96b",
+        "attempt_end_id": null,
+        "blocker_ids": []
+      },
+      "rationale": "Verdict ver_01a0d759-9a8e-728b-a205-0fdd8cf4f96b: all 5 declared criteria (rename, version, preserve, immutable, coverage) assessed as supported with high confidence, backed by a full pytest run (13/13 passing, 3 new regression tests) and a manual reproduction of the exact ISSUE.md example confirming correct output and no input mutation.",
+      "verification_exception": null
+    },
+    {
+      "settlement_id": "set_01a0d75a-d3e8-7358-b633-00d9521732c6",
+      "task_id": "tsk_01a0d754-767f-7305-b41f-56bf31eb4aa0",
+      "attempt_id": "att_01a0d75a-a410-765c-9222-11aaf7b03e20",
+      "decision": "land",
+      "decided_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "decided_at": "2026-09-25T06:57:29.064Z",
+      "basis": {
+        "verdict_id": "ver_01a0d759-9a8e-728b-a205-0fdd8cf4f96b",
+        "attempt_end_id": null,
+        "blocker_ids": []
+      },
+      "rationale": "Re-settling against attempt att_01a0d75a whose workspace has the branch field bound (fix/config-migration-preserve-keys), so the land cross-check can resolve live Git state. Same basis as before: verdict ver_01a0d759-9a8e-728b-a205-0fdd8cf4f96b (all 5 criteria supported, high confidence).",
+      "verification_exception": null
+    }
+  ],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": []
+}

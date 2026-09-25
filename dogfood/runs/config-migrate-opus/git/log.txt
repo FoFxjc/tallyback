@@ -1,0 +1,2 @@
+06e0223aef132f634e8cb3d95e234ebf26b037b0 Claude Preserve user-defined keys in v1->v2 config migration
+cfb8d4093b83142257b29caf6726025df0342553 Tallyback Dogfood seed: config-migrate

@@ -1,0 +1,54 @@
+{
+  "model_reported_by_cli": "claude-haiku-4-5-20251001",
+  "model_usage": {
+    "claude-haiku-4-5-20251001": {
+      "inputTokens": 547,
+      "outputTokens": 16321,
+      "cacheReadInputTokens": 3114926,
+      "cacheCreationInputTokens": 37005,
+      "webSearchRequests": 0,
+      "costUSD": 0.4676546000000001,
+      "contextWindow": 200000,
+      "maxOutputTokens": 32000,
+      "thinkingTokens": 3807,
+      "canonicalModel": "claude-haiku-4-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "num_turns": 69,
+  "duration_ms": 186280,
+  "total_cost_usd": 0.4676546000000001,
+  "result_is_error": false,
+  "tool_calls": 67,
+  "tool_calls_by_name": {
+    "Bash": 59,
+    "Edit": 2,
+    "Read": 5,
+    "Skill": 1
+  },
+  "tallyback_invocations": 52,
+  "tallyback_failed_or_rejected": 30,
+  "tallyback_by_subcommand": {
+    "begin-check": 4,
+    "claim": 3,
+    "declare": 2,
+    "dispatch": 4,
+    "end": 2,
+    "evidence": 7,
+    "handshake": 1,
+    "help": 1,
+    "init": 1,
+    "record-check": 5,
+    "settle": 7,
+    "task": 1,
+    "topic": 1,
+    "verdict": 3,
+    "view": 9,
+    "workspace": 1
+  },
+  "used_skill_tool": true,
+  "touched_tallyback_source": false,
+  "inspected_tallyback_wrapper": true,
+  "spawned_subagents": 0
+}

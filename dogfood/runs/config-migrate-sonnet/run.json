@@ -1,0 +1,12 @@
+{
+  "run_id": "config-migrate-sonnet",
+  "fixture": "config-migrate",
+  "model_alias": "sonnet",
+  "model_requested": "claude-sonnet-5",
+  "seed_sha": "cfb8d4093b83142257b29caf6726025df0342553",
+  "workspace": "/tmp/claude-0/-home-user-tallyback/01b763c0-69a7-5ad2-94c6-b173155321d2/scratchpad/bench/w/hf3yYVwB/repo",
+  "started_at": "2026-09-25T06:50:14Z",
+  "ended_at": "2026-09-25T06:58:05Z",
+  "wall_clock_seconds": 471,
+  "claude_exit_code": 0
+}

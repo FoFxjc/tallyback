@@ -1,0 +1,2 @@
+1b0a027dcc9e2920a8fdfa7ffa4d102fd66c7854 Claude Fix v1->v2 config migration dropping unknown keys
+cfb8d4093b83142257b29caf6726025df0342553 Tallyback Dogfood seed: config-migrate

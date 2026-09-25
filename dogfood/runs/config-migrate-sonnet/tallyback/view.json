@@ -1,0 +1,138 @@
+{
+  "generated_from_revision": 28,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d754-767f-7305-b41f-56bf31eb4aa0",
+      "title": "Fix v1->v2 config migration losing custom keys",
+      "topic_id": "top_01a0d754-6acb-70dc-a114-9c885df956b1",
+      "declaration": {
+        "declaration_id": "dcl_01a0d757-c568-77c8-bf1b-6b92c446b52b",
+        "objective": "Fix v1->v2 config migration in cfgmigrate/migrate.py so it preserves unrelated user-defined keys (e.g. 'custom') recursively, renames timeout->request_timeout, sets version=2, and does not mutate the input object; add regression coverage for unknown-key preservation.",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d757-c569-73f9-865c-303f7c2cee03",
+            "code": "rename",
+            "statement": "Rename 'timeout' to 'request_timeout'.",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d757-c569-73f9-865c-356cfae23b50",
+            "code": "version",
+            "statement": "Set 'version' to 2.",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d757-c569-73f9-865c-3ac14da92e3a",
+            "code": "preserve",
+            "statement": "Preserve all unrelated user-defined keys recursively.",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d757-c569-73f9-865c-3e547e1ffcc0",
+            "code": "immutable",
+            "statement": "Do not mutate the input object.",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d757-c569-73f9-865c-400dd5bcfcf7",
+            "code": "coverage",
+            "statement": "Add regression coverage for preservation of unknown keys.",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d755-436e-75c8-8227-e66f0f8fe1d9",
+          "executor": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "workspace_id": "wsp_01a0d755-3718-7368-a316-4dd194addd1f",
+          "repository_id": "repo_01a0d754-5e60-71be-bb3d-7967d48bcfcd",
+          "dispatched_at": "2026-09-25T06:51:24.399Z",
+          "ended": true
+        },
+        {
+          "attempt_id": "att_01a0d758-2892-75df-9c9b-32bca255fb02",
+          "executor": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "workspace_id": "wsp_01a0d755-3718-7368-a316-4dd194addd1f",
+          "repository_id": "repo_01a0d754-5e60-71be-bb3d-7967d48bcfcd",
+          "dispatched_at": "2026-09-25T06:54:34.130Z",
+          "ended": true
+        },
+        {
+          "attempt_id": "att_01a0d75a-a410-765c-9222-11aaf7b03e20",
+          "executor": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "workspace_id": "wsp_01a0d75a-736a-7162-b101-97b60246be01",
+          "repository_id": "repo_01a0d754-5e60-71be-bb3d-7967d48bcfcd",
+          "dispatched_at": "2026-09-25T06:57:16.816Z",
+          "ended": true
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d756-2b01-755a-b2d9-dcac34bdc1d6",
+          "statement": "Rewrote _v1_to_v2 in cfgmigrate/migrate.py to deep-copy the input, rename timeout->request_timeout, set version=2, default plugins to [] if missing, and preserve all other keys (e.g. custom) recursively without mutating the input. Added regression tests for unknown top-level key preservation, nested key preservation, and non-mutation of the input. Full pytest suite (13 tests) passes.",
+          "evidence_ids": [],
+          "claimed_by": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "claimed_at": "2026-09-25T06:52:23.681Z"
+        },
+        {
+          "claim_id": "clm_01a0d758-439a-75f1-90e7-130c4fc24e2e",
+          "statement": "Rewrote _v1_to_v2 in cfgmigrate/migrate.py to deep-copy the input (no input mutation), rename timeout->request_timeout, set version=2, default plugins to [] if missing, and preserve all other keys (e.g. custom) recursively. Added regression tests (test_preserves_unknown_top_level_keys, test_preserves_nested_unknown_keys_recursively, test_does_not_mutate_input). Full pytest suite (13 tests, including 3 new) passes; manually reproduced the exact example from ISSUE.md and confirmed output matches expected and input dict is untouched.",
+          "evidence_ids": [],
+          "claimed_by": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "claimed_at": "2026-09-25T06:54:41.050Z"
+        }
+      ],
+      "evidence": [],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d759-9a8e-728b-a205-0fdd8cf4f96b",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "python -m pytest -v: 13/13 passed, including the 3 new regression tests (test_preserves_unknown_top_level_keys, test_preserves_nested_unknown_keys_recursively, test_does_not_mutate_input). Manually reproduced the exact ISSUE.md example: migrating {version:1, timeout:30, plugins:[foo], custom:{owner:peter}} yields {version:2, request_timeout:30, plugins:[foo], custom:{owner:peter}} and confirmed the input dict is unchanged after the call."
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d75a-d3e8-7358-b633-00d9521732c6",
+        "decision": "land",
+        "verification_exception": null,
+        "rationale": "Re-settling against attempt att_01a0d75a whose workspace has the branch field bound (fix/config-migration-preserve-keys), so the land cross-check can resolve live Git state. Same basis as before: verdict ver_01a0d759-9a8e-728b-a205-0fdd8cf4f96b (all 5 criteria supported, high confidence)."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": true,
+        "stale": false
+      },
+      "next_action": "settled: land"
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 1,
+    "stale": 0,
+    "settled": 1
+  }
+}

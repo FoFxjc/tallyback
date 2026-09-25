@@ -1,0 +1,370 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 16,
+  "included_through": 16,
+  "project": {
+    "project_id": "prj_01a0d754-5129-7498-aeb8-dcd6b2657695",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d754-5129-7498-aeb8-e1c7da184e7c",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d754-5129-7498-aeb8-e1c7da184e7c",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d754-bb56-7554-92dd-ecadb2f2b8ad",
+      "repository_id": "repo_01a0d754-5129-7498-aeb8-e1c7da184e7c"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d754-5a7d-7388-80ef-e98c93a84495",
+      "project_id": "prj_01a0d754-5129-7498-aeb8-dcd6b2657695",
+      "name": "config-migration",
+      "goal": "",
+      "created_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "created_at": "2026-09-25T06:50:24.765Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d754-66f8-75c0-a752-fd30aebcb774",
+      "topic_id": "top_01a0d754-5a7d-7388-80ef-e98c93a84495",
+      "title": "v1->v2 migration preserves user keys"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d754-843d-75bd-a568-2b31e220019d",
+      "task_id": "tsk_01a0d754-66f8-75c0-a752-fd30aebcb774",
+      "declared_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "declared_at": "2026-09-25T06:50:35.453Z",
+      "objective": "Fix v1->v2 config migration dropping user-defined keys (ISSUE.md)",
+      "criteria": []
+    },
+    {
+      "declaration_id": "dcl_01a0d754-a7b9-7747-95ea-dfe814552f9d",
+      "task_id": "tsk_01a0d754-66f8-75c0-a752-fd30aebcb774",
+      "declared_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "declared_at": "2026-09-25T06:50:44.537Z",
+      "objective": "Fix v1->v2 config migration dropping user-defined keys (ISSUE.md)",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d754-a7ba-75af-9313-ff79e227c8f8",
+          "code": "AC1",
+          "statement": " rename timeout to request_timeout",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d754-a7ba-75af-9314-00d6284cfc9a",
+          "code": "AC2",
+          "statement": " set version to 2",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d754-a7ba-75af-9314-0745584d6160",
+          "code": "AC3",
+          "statement": " preserve all unrelated user-defined keys recursively",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d754-a7ba-75af-9314-0800e37cee0c",
+          "code": "AC4",
+          "statement": " do not mutate the input object",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d754-a7ba-75af-9314-0ef8ae7a6475",
+          "code": "AC5",
+          "statement": " regression coverage for preservation of unknown keys",
+          "required": true
+        }
+      ],
+      "supersedes": "dcl_01a0d754-843d-75bd-a568-2b31e220019d"
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d754-d98e-736b-b01c-65f804f30e35",
+      "task_id": "tsk_01a0d754-66f8-75c0-a752-fd30aebcb774",
+      "declaration_id": "dcl_01a0d754-a7b9-7747-95ea-dfe814552f9d",
+      "repository_id": "repo_01a0d754-5129-7498-aeb8-e1c7da184e7c",
+      "workspace_id": "wsp_01a0d754-bb56-7554-92dd-ecadb2f2b8ad",
+      "executor": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_at": "2026-09-25T06:50:57.294Z"
+    }
+  ],
+  "attempt_ends": [
+    {
+      "attempt_end_id": "ate_01a0d756-b350-70f0-92d0-4dca6126c530",
+      "attempt_id": "att_01a0d754-d98e-736b-b01c-65f804f30e35",
+      "outcome": "returned",
+      "reported_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "ended_at": "2026-09-25T06:52:58.576Z"
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "clm_01a0d755-4c18-76c3-aefb-25104a71b812",
+      "task_id": "tsk_01a0d754-66f8-75c0-a752-fd30aebcb774",
+      "attempt_id": "att_01a0d754-d98e-736b-b01c-65f804f30e35",
+      "declaration_id": "dcl_01a0d754-a7b9-7747-95ea-dfe814552f9d",
+      "statement": "Commit 06e0223 on fix/preserve-user-keys: v1->v2 deep-copies input, renames timeout, sets version 2; 4 regression tests added",
+      "evidence_ids": [],
+      "claimed_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "claimed_at": "2026-09-25T06:51:26.616Z"
+    },
+    {
+      "claim_id": "clm_01a0d756-66f3-72fc-b039-14141f176d15",
+      "task_id": "tsk_01a0d754-66f8-75c0-a752-fd30aebcb774",
+      "attempt_id": "att_01a0d754-d98e-736b-b01c-65f804f30e35",
+      "declaration_id": "dcl_01a0d754-a7b9-7747-95ea-dfe814552f9d",
+      "statement": "Commit 06e0223 on fix/preserve-user-keys: v1->v2 deep-copies input, renames timeout, sets version 2, migrate() never returns input object; 4 regression tests added (fail on seed, pass after fix)",
+      "evidence_ids": [
+        "evi_01a0d755-9958-743f-a97c-cc9ad3b3be91",
+        "evi_01a0d755-acef-704f-b543-801068b633a1"
+      ],
+      "claimed_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "claimed_at": "2026-09-25T06:52:39.027Z"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "test_run",
+      "payload": {
+        "command": "python3 -m pytest",
+        "exit_code": 0
+      },
+      "submitted_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "evidence_id": "evi_01a0d755-9958-743f-a97c-cc9ad3b3be91",
+      "submitted_at": "2026-09-25T06:51:46.392Z"
+    },
+    {
+      "kind": "test_run",
+      "payload": {
+        "command": "git checkout cfb8d40 -- cfgmigrate && python3 -m pytest  # new tests vs seed code: 4 failed, 10 passed",
+        "exit_code": 1
+      },
+      "submitted_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "evidence_id": "evi_01a0d755-acef-704f-b543-801068b633a1",
+      "submitted_at": "2026-09-25T06:51:51.407Z"
+    }
+  ],
+  "reconciliations": [],
+  "check_invocations": [
+    {
+      "check_invocation_id": "chk_01a0d755-de70-732d-8384-2f69f26d7e48",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d755-4c18-76c3-aefb-25104a71b812"
+      },
+      "checker": {
+        "id": "claude-orchestrator",
+        "version": "1"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d754-5129-7498-aeb8-dcd6b2657695",
+        "revision": 9,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "321904d3df334d173dbdc7f180f8fd952940615949de3b98ca3eb141e0ea1ad5"
+        }
+      },
+      "invoked_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "invoked_at": "2026-09-25T06:52:04.080Z"
+    },
+    {
+      "check_invocation_id": "chk_01a0d756-7bb2-77c7-b8fa-8a6b5a8ce9ad",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d756-66f3-72fc-b039-14141f176d15"
+      },
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d754-5129-7498-aeb8-dcd6b2657695",
+        "revision": 12,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "c1539042f31b8bbf6739bf397f26920b8b3cdde9ee7637a7fc2cc0f2ab597f2e"
+        }
+      },
+      "invoked_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "invoked_at": "2026-09-25T06:52:44.338Z"
+    }
+  ],
+  "check_results": [
+    {
+      "check_result_id": "ckr_01a0d756-65a2-739c-bd20-9ed750029096",
+      "check_invocation_id": "chk_01a0d755-de70-732d-8384-2f69f26d7e48",
+      "outcome": "verdict_withheld",
+      "produced_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "completed_at": "2026-09-25T06:52:38.691Z",
+      "diagnostics": [],
+      "reconciliation_ids": [],
+      "verdict_id": null
+    },
+    {
+      "check_result_id": "ckr_01a0d756-7bc2-74f9-9458-4482602aeb65",
+      "check_invocation_id": "chk_01a0d756-7bb2-77c7-b8fa-8a6b5a8ce9ad",
+      "outcome": "verdict_emitted",
+      "produced_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "completed_at": "2026-09-25T06:52:44.354Z",
+      "diagnostics": [],
+      "reconciliation_ids": [],
+      "verdict_id": "ver_01a0d756-7bb1-743d-b67e-c5a72d3fdc8e"
+    }
+  ],
+  "verdicts": [
+    {
+      "verdict_id": "ver_01a0d756-7bb1-743d-b67e-c5a72d3fdc8e",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d756-66f3-72fc-b039-14141f176d15"
+      },
+      "declaration_id": "dcl_01a0d754-a7b9-7747-95ea-dfe814552f9d",
+      "scope": {
+        "evaluated_criteria": [
+          "cri_01a0d754-a7ba-75af-9313-ff79e227c8f8",
+          "cri_01a0d754-a7ba-75af-9314-00d6284cfc9a",
+          "cri_01a0d754-a7ba-75af-9314-0745584d6160",
+          "cri_01a0d754-a7ba-75af-9314-0800e37cee0c",
+          "cri_01a0d754-a7ba-75af-9314-0ef8ae7a6475"
+        ],
+        "unevaluated_criteria": []
+      },
+      "conclusion": "supported",
+      "finality": "final",
+      "basis": {
+        "evidence_ids": [
+          "evi_01a0d755-9958-743f-a97c-cc9ad3b3be91",
+          "evi_01a0d755-acef-704f-b543-801068b633a1"
+        ],
+        "reconciliation_ids": []
+      },
+      "findings": [
+        {
+          "criterion_id": "cri_01a0d754-a7ba-75af-9313-ff79e227c8f8",
+          "assessment": "supported",
+          "summary": "AC1: assessed as supported",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d754-a7ba-75af-9314-00d6284cfc9a",
+          "assessment": "supported",
+          "summary": "AC2: assessed as supported",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d754-a7ba-75af-9314-0745584d6160",
+          "assessment": "supported",
+          "summary": "AC3: assessed as supported",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d754-a7ba-75af-9314-0800e37cee0c",
+          "assessment": "supported",
+          "summary": "AC4: assessed as supported",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d754-a7ba-75af-9314-0ef8ae7a6475",
+          "assessment": "supported",
+          "summary": "AC5: assessed as supported",
+          "basis_refs": []
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Independently re-ran pytest at 06e0223 (14 passed); new tests fail on seed code (4 failed); direct check of ISSUE.md YAML example: request_timeout=30, no timeout, version=2, output equals expected incl. custom; input unchanged and result shares no objects with input"
+      },
+      "rationale": "Independently re-ran pytest at 06e0223 (14 passed); new tests fail on seed code (4 failed); direct check of ISSUE.md YAML example: request_timeout=30, no timeout, version=2, output equals expected incl. custom; input unchanged and result shares no objects with input",
+      "uncertainty": [],
+      "limitations": [],
+      "issued_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "issued_at": "2026-09-25T06:52:44.337Z",
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      }
+    }
+  ],
+  "settlements": [
+    {
+      "settlement_id": "set_01a0d756-b4c8-721d-8df0-3c41935f4494",
+      "task_id": "tsk_01a0d754-66f8-75c0-a752-fd30aebcb774",
+      "attempt_id": "att_01a0d754-d98e-736b-b01c-65f804f30e35",
+      "decision": "accept",
+      "decided_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "decided_at": "2026-09-25T06:52:58.952Z",
+      "basis": {
+        "verdict_id": "ver_01a0d756-7bb1-743d-b67e-c5a72d3fdc8e",
+        "attempt_end_id": null,
+        "blocker_ids": []
+      },
+      "rationale": "All 5 criteria supported at high confidence by independent re-verification; accept (not land) since merge to main was not requested",
+      "verification_exception": null
+    }
+  ],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": []
+}

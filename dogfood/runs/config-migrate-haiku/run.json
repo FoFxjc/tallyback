@@ -1,0 +1,12 @@
+{
+  "run_id": "config-migrate-haiku",
+  "fixture": "config-migrate",
+  "model_alias": "haiku",
+  "model_requested": "claude-haiku-4-5-20251001",
+  "seed_sha": "cfb8d4093b83142257b29caf6726025df0342553",
+  "workspace": "/tmp/claude-0/-home-user-tallyback/01b763c0-69a7-5ad2-94c6-b173155321d2/scratchpad/bench/w/4HqUcbEs/repo",
+  "started_at": "2026-09-25T06:50:14Z",
+  "ended_at": "2026-09-25T06:53:21Z",
+  "wall_clock_seconds": 187,
+  "claude_exit_code": 0
+}

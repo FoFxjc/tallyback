@@ -1,0 +1,6 @@
+ M cfgmigrate/migrate.py
+ M tests/test_migrate.py
+?? .tallyback/history.jsonl
+?? .tallyback/project.json
+?? .tallyback/runtime/bindings.json
+?? .tallyback/state.json

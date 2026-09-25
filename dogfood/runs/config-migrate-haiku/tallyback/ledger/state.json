@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 10,
+  "included_through": 10,
+  "project": {
+    "project_id": "prj_01a0d754-9e8e-70db-a29b-f94598e023b3",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d754-9e8e-70db-a29b-febf498fd5fa",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d754-9e8e-70db-a29b-febf498fd5fa",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d755-10f5-775c-b345-b2d49f3d9c11",
+      "repository_id": "repo_01a0d754-9e8e-70db-a29b-febf498fd5fa"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d754-ae15-75cd-9dfb-0ae92753f227",
+      "project_id": "prj_01a0d754-9e8e-70db-a29b-f94598e023b3",
+      "name": "config migration v1 to v2",
+      "goal": "",
+      "created_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "created_at": "2026-09-25T06:50:46.165Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d754-bd94-763b-bbb6-d5681ecd75f4",
+      "topic_id": "top_01a0d754-ae15-75cd-9dfb-0ae92753f227",
+      "title": "Fix: preserve unknown keys during config migration"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d754-ddb1-73fb-a808-02c4074906d4",
+      "task_id": "tsk_01a0d754-bd94-763b-bbb6-d5681ecd75f4",
+      "declared_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "declared_at": "2026-09-25T06:50:58.353Z",
+      "objective": "Preserve all user-defined keys recursively when migrating v1 config to v2, and add regression test coverage",
+      "criteria": []
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d755-1b78-711f-b309-d5115efd1a5d",
+      "task_id": "tsk_01a0d754-bd94-763b-bbb6-d5681ecd75f4",
+      "declaration_id": "dcl_01a0d754-ddb1-73fb-a808-02c4074906d4",
+      "repository_id": "repo_01a0d754-9e8e-70db-a29b-febf498fd5fa",
+      "workspace_id": "wsp_01a0d755-10f5-775c-b345-b2d49f3d9c11",
+      "executor": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_at": "2026-09-25T06:51:14.168Z"
+    }
+  ],
+  "attempt_ends": [
+    {
+      "attempt_end_id": "ate_01a0d756-59a5-739d-ab43-a8316995ddf6",
+      "attempt_id": "att_01a0d755-1b78-711f-b309-d5115efd1a5d",
+      "outcome": "returned",
+      "reported_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "ended_at": "2026-09-25T06:52:35.622Z"
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "clm_01a0d755-73bf-703e-b488-0b5cf53efdcb",
+      "task_id": "tsk_01a0d754-bd94-763b-bbb6-d5681ecd75f4",
+      "attempt_id": "att_01a0d755-1b78-711f-b309-d5115efd1a5d",
+      "declaration_id": "dcl_01a0d754-ddb1-73fb-a808-02c4074906d4",
+      "statement": "Migration function updated to preserve all unknown keys",
+      "evidence_ids": [],
+      "claimed_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "claimed_at": "2026-09-25T06:51:36.768Z"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "artifact",
+      "payload": {},
+      "submitted_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "evidence_id": "evi_01a0d755-bdcf-72c3-9e99-885b09a0b543",
+      "submitted_at": "2026-09-25T06:51:55.727Z"
+    }
+  ],
+  "reconciliations": [],
+  "check_invocations": [
+    {
+      "check_invocation_id": "chk_01a0d755-f5d1-738e-98df-cef03a2b3cc5",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d755-73bf-703e-b488-0b5cf53efdcb"
+      },
+      "checker": {
+        "id": "claude",
+        "version": "1.0"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d754-9e8e-70db-a29b-f94598e023b3",
+        "revision": 7,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "46a3b2c9e70deb76685376b2dbc7b01655ac14bfadbe359df44f239bda4ceb20"
+        }
+      },
+      "invoked_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "invoked_at": "2026-09-25T06:52:10.065Z"
+    }
+  ],
+  "check_results": [
+    {
+      "check_result_id": "ckr_01a0d756-2223-7443-a81d-b16624e94c51",
+      "check_invocation_id": "chk_01a0d755-f5d1-738e-98df-cef03a2b3cc5",
+      "outcome": "verdict_withheld",
+      "produced_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "completed_at": "2026-09-25T06:52:21.411Z",
+      "diagnostics": [],
+      "reconciliation_ids": [],
+      "verdict_id": null
+    }
+  ],
+  "verdicts": [],
+  "settlements": [],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": []
+}

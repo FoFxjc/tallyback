@@ -1,0 +1,14 @@
+{
+  "repositories": {
+    "repo_01a0d754-5e60-71be-bb3d-7967d48bcfcd": {
+      "workspaces": {
+        "wsp_01a0d755-3718-7368-a316-4dd194addd1f": {
+          "root": "/tmp/claude-0/-home-user-tallyback/01b763c0-69a7-5ad2-94c6-b173155321d2/scratchpad/bench/w/hf3yYVwB/repo"
+        },
+        "wsp_01a0d75a-736a-7162-b101-97b60246be01": {
+          "root": "/tmp/claude-0/-home-user-tallyback/01b763c0-69a7-5ad2-94c6-b173155321d2/scratchpad/bench/w/hf3yYVwB/repo"
+        }
+      }
+    }
+  }
+}

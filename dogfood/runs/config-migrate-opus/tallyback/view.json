@@ -1,0 +1,138 @@
+{
+  "generated_from_revision": 16,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d754-66f8-75c0-a752-fd30aebcb774",
+      "title": "v1->v2 migration preserves user keys",
+      "topic_id": "top_01a0d754-5a7d-7388-80ef-e98c93a84495",
+      "declaration": {
+        "declaration_id": "dcl_01a0d754-a7b9-7747-95ea-dfe814552f9d",
+        "objective": "Fix v1->v2 config migration dropping user-defined keys (ISSUE.md)",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d754-a7ba-75af-9313-ff79e227c8f8",
+            "code": "AC1",
+            "statement": " rename timeout to request_timeout",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d754-a7ba-75af-9314-00d6284cfc9a",
+            "code": "AC2",
+            "statement": " set version to 2",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d754-a7ba-75af-9314-0745584d6160",
+            "code": "AC3",
+            "statement": " preserve all unrelated user-defined keys recursively",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d754-a7ba-75af-9314-0800e37cee0c",
+            "code": "AC4",
+            "statement": " do not mutate the input object",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d754-a7ba-75af-9314-0ef8ae7a6475",
+            "code": "AC5",
+            "statement": " regression coverage for preservation of unknown keys",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d754-d98e-736b-b01c-65f804f30e35",
+          "executor": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "workspace_id": "wsp_01a0d754-bb56-7554-92dd-ecadb2f2b8ad",
+          "repository_id": "repo_01a0d754-5129-7498-aeb8-e1c7da184e7c",
+          "dispatched_at": "2026-09-25T06:50:57.294Z",
+          "ended": true
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d755-4c18-76c3-aefb-25104a71b812",
+          "statement": "Commit 06e0223 on fix/preserve-user-keys: v1->v2 deep-copies input, renames timeout, sets version 2; 4 regression tests added",
+          "evidence_ids": [],
+          "claimed_by": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "claimed_at": "2026-09-25T06:51:26.616Z"
+        },
+        {
+          "claim_id": "clm_01a0d756-66f3-72fc-b039-14141f176d15",
+          "statement": "Commit 06e0223 on fix/preserve-user-keys: v1->v2 deep-copies input, renames timeout, sets version 2, migrate() never returns input object; 4 regression tests added (fail on seed, pass after fix)",
+          "evidence_ids": [
+            "evi_01a0d755-9958-743f-a97c-cc9ad3b3be91",
+            "evi_01a0d755-acef-704f-b543-801068b633a1"
+          ],
+          "claimed_by": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "claimed_at": "2026-09-25T06:52:39.027Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d755-9958-743f-a97c-cc9ad3b3be91",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "submitted_at": "2026-09-25T06:51:46.392Z"
+        },
+        {
+          "evidence_id": "evi_01a0d755-acef-704f-b543-801068b633a1",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "submitted_at": "2026-09-25T06:51:51.407Z"
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d756-7bb1-743d-b67e-c5a72d3fdc8e",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "Independently re-ran pytest at 06e0223 (14 passed); new tests fail on seed code (4 failed); direct check of ISSUE.md YAML example: request_timeout=30, no timeout, version=2, output equals expected incl. custom; input unchanged and result shares no objects with input"
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d756-b4c8-721d-8df0-3c41935f4494",
+        "decision": "accept",
+        "verification_exception": null,
+        "rationale": "All 5 criteria supported at high confidence by independent re-verification; accept (not land) since merge to main was not requested"
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "settled: accept"
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 1
+  }
+}

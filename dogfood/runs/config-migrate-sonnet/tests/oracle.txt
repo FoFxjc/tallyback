@@ -1,0 +1,10 @@
+......                                                                   [100%]
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED oracle/test_oracle.py::test_c1_c2_issue_example_exact
+PASSED oracle/test_oracle.py::test_c3_preserves_unknown_keys_recursively
+PASSED oracle/test_oracle.py::test_c3_nested_key_named_timeout_is_not_renamed
+PASSED oracle/test_oracle.py::test_c3_missing_plugins_does_not_inject_unrelated_changes
+PASSED oracle/test_oracle.py::test_c4_input_not_mutated
+PASSED oracle/test_oracle.py::test_info_output_does_not_alias_input_containers
+6 passed in 0.01s
