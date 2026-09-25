@@ -316,6 +316,56 @@ describe('View — every Settlement decision is presentable; no Task-lifecycle f
     expect(view.status).toEqual(before.status);
   });
 
+  it('an Attempt that ended without a Claim is settled, not claimed on (NOT_FIT return)', async () => {
+    const fixture = await buildLedger('tallyback-view-ended-no-claim-');
+    // The fixture's Attempt carries a Claim; the NOT_FIT Attempt is a fresh one with none.
+    expect(
+      (
+        await fixture.store.endAttempt({
+          attempt_id: fixture.attempt_id,
+          outcome: 'returned',
+          reported_by: AGENT,
+        })
+      ).ok,
+    ).toBe(true);
+    await new Promise((r) => setTimeout(r, 5));
+    const second = await fixture.store.dispatch({
+      task_id: fixture.task_id,
+      declaration_id: fixture.declaration_id,
+      repository_id: fixture.repository_id,
+      workspace_id: fixture.workspace_id,
+      executor: AGENT,
+      dispatched_by: ALICE,
+    });
+    expect(second.ok, JSON.stringify(second)).toBe(true);
+    const attemptId = second.ok ? second.attempt.attempt_id : 'unreachable';
+    const ended = await fixture.store.endAttempt({
+      attempt_id: attemptId,
+      outcome: 'returned',
+      reason: 'NOT_FIT: needs an approval',
+      reported_by: AGENT,
+    });
+    expect(ended.ok, JSON.stringify(ended)).toBe(true);
+    const endId = ended.ok ? ended.attempt_end.attempt_end_id : 'unreachable';
+    let view = buildTaskViews(fixture.store.currentSnapshot())[0]!;
+    expect(view.next_action).toBe('settle');
+    expect(view.next_command?.command).toContain('--decision <retry|abandon>');
+    expect(view.next_command?.command).toContain(`--attempt-end-id ${endId}`);
+    expect(view.next_command?.command).not.toContain('tallyback claim');
+
+    const settled = await fixture.store.settle({
+      task_id: fixture.task_id,
+      attempt_id: attemptId,
+      decision: 'retry',
+      basis: { verdict_id: null, attempt_end_id: endId, blocker_ids: [] },
+      rationale: 'approval now exists; new Attempt',
+      decided_by: ALICE,
+    });
+    expect(settled.ok, JSON.stringify(settled)).toBe(true);
+    view = buildTaskViews(fixture.store.currentSnapshot())[0]!;
+    expect(view.next_command?.command).toContain(`tallyback dispatch --task-id ${fixture.task_id}`);
+  });
+
   it('execution_fit: assessment parses NOT_FIT and leaves unlabelled choices null', async () => {
     const fixture = await buildLedger('tallyback-view-execution-fit-labels-');
     const decide = (choice: string, supersedes?: string) =>

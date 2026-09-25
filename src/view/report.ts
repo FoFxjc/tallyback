@@ -268,7 +268,12 @@ function deriveNextAction(snapshot: Snapshot, task: Task, projections: Projectio
   )!;
 
   const claimsForAttempt = snapshot.claims.filter((c) => c.attempt_id === latestAttempt.attempt_id);
-  if (claimsForAttempt.length === 0) return 'observe (claim)';
+  if (claimsForAttempt.length === 0) {
+    // An ended Attempt takes no new Claims: new work belongs to a new Attempt, after this
+    // one is settled (e.g. `retry`, TB-LC-003). Never point a Claim at a finished Attempt.
+    const ended = snapshot.attempt_ends.some((e) => e.attempt_id === latestAttempt.attempt_id);
+    return ended ? 'settle' : 'observe (claim)';
+  }
   const latestClaim = pickLatest(
     claimsForAttempt,
     (c) => c.claimed_at,
@@ -417,6 +422,24 @@ function deriveNextCommand(
         'unsupported|contradicted); --finding/--finding-basis say what supports each one.',
       requires: [...codes.map((c) => `--criterion ${c}`), '--confidence', '--rationale'],
     };
+  }
+  if (nextAction === 'settle' && !latestClaim) {
+    const end = pickLatest(
+      snapshot.attempt_ends.filter((e) => e.attempt_id === latestAttempt.attempt_id),
+      (e) => e.ended_at,
+      (e) => e.attempt_end_id,
+    );
+    if (end) {
+      return {
+        command:
+          `tallyback settle --task-id ${t} --attempt-id ${latestAttempt.attempt_id} ` +
+          `--decision <retry|abandon> --attempt-end-id ${end.attempt_end_id} --rationale <text>`,
+        reason:
+          `The latest Attempt ended (\`${end.outcome}\`) without a Claim; it takes no new work. ` +
+          'Settle it: `retry` keeps the Task open for a new Attempt, `abandon` closes it.',
+        requires: ['--decision', '--rationale'],
+      };
+    }
   }
   if (nextAction === 'settle') {
     const positive = snapshot.verdicts

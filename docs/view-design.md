@@ -131,7 +131,8 @@ names as the loop's explicit commands.
       "title": "...",
       "topic_id": "top_...",
       "declaration": { "declaration_id": "dcl_...", "objective": "...", "criteria": [...] } ,
-      "attempts": [{ "attempt_id": "...", "executor": {...}, "workspace_id": "...", "repository_id": "...", "dispatched_at": "...", "ended": false }],
+      "attempts": [{ "attempt_id": "...", "executor": {...}, "workspace_id": "...", "repository_id": "...", "dispatched_at": "...", "ended": false,
+                     "execution_fit": { "decision_id": "dec_...", "decided_by": {...}, "decided_at": "...", "assessment": "CONDITIONAL", "choice": "CONDITIONAL: ...", "rationale": "...", "supersedes": "dec_..." | null, "concurrent": [] } | null }],
       "claims": [{ "claim_id": "...", "statement": "...", "evidence_ids": [...], "claimed_by": {...}, "claimed_at": "..." }],
       "evidence": [{ "evidence_id": "...", "kind": "observation", "submitted_by": {...}, "submitted_at": "...", "note": "..." }],
       "blockers": [{ "blocker_id": "...", "description": "...", "raised_by": {...}, "raised_at": "..." }],
@@ -203,3 +204,12 @@ ledger keeps its own failure.
   alongside `show`/`list`/`land` (after `Store.open`, before the mutating preflight),
   JSON to stdout via the existing `print()` helper, one-line human summary to stderr,
   matching `runValidate`/`runLand`'s convention exactly.
+
+## `attempts[].execution_fit` (Bridge Execution Fit, read-only)
+
+The Attempt's effective `execution_choice` Decision — what the Bridge skill records for its
+Execution Fit Check — or `null`. `assessment` is the `FIT` / `CONDITIONAL` / `NOT_FIT`
+prefix of `choice` (null if absent); `supersedes` names the Fit it replaced (typically an
+earlier executor's); `concurrent` lists other unsuperseded Fit Decisions (a forked lineage,
+normally empty). Projection only: no status, `next_action`, or readiness reads it, and a
+ledger without any Fit Decision is fully usable.

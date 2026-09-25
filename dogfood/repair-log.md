@@ -274,3 +274,27 @@ n = 1 per model — the next benchmark round, not this check, should carry the c
 - **Regression**: `test/view.test.ts` (retry continues).
 - **Dogfood**: decision → superseding decision → end → settle retry → view (`end`/`dispatch`
   next) → dispatch → view `observe (claim)` on the new Attempt.
+
+## R12 — the previous executor's Fit was invisible and inheritable (fit cold-return)
+
+- **Reproduced**: `fit/runs/cold-return-*` and `fit2/runs/repro-cold-haiku-pre-fix`: every
+  resuming session's own Fit was refused (`invariant.supersession_conflict`) and it took 3-8
+  `show`/history calls to find the earlier one; Haiku worked under the earlier FIT (2/2).
+- **Change**: `view` gains `attempts[].execution_fit` (projection of the effective
+  `execution_choice` Decision; no new record, nothing reads it); the refusal's hint says
+  `--supersedes`; the skill states that a Fit belongs to its executor and (10e8acd) that the
+  Fit Check is due when picking up an open Attempt, after `git diff`.
+- **Regression**: `test/view.test.ts`, `test/cli-execution-fit.test.ts`, `test/bridge.test.ts`.
+- **Dogfood**: `fit2/runs/cold-post-fix-*`: Sonnet/Opus superseded on the first call; Haiku
+  still skipped its own Fit (3/3) — executor behaviour, left as a finding.
+
+## R13 — `view` pointed new work at an Attempt that had ended (NOT_FIT handoff)
+
+- **Reproduced**: `fit2/runs/handoff-not-fit-sonnet`: after a NOT_FIT Attempt was ended
+  `returned` and its blocker resolved, `view` suggested `tallyback claim … --attempt-id
+<the ended Attempt>`; the resuming executor recorded its approved work, Claim, Verdict and
+  `accept` on the Attempt whose record says NOT_FIT/returned.
+- **Change** (view projection only): an ended Attempt with no Claim yields `next_action:
+settle` with `--decision <retry|abandon> --attempt-end-id <ate_…>`; after `retry`, R11's
+  guidance dispatches a new Attempt.
+- **Regression**: `test/view.test.ts` (ended without a Claim).
