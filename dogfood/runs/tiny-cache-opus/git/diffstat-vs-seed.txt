@@ -1,0 +1,3 @@
+ tests/test_cache.py | 20 ++++++++++++++++++++
+ tinycache/cache.py  |  1 +
+ 2 files changed, 21 insertions(+)

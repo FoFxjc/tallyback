@@ -1,0 +1,36 @@
+diff --git a/tests/test_cache.py b/tests/test_cache.py
+index fef277d..d836710 100644
+--- a/tests/test_cache.py
++++ b/tests/test_cache.py
+@@ -58,6 +58,19 @@ def test_expired_entry_is_recomputed(clock):
+     assert calls == [1, 1]
+ 
+ 
++def test_refreshed_entry_stays_cached_until_new_ttl_expires(clock):
++    load_user, calls = make_loader(clock)
++    load_user(1)
++    clock.advance(30)
++    assert load_user(1) == {"id": 1, "n": 2}
++    clock.advance(29)
++    assert load_user(1) == {"id": 1, "n": 2}
++    assert calls == [1, 1]
++    clock.advance(1)
++    assert load_user(1) == {"id": 1, "n": 3}
++    assert calls == [1, 1, 1]
++
++
+ def test_cache_info_counts_hits_and_misses(clock):
+     load_user, _ = make_loader(clock)
+     load_user(1)
+diff --git a/tinycache/cache.py b/tinycache/cache.py
+index 0343127..a1f9115 100644
+--- a/tinycache/cache.py
++++ b/tinycache/cache.py
+@@ -71,6 +71,7 @@ def ttl_cache(ttl_seconds: float, *, clock: Callable[[], float] = time.monotonic
+                 # Expired: recompute and refresh the entry in place.
+                 misses += 1
+                 entry.value = func(*args, **kwargs)
++                entry.stored_at = now
+                 return entry.value
+ 
+             hits += 1

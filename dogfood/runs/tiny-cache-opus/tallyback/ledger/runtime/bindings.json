@@ -1,0 +1,11 @@
+{
+  "repositories": {
+    "repo_01a0d74d-1306-750d-9179-9dece2085e95": {
+      "workspaces": {
+        "wsp_01a0d74d-b076-7423-b0ac-54f3ae2e4b38": {
+          "root": "/tmp/claude-0/-home-user-tallyback/01b763c0-69a7-5ad2-94c6-b173155321d2/scratchpad/bench/w/YrWTyo91/repo"
+        }
+      }
+    }
+  }
+}

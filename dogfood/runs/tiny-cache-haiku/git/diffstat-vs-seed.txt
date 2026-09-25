@@ -1,0 +1,7 @@
+ .tallyback/history.jsonl         |  13 ++++
+ .tallyback/project.json          |   9 +++
+ .tallyback/runtime/bindings.json |   3 +
+ .tallyback/state.json            | 138 +++++++++++++++++++++++++++++++++++++++
+ tests/test_cache.py              |  16 +++++
+ tinycache/cache.py               |   1 +
+ 6 files changed, 180 insertions(+)

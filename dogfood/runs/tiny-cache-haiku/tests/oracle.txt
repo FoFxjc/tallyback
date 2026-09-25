@@ -1,0 +1,10 @@
+......                                                                   [100%]
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED oracle/test_oracle.py::test_c1_expired_value_is_recomputed
+PASSED oracle/test_oracle.py::test_c2_refreshed_value_stays_cached_for_new_ttl
+PASSED oracle/test_oracle.py::test_c2_repeated_refresh_cycles
+PASSED oracle/test_oracle.py::test_c3_hits_unchanged
+PASSED oracle/test_oracle.py::test_c3_cache_info_after_refresh_counts_miss_then_hit
+PASSED oracle/test_oracle.py::test_c5_public_api_unchanged
+6 passed in 0.01s

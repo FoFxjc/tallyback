@@ -1,0 +1,12 @@
+{
+  "run_id": "tiny-cache-opus",
+  "fixture": "tiny-cache",
+  "model_alias": "opus",
+  "model_requested": "claude-opus-5-5",
+  "seed_sha": "3177d80d7a8ad00bbb839afcd4624b70e02d08c0",
+  "workspace": "/tmp/claude-0/-home-user-tallyback/01b763c0-69a7-5ad2-94c6-b173155321d2/scratchpad/bench/w/YrWTyo91/repo",
+  "started_at": "2026-09-25T06:42:20Z",
+  "ended_at": "2026-09-25T06:44:40Z",
+  "wall_clock_seconds": 140,
+  "claude_exit_code": 0
+}

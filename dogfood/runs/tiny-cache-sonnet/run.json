@@ -1,0 +1,12 @@
+{
+  "run_id": "tiny-cache-sonnet",
+  "fixture": "tiny-cache",
+  "model_alias": "sonnet",
+  "model_requested": "claude-sonnet-5",
+  "seed_sha": "3177d80d7a8ad00bbb839afcd4624b70e02d08c0",
+  "workspace": "/tmp/claude-0/-home-user-tallyback/01b763c0-69a7-5ad2-94c6-b173155321d2/scratchpad/bench/w/Vh0Y7e6t/repo",
+  "started_at": "2026-09-25T06:42:20Z",
+  "ended_at": "2026-09-25T06:50:28Z",
+  "wall_clock_seconds": 488,
+  "claude_exit_code": 0
+}

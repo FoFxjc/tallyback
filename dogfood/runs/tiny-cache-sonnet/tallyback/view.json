@@ -1,0 +1,127 @@
+{
+  "generated_from_revision": 18,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d74d-645d-7283-8607-716318f220b7",
+      "title": "Fix expired ttl_cache entries not staying cached after refresh",
+      "topic_id": "top_01a0d74d-4d84-77a8-825b-6a15d596de73",
+      "declaration": {
+        "declaration_id": "dcl_01a0d750-ce24-721e-bb28-fd0563f7ab1f",
+        "objective": "Fix ttl_cache so that after an expired entry is recomputed, the refreshed value stays cached until its new TTL elapses, without changing the public API",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d750-ce25-709f-9ceb-445fbcd2cdfe",
+            "code": "expired_recomputed",
+            "statement": "An expired value is recomputed",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d750-ce25-709f-9ceb-491d7b5d337d",
+            "code": "refresh_stays_cached",
+            "statement": "The refreshed value remains cached until its new TTL expires",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d750-ce25-709f-9ceb-4f5ab5493ffc",
+            "code": "hit_behavior_unchanged",
+            "statement": "Existing cache-hit behavior remains unchanged",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d750-ce25-709f-9ceb-50af2d5d21c1",
+            "code": "regression_test",
+            "statement": "A regression test demonstrating the bug is added",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d750-ce25-709f-9ceb-544d88554607",
+            "code": "api_unchanged",
+            "statement": "The public API is not changed",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d74d-f70a-711d-a3fa-06fcd9709642",
+          "executor": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "workspace_id": "wsp_01a0d74d-e78f-7593-aabd-51c175ed3056",
+          "repository_id": "repo_01a0d74d-241e-708b-816e-208a8e37f8d9",
+          "dispatched_at": "2026-09-25T06:43:26.090Z",
+          "ended": true
+        },
+        {
+          "attempt_id": "att_01a0d751-4b17-70b0-9d9a-33540be39b38",
+          "executor": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "workspace_id": "wsp_01a0d74d-e78f-7593-aabd-51c175ed3056",
+          "repository_id": "repo_01a0d74d-241e-708b-816e-208a8e37f8d9",
+          "dispatched_at": "2026-09-25T06:47:04.215Z",
+          "ended": false
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d74e-80a6-721c-ba54-7382ca40bd07",
+          "statement": "Fixed ttl_cache to update entry.stored_at on refresh after expiry so the recomputed value stays cached for a full new TTL window; added a regression test (test_refreshed_entry_stays_cached_until_new_ttl_expires) that fails on the pre-fix code and passes after the fix. Full test suite (11 tests) passes.",
+          "evidence_ids": [],
+          "claimed_by": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "claimed_at": "2026-09-25T06:44:01.318Z"
+        },
+        {
+          "claim_id": "clm_01a0d751-5f98-7408-b7d3-c1a950452b56",
+          "statement": "Fixed ttl_cache: on cache-entry expiry, entry.stored_at is now updated to the current clock value after recomputing entry.value (tinycache/cache.py), so the refreshed entry is treated as freshly stored and served as a cache hit for a full new ttl_seconds window instead of being recomputed on almost every subsequent call. Cache-hit and initial-miss code paths are unchanged. Added regression test test_refreshed_entry_stays_cached_until_new_ttl_expires in tests/test_cache.py, which fails against the pre-fix code (verified via git stash) and passes with the fix. Full suite: 11/11 tests pass. No public API changes (ttl_cache signature, cache_info, cache_clear all unchanged).",
+          "evidence_ids": [],
+          "claimed_by": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "claimed_at": "2026-09-25T06:47:09.464Z"
+        }
+      ],
+      "evidence": [],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_524e1920-2c14-70e3-95dc-f1eaefabfb17",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "Full test suite (11/11) passes, the new regression test was verified to fail on pre-fix code and pass post-fix, and the diff is a single added line with no API surface change."
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d754-2289-7079-b91c-cdb3512540c9",
+        "decision": "accept",
+        "verification_exception": null,
+        "rationale": "All 5 acceptance criteria verified via pytest and code review; see verdict ver_524e1920-2c14-70e3-95dc-f1eaefabfb17."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "settled: accept"
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 1
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "generated_from_revision": 14,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d74d-279e-715e-a826-9c8c9110c513",
+      "title": "Refreshed expired cache entries must stay cached for a new TTL",
+      "topic_id": "top_01a0d74d-1bac-71b7-aaf4-a9fe249b3374",
+      "declaration": {
+        "declaration_id": "dcl_01a0d74d-8ba0-73ea-9d93-0e0e4f09e40a",
+        "objective": "Fix ttl_cache so refreshed expired entries remain cached for a fresh TTL window (ISSUE.md). Supersedes accidental probe declaration with objective 'x'.",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d74d-8ba0-73ea-9d93-13cbaa5a326c",
+            "code": "AC1",
+            "statement": "An expired value is recomputed.",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d74d-8ba0-73ea-9d93-17c307f07668",
+            "code": "AC2",
+            "statement": "The refreshed value remains cached until its new TTL expires.",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d74d-8ba0-73ea-9d93-1b9cd8e008c4",
+            "code": "AC3",
+            "statement": "Existing cache-hit behavior remains unchanged.",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d74d-8ba0-73ea-9d93-1e5e68afe0c7",
+            "code": "AC4",
+            "statement": "A regression test demonstrates the bug.",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d74d-8ba0-73ea-9d93-2021eac4a9e9",
+            "code": "AC5",
+            "statement": "The public API is not changed.",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d74d-f470-72bf-bd2f-f8a9e4f42685",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-opus-5-5"
+          },
+          "workspace_id": "wsp_01a0d74d-b076-7423-b0ac-54f3ae2e4b38",
+          "repository_id": "repo_01a0d74d-1306-750d-9179-9dece2085e95",
+          "dispatched_at": "2026-09-25T06:43:25.424Z",
+          "ended": false
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d74e-864c-769d-9e1f-9ee4ec8946c0",
+          "statement": "ttl_cache now resets stored_at when recomputing an expired entry; regression test added; all tests pass; public API unchanged. Changes are uncommitted in the working tree of fix/ttl-refresh-stored-at.",
+          "evidence_ids": [
+            "evi_01a0d74e-73b8-7108-8e3a-24b5328686e3",
+            "evi_01a0d74e-751f-777d-949f-0483f3a4964b",
+            "evi_01a0d74e-76a4-704f-a9b4-0bc5789f81a6"
+          ],
+          "claimed_by": {
+            "kind": "executor",
+            "id": "claude-opus-5-5"
+          },
+          "claimed_at": "2026-09-25T06:44:02.764Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d74e-73b8-7108-8e3a-24b5328686e3",
+          "kind": "observation",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-opus-5-5"
+          },
+          "submitted_at": "2026-09-25T06:43:58.008Z",
+          "note": "regression test fails without fix"
+        },
+        {
+          "evidence_id": "evi_01a0d74e-751f-777d-949f-0483f3a4964b",
+          "kind": "observation",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-opus-5-5"
+          },
+          "submitted_at": "2026-09-25T06:43:58.367Z",
+          "note": "full suite passes with fix"
+        },
+        {
+          "evidence_id": "evi_01a0d74e-76a4-704f-a9b4-0bc5789f81a6",
+          "kind": "observation",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-opus-5-5"
+          },
+          "submitted_at": "2026-09-25T06:43:58.756Z",
+          "note": "diff scope and public API"
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d74e-beea-7360-a934-41648b267b2b",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "Coordinator re-ran checks independently: pytest 11 passed; test_expired_entry_is_recomputed (AC1) and new test_refreshed_entry_stays_cached_for_a_new_ttl (AC2, AC4) pass, the latter fails without the fix; test_hit_within_ttl/cache_info tests unchanged and pass (AC3); standalone 1rps x 120s simulation gives 4 computes (one per TTL window), hits=116; ttl_cache signature and __all__ unchanged, diff touches no API (AC5). Caveat: changes are uncommitted, so branch has not advanced."
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d74e-ddc4-75e8-96c7-2dec309db6a4",
+        "decision": "accept",
+        "verification_exception": null,
+        "rationale": "All five criteria supported at high confidence by independent re-verification. Accept only: fix is uncommitted on fix/ttl-refresh-stored-at; commit and land authorization left to the user."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "settled: accept"
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 1
+  }
+}

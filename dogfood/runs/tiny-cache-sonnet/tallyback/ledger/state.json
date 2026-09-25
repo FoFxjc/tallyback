@@ -1,0 +1,439 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 18,
+  "included_through": 18,
+  "project": {
+    "project_id": "prj_01a0d74d-241e-708b-816e-1f2274f81054",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d74d-241e-708b-816e-208a8e37f8d9",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d74d-241e-708b-816e-208a8e37f8d9",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d74d-e78f-7593-aabd-51c175ed3056",
+      "repository_id": "repo_01a0d74d-241e-708b-816e-208a8e37f8d9"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d74d-4d84-77a8-825b-6a15d596de73",
+      "project_id": "prj_01a0d74d-241e-708b-816e-1f2274f81054",
+      "name": "ttl-cache-bugfix",
+      "goal": "",
+      "created_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "created_at": "2026-09-25T06:42:42.693Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d74d-645d-7283-8607-716318f220b7",
+      "topic_id": "top_01a0d74d-4d84-77a8-825b-6a15d596de73",
+      "title": "Fix expired ttl_cache entries not staying cached after refresh"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d74d-9466-7471-bf02-9043fb2a027e",
+      "task_id": "tsk_01a0d74d-645d-7283-8607-716318f220b7",
+      "declared_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "declared_at": "2026-09-25T06:43:00.838Z",
+      "objective": "Fix ttl_cache so that after an expired entry is recomputed, the refreshed value stays cached until its new TTL elapses, without changing the public API",
+      "criteria": []
+    },
+    {
+      "declaration_id": "dcl_01a0d74f-e459-7040-b084-41ab0268dd8b",
+      "task_id": "tsk_01a0d74d-645d-7283-8607-716318f220b7",
+      "declared_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "declared_at": "2026-09-25T06:45:32.377Z",
+      "objective": "Fix ttl_cache so that after an expired entry is recomputed, the refreshed value stays cached until its new TTL elapses, without changing the public API",
+      "criteria": [],
+      "supersedes": "dcl_01a0d74d-9466-7471-bf02-9043fb2a027e"
+    },
+    {
+      "declaration_id": "dcl_01a0d74f-f46d-725c-80ec-89761a0ddd74",
+      "task_id": "tsk_01a0d74d-645d-7283-8607-716318f220b7",
+      "declared_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "declared_at": "2026-09-25T06:45:36.493Z",
+      "objective": "Fix ttl_cache so that after an expired entry is recomputed, the refreshed value stays cached until its new TTL elapses, without changing the public API",
+      "criteria": [],
+      "supersedes": "dcl_01a0d74f-e459-7040-b084-41ab0268dd8b"
+    },
+    {
+      "declaration_id": "dcl_01a0d750-ce24-721e-bb28-fd0563f7ab1f",
+      "task_id": "tsk_01a0d74d-645d-7283-8607-716318f220b7",
+      "declared_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "declared_at": "2026-09-25T06:46:32.228Z",
+      "objective": "Fix ttl_cache so that after an expired entry is recomputed, the refreshed value stays cached until its new TTL elapses, without changing the public API",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d750-ce25-709f-9ceb-445fbcd2cdfe",
+          "code": "expired_recomputed",
+          "statement": "An expired value is recomputed",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d750-ce25-709f-9ceb-491d7b5d337d",
+          "code": "refresh_stays_cached",
+          "statement": "The refreshed value remains cached until its new TTL expires",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d750-ce25-709f-9ceb-4f5ab5493ffc",
+          "code": "hit_behavior_unchanged",
+          "statement": "Existing cache-hit behavior remains unchanged",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d750-ce25-709f-9ceb-50af2d5d21c1",
+          "code": "regression_test",
+          "statement": "A regression test demonstrating the bug is added",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d750-ce25-709f-9ceb-544d88554607",
+          "code": "api_unchanged",
+          "statement": "The public API is not changed",
+          "required": true
+        }
+      ],
+      "supersedes": "dcl_01a0d74f-f46d-725c-80ec-89761a0ddd74"
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d74d-f70a-711d-a3fa-06fcd9709642",
+      "task_id": "tsk_01a0d74d-645d-7283-8607-716318f220b7",
+      "declaration_id": "dcl_01a0d74d-9466-7471-bf02-9043fb2a027e",
+      "repository_id": "repo_01a0d74d-241e-708b-816e-208a8e37f8d9",
+      "workspace_id": "wsp_01a0d74d-e78f-7593-aabd-51c175ed3056",
+      "executor": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_at": "2026-09-25T06:43:26.090Z"
+    },
+    {
+      "attempt_id": "att_01a0d751-4b17-70b0-9d9a-33540be39b38",
+      "task_id": "tsk_01a0d74d-645d-7283-8607-716318f220b7",
+      "declaration_id": "dcl_01a0d750-ce24-721e-bb28-fd0563f7ab1f",
+      "repository_id": "repo_01a0d74d-241e-708b-816e-208a8e37f8d9",
+      "workspace_id": "wsp_01a0d74d-e78f-7593-aabd-51c175ed3056",
+      "executor": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_at": "2026-09-25T06:47:04.215Z"
+    }
+  ],
+  "attempt_ends": [
+    {
+      "attempt_end_id": "ate_01a0d751-3952-751a-9d59-27bbb637da0e",
+      "attempt_id": "att_01a0d74d-f70a-711d-a3fa-06fcd9709642",
+      "outcome": "returned",
+      "reported_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "ended_at": "2026-09-25T06:46:59.666Z"
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "clm_01a0d74e-80a6-721c-ba54-7382ca40bd07",
+      "task_id": "tsk_01a0d74d-645d-7283-8607-716318f220b7",
+      "attempt_id": "att_01a0d74d-f70a-711d-a3fa-06fcd9709642",
+      "declaration_id": "dcl_01a0d74d-9466-7471-bf02-9043fb2a027e",
+      "statement": "Fixed ttl_cache to update entry.stored_at on refresh after expiry so the recomputed value stays cached for a full new TTL window; added a regression test (test_refreshed_entry_stays_cached_until_new_ttl_expires) that fails on the pre-fix code and passes after the fix. Full test suite (11 tests) passes.",
+      "evidence_ids": [],
+      "claimed_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "claimed_at": "2026-09-25T06:44:01.318Z"
+    },
+    {
+      "claim_id": "clm_01a0d751-5f98-7408-b7d3-c1a950452b56",
+      "task_id": "tsk_01a0d74d-645d-7283-8607-716318f220b7",
+      "attempt_id": "att_01a0d751-4b17-70b0-9d9a-33540be39b38",
+      "declaration_id": "dcl_01a0d750-ce24-721e-bb28-fd0563f7ab1f",
+      "statement": "Fixed ttl_cache: on cache-entry expiry, entry.stored_at is now updated to the current clock value after recomputing entry.value (tinycache/cache.py), so the refreshed entry is treated as freshly stored and served as a cache hit for a full new ttl_seconds window instead of being recomputed on almost every subsequent call. Cache-hit and initial-miss code paths are unchanged. Added regression test test_refreshed_entry_stays_cached_until_new_ttl_expires in tests/test_cache.py, which fails against the pre-fix code (verified via git stash) and passes with the fix. Full suite: 11/11 tests pass. No public API changes (ttl_cache signature, cache_info, cache_clear all unchanged).",
+      "evidence_ids": [],
+      "claimed_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "claimed_at": "2026-09-25T06:47:09.464Z"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "test_run",
+      "payload": {
+        "command": "python -m pytest tests/ -v",
+        "exit_code": 0
+      },
+      "submitted_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "evidence_id": "evi_01a0d74f-12e8-72a4-a3f2-d156ef06fe92",
+      "submitted_at": "2026-09-25T06:44:38.760Z"
+    },
+    {
+      "kind": "test_run",
+      "payload": {
+        "command": "python -m pytest tests/ -v",
+        "exit_code": 0
+      },
+      "submitted_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "evidence_id": "evi_01a0d751-812b-7615-b25f-5e58cde0afde",
+      "submitted_at": "2026-09-25T06:47:18.059Z"
+    }
+  ],
+  "reconciliations": [
+    {
+      "reconciliation_id": "rec_1f17c700-cc30-70f6-aa64-c21dedb8e7f4",
+      "evidence_id": "evi_01a0d751-812b-7615-b25f-5e58cde0afde",
+      "checked_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "checked_at": "2026-09-25T06:49:12.000Z",
+      "method": {
+        "name": "pytest",
+        "version": "8.3.3"
+      },
+      "observed_context": {
+        "repository_id": "repo_01a0d74d-241e-708b-816e-208a8e37f8d9",
+        "head_oid": "3177d80d7a8ad00bbb839afcd4624b70e02d08c0"
+      },
+      "checks": [
+        {
+          "predicate": "pytest tests/ -v exits 0 with 11 passed, 0 failed, including test_refreshed_entry_stays_cached_until_new_ttl_expires and test_expired_entry_is_recomputed",
+          "outcome": "confirmed"
+        },
+        {
+          "predicate": "test_refreshed_entry_stays_cached_until_new_ttl_expires fails against pre-fix tinycache/cache.py (verified via git stash) and passes against the fixed version",
+          "outcome": "confirmed"
+        },
+        {
+          "predicate": "tinycache/cache.py public API (ttl_cache signature, cache_info, cache_clear) is unchanged; only entry.stored_at = now was added inside the expiry branch",
+          "outcome": "confirmed"
+        }
+      ],
+      "limitations": []
+    }
+  ],
+  "check_invocations": [
+    {
+      "check_invocation_id": "chk_01a0d74f-56c7-73ed-80e4-d59f70e536b1",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d74e-80a6-721c-ba54-7382ca40bd07"
+      },
+      "checker": {
+        "id": "pytest",
+        "version": "8.3.3"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d74d-241e-708b-816e-1f2274f81054",
+        "revision": 7,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "ce8eb104fd4e226de8bbebad5eb4b768794f360052dd146279c0f0b33cfc801a"
+        }
+      },
+      "invoked_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "invoked_at": "2026-09-25T06:44:56.135Z"
+    },
+    {
+      "check_invocation_id": "chk_01a0d751-8f5e-711d-9386-6cb4cb1cdc12",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d751-5f98-7408-b7d3-c1a950452b56"
+      },
+      "checker": {
+        "id": "pytest",
+        "version": "8.3.3"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d74d-241e-708b-816e-1f2274f81054",
+        "revision": 15,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "5e2b5d2638db6ac63c0ccde7c3de5d6b2d8f42961af046c855dfc834dd7fe00b"
+        }
+      },
+      "invoked_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "invoked_at": "2026-09-25T06:47:21.694Z"
+    }
+  ],
+  "check_results": [
+    {
+      "check_result_id": "ckr_01a0d753-b0e7-7621-9fb2-ee34cffcc137",
+      "check_invocation_id": "chk_01a0d751-8f5e-711d-9386-6cb4cb1cdc12",
+      "outcome": "verdict_emitted",
+      "produced_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "completed_at": "2026-09-25T06:49:41.352Z",
+      "diagnostics": [],
+      "reconciliation_ids": [
+        "rec_1f17c700-cc30-70f6-aa64-c21dedb8e7f4"
+      ],
+      "verdict_id": "ver_524e1920-2c14-70e3-95dc-f1eaefabfb17"
+    }
+  ],
+  "verdicts": [
+    {
+      "verdict_id": "ver_524e1920-2c14-70e3-95dc-f1eaefabfb17",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d751-5f98-7408-b7d3-c1a950452b56"
+      },
+      "declaration_id": "dcl_01a0d750-ce24-721e-bb28-fd0563f7ab1f",
+      "scope": {
+        "evaluated_criteria": [
+          "cri_01a0d750-ce25-709f-9ceb-445fbcd2cdfe",
+          "cri_01a0d750-ce25-709f-9ceb-491d7b5d337d",
+          "cri_01a0d750-ce25-709f-9ceb-4f5ab5493ffc",
+          "cri_01a0d750-ce25-709f-9ceb-50af2d5d21c1",
+          "cri_01a0d750-ce25-709f-9ceb-544d88554607"
+        ],
+        "unevaluated_criteria": []
+      },
+      "conclusion": "supported",
+      "finality": "final",
+      "basis": {
+        "evidence_ids": [
+          "evi_01a0d751-812b-7615-b25f-5e58cde0afde"
+        ],
+        "reconciliation_ids": [
+          "rec_1f17c700-cc30-70f6-aa64-c21dedb8e7f4"
+        ]
+      },
+      "findings": [
+        {
+          "criterion_id": "cri_01a0d750-ce25-709f-9ceb-445fbcd2cdfe",
+          "assessment": "supported",
+          "summary": "test_expired_entry_is_recomputed confirms an expired entry recomputes its value.",
+          "basis_refs": [
+            "evi_01a0d751-812b-7615-b25f-5e58cde0afde",
+            "rec_1f17c700-cc30-70f6-aa64-c21dedb8e7f4"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d750-ce25-709f-9ceb-491d7b5d337d",
+          "assessment": "supported",
+          "summary": "entry.stored_at is now reset to the recompute time; test_refreshed_entry_stays_cached_until_new_ttl_expires shows the refreshed value is served as a hit until the new TTL elapses.",
+          "basis_refs": [
+            "evi_01a0d751-812b-7615-b25f-5e58cde0afde",
+            "rec_1f17c700-cc30-70f6-aa64-c21dedb8e7f4"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d750-ce25-709f-9ceb-4f5ab5493ffc",
+          "assessment": "supported",
+          "summary": "Pre-existing hit/miss tests (test_hit_within_ttl, test_distinct_arguments_are_cached_separately, test_cache_info_counts_hits_and_misses, etc.) still pass unmodified.",
+          "basis_refs": [
+            "evi_01a0d751-812b-7615-b25f-5e58cde0afde"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d750-ce25-709f-9ceb-50af2d5d21c1",
+          "assessment": "supported",
+          "summary": "test_refreshed_entry_stays_cached_until_new_ttl_expires added to tests/test_cache.py; confirmed to fail on pre-fix code via git stash and pass post-fix.",
+          "basis_refs": [
+            "evi_01a0d751-812b-7615-b25f-5e58cde0afde",
+            "rec_1f17c700-cc30-70f6-aa64-c21dedb8e7f4"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d750-ce25-709f-9ceb-544d88554607",
+          "assessment": "supported",
+          "summary": "Only change is adding entry.stored_at = now inside the existing expiry branch; ttl_cache's decorator signature, cache_info, and cache_clear are untouched.",
+          "basis_refs": [
+            "rec_1f17c700-cc30-70f6-aa64-c21dedb8e7f4"
+          ]
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Full test suite (11/11) passes, the new regression test was verified to fail on pre-fix code and pass post-fix, and the diff is a single added line with no API surface change."
+      },
+      "rationale": "The bug was a missing refresh of entry.stored_at on the expiry/recompute path, so the TTL window never restarted after a refresh. Setting entry.stored_at = now alongside entry.value fixes this without touching any other code path.",
+      "uncertainty": [],
+      "limitations": [],
+      "issued_by": {
+        "kind": "tool",
+        "id": "tallyback-check"
+      },
+      "issued_at": "2026-09-25T06:49:12.000Z"
+    }
+  ],
+  "settlements": [
+    {
+      "settlement_id": "set_01a0d754-2289-7079-b91c-cdb3512540c9",
+      "task_id": "tsk_01a0d74d-645d-7283-8607-716318f220b7",
+      "attempt_id": "att_01a0d751-4b17-70b0-9d9a-33540be39b38",
+      "decision": "accept",
+      "decided_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "decided_at": "2026-09-25T06:50:10.441Z",
+      "basis": {
+        "verdict_id": "ver_524e1920-2c14-70e3-95dc-f1eaefabfb17",
+        "attempt_end_id": null,
+        "blocker_ids": []
+      },
+      "rationale": "All 5 acceptance criteria verified via pytest and code review; see verdict ver_524e1920-2c14-70e3-95dc-f1eaefabfb17.",
+      "verification_exception": null
+    }
+  ],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": []
+}

@@ -1,0 +1,337 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 14,
+  "included_through": 14,
+  "project": {
+    "project_id": "prj_01a0d74d-1306-750d-9179-9a4c4e10c708",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d74d-1306-750d-9179-9dece2085e95",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d74d-1306-750d-9179-9dece2085e95",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d74d-b076-7423-b0ac-54f3ae2e4b38",
+      "repository_id": "repo_01a0d74d-1306-750d-9179-9dece2085e95",
+      "branch": "fix/ttl-refresh-stored-at"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d74d-1bac-71b7-aaf4-a9fe249b3374",
+      "project_id": "prj_01a0d74d-1306-750d-9179-9a4c4e10c708",
+      "name": "tinycache-ttl-refresh",
+      "goal": "",
+      "created_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "created_at": "2026-09-25T06:42:29.933Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d74d-279e-715e-a826-9c8c9110c513",
+      "topic_id": "top_01a0d74d-1bac-71b7-aaf4-a9fe249b3374",
+      "title": "Refreshed expired cache entries must stay cached for a new TTL"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d74d-43c6-719a-a63a-27fd8edb8b0f",
+      "task_id": "tsk_01a0d74d-279e-715e-a826-9c8c9110c513",
+      "declared_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "declared_at": "2026-09-25T06:42:40.199Z",
+      "objective": "Fix ttl_cache so refreshed expired entries remain cached for a fresh TTL window",
+      "criteria": []
+    },
+    {
+      "declaration_id": "dcl_01a0d74d-6a4a-7019-a4d0-cdb11a77558f",
+      "task_id": "tsk_01a0d74d-279e-715e-a826-9c8c9110c513",
+      "declared_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "declared_at": "2026-09-25T06:42:50.059Z",
+      "objective": "x",
+      "criteria": [],
+      "supersedes": "dcl_01a0d74d-43c6-719a-a63a-27fd8edb8b0f"
+    },
+    {
+      "declaration_id": "dcl_01a0d74d-8ba0-73ea-9d93-0e0e4f09e40a",
+      "task_id": "tsk_01a0d74d-279e-715e-a826-9c8c9110c513",
+      "declared_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "declared_at": "2026-09-25T06:42:58.592Z",
+      "objective": "Fix ttl_cache so refreshed expired entries remain cached for a fresh TTL window (ISSUE.md). Supersedes accidental probe declaration with objective 'x'.",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d74d-8ba0-73ea-9d93-13cbaa5a326c",
+          "code": "AC1",
+          "statement": "An expired value is recomputed.",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d74d-8ba0-73ea-9d93-17c307f07668",
+          "code": "AC2",
+          "statement": "The refreshed value remains cached until its new TTL expires.",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d74d-8ba0-73ea-9d93-1b9cd8e008c4",
+          "code": "AC3",
+          "statement": "Existing cache-hit behavior remains unchanged.",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d74d-8ba0-73ea-9d93-1e5e68afe0c7",
+          "code": "AC4",
+          "statement": "A regression test demonstrates the bug.",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d74d-8ba0-73ea-9d93-2021eac4a9e9",
+          "code": "AC5",
+          "statement": "The public API is not changed.",
+          "required": true
+        }
+      ],
+      "supersedes": "dcl_01a0d74d-6a4a-7019-a4d0-cdb11a77558f"
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d74d-f470-72bf-bd2f-f8a9e4f42685",
+      "task_id": "tsk_01a0d74d-279e-715e-a826-9c8c9110c513",
+      "declaration_id": "dcl_01a0d74d-8ba0-73ea-9d93-0e0e4f09e40a",
+      "repository_id": "repo_01a0d74d-1306-750d-9179-9dece2085e95",
+      "workspace_id": "wsp_01a0d74d-b076-7423-b0ac-54f3ae2e4b38",
+      "executor": {
+        "kind": "executor",
+        "id": "claude-opus-5-5"
+      },
+      "dispatched_by": {
+        "kind": "tool",
+        "id": "tallyback"
+      },
+      "dispatched_at": "2026-09-25T06:43:25.424Z"
+    }
+  ],
+  "attempt_ends": [],
+  "claims": [
+    {
+      "claim_id": "clm_01a0d74e-864c-769d-9e1f-9ee4ec8946c0",
+      "task_id": "tsk_01a0d74d-279e-715e-a826-9c8c9110c513",
+      "attempt_id": "att_01a0d74d-f470-72bf-bd2f-f8a9e4f42685",
+      "declaration_id": "dcl_01a0d74d-8ba0-73ea-9d93-0e0e4f09e40a",
+      "statement": "ttl_cache now resets stored_at when recomputing an expired entry; regression test added; all tests pass; public API unchanged. Changes are uncommitted in the working tree of fix/ttl-refresh-stored-at.",
+      "evidence_ids": [
+        "evi_01a0d74e-73b8-7108-8e3a-24b5328686e3",
+        "evi_01a0d74e-751f-777d-949f-0483f3a4964b",
+        "evi_01a0d74e-76a4-704f-a9b4-0bc5789f81a6"
+      ],
+      "claimed_by": {
+        "kind": "executor",
+        "id": "claude-opus-5-5"
+      },
+      "claimed_at": "2026-09-25T06:44:02.764Z"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "observation",
+      "payload": {
+        "text": "With tinycache/cache.py fix stashed, 'python3 -m pytest -q' -> 1 failed, 10 passed; failing: tests/test_cache.py::test_refreshed_entry_stays_cached_for_a_new_ttl (call 1s after refresh recomputed, n=3 != 2)."
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-opus-5-5"
+      },
+      "note": "regression test fails without fix",
+      "evidence_id": "evi_01a0d74e-73b8-7108-8e3a-24b5328686e3",
+      "submitted_at": "2026-09-25T06:43:58.008Z"
+    },
+    {
+      "kind": "observation",
+      "payload": {
+        "text": "With fix applied, 'python3 -m pytest -q' -> 11 passed (10 pre-existing + 1 regression test)."
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-opus-5-5"
+      },
+      "note": "full suite passes with fix",
+      "evidence_id": "evi_01a0d74e-751f-777d-949f-0483f3a4964b",
+      "submitted_at": "2026-09-25T06:43:58.367Z"
+    },
+    {
+      "kind": "observation",
+      "payload": {
+        "text": "git diff: tinycache/cache.py +1 line ('entry.stored_at = now' in the expiry branch); tests/test_cache.py +20 lines. ttl_cache signature, CacheInfo, cache_info, cache_clear and __all__ untouched."
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-opus-5-5"
+      },
+      "note": "diff scope and public API",
+      "evidence_id": "evi_01a0d74e-76a4-704f-a9b4-0bc5789f81a6",
+      "submitted_at": "2026-09-25T06:43:58.756Z"
+    }
+  ],
+  "reconciliations": [],
+  "check_invocations": [
+    {
+      "check_invocation_id": "chk_01a0d74e-beec-7464-bf8d-ece3940d91e3",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d74e-864c-769d-9e1f-9ee4ec8946c0"
+      },
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d74d-1306-750d-9179-9a4c4e10c708",
+        "revision": 11,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "27fdffbb7ac3971b8bf41e732c90f5de3e8a83ef96f62f4b1c9dffcb1840c570"
+        }
+      },
+      "invoked_by": {
+        "kind": "executor",
+        "id": "claude-opus-5-5"
+      },
+      "invoked_at": "2026-09-25T06:44:17.260Z"
+    }
+  ],
+  "check_results": [
+    {
+      "check_result_id": "ckr_01a0d74e-befc-71ae-8536-7a7eac00afcd",
+      "check_invocation_id": "chk_01a0d74e-beec-7464-bf8d-ece3940d91e3",
+      "outcome": "verdict_emitted",
+      "produced_by": {
+        "kind": "executor",
+        "id": "claude-opus-5-5"
+      },
+      "completed_at": "2026-09-25T06:44:17.276Z",
+      "diagnostics": [],
+      "reconciliation_ids": [],
+      "verdict_id": "ver_01a0d74e-beea-7360-a934-41648b267b2b"
+    }
+  ],
+  "verdicts": [
+    {
+      "verdict_id": "ver_01a0d74e-beea-7360-a934-41648b267b2b",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d74e-864c-769d-9e1f-9ee4ec8946c0"
+      },
+      "declaration_id": "dcl_01a0d74d-8ba0-73ea-9d93-0e0e4f09e40a",
+      "scope": {
+        "evaluated_criteria": [
+          "cri_01a0d74d-8ba0-73ea-9d93-13cbaa5a326c",
+          "cri_01a0d74d-8ba0-73ea-9d93-17c307f07668",
+          "cri_01a0d74d-8ba0-73ea-9d93-1b9cd8e008c4",
+          "cri_01a0d74d-8ba0-73ea-9d93-1e5e68afe0c7",
+          "cri_01a0d74d-8ba0-73ea-9d93-2021eac4a9e9"
+        ],
+        "unevaluated_criteria": []
+      },
+      "conclusion": "supported",
+      "finality": "final",
+      "basis": {
+        "evidence_ids": [
+          "evi_01a0d74e-73b8-7108-8e3a-24b5328686e3",
+          "evi_01a0d74e-751f-777d-949f-0483f3a4964b",
+          "evi_01a0d74e-76a4-704f-a9b4-0bc5789f81a6"
+        ],
+        "reconciliation_ids": []
+      },
+      "findings": [
+        {
+          "criterion_id": "cri_01a0d74d-8ba0-73ea-9d93-13cbaa5a326c",
+          "assessment": "supported",
+          "summary": "AC1: assessed as supported",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d74d-8ba0-73ea-9d93-17c307f07668",
+          "assessment": "supported",
+          "summary": "AC2: assessed as supported",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d74d-8ba0-73ea-9d93-1b9cd8e008c4",
+          "assessment": "supported",
+          "summary": "AC3: assessed as supported",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d74d-8ba0-73ea-9d93-1e5e68afe0c7",
+          "assessment": "supported",
+          "summary": "AC4: assessed as supported",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d74d-8ba0-73ea-9d93-2021eac4a9e9",
+          "assessment": "supported",
+          "summary": "AC5: assessed as supported",
+          "basis_refs": []
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Coordinator re-ran checks independently: pytest 11 passed; test_expired_entry_is_recomputed (AC1) and new test_refreshed_entry_stays_cached_for_a_new_ttl (AC2, AC4) pass, the latter fails without the fix; test_hit_within_ttl/cache_info tests unchanged and pass (AC3); standalone 1rps x 120s simulation gives 4 computes (one per TTL window), hits=116; ttl_cache signature and __all__ unchanged, diff touches no API (AC5). Caveat: changes are uncommitted, so branch has not advanced."
+      },
+      "rationale": "Coordinator re-ran checks independently: pytest 11 passed; test_expired_entry_is_recomputed (AC1) and new test_refreshed_entry_stays_cached_for_a_new_ttl (AC2, AC4) pass, the latter fails without the fix; test_hit_within_ttl/cache_info tests unchanged and pass (AC3); standalone 1rps x 120s simulation gives 4 computes (one per TTL window), hits=116; ttl_cache signature and __all__ unchanged, diff touches no API (AC5). Caveat: changes are uncommitted, so branch has not advanced.",
+      "uncertainty": [],
+      "limitations": [],
+      "issued_by": {
+        "kind": "executor",
+        "id": "claude-opus-5-5"
+      },
+      "issued_at": "2026-09-25T06:44:17.259Z",
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      }
+    }
+  ],
+  "settlements": [
+    {
+      "settlement_id": "set_01a0d74e-ddc4-75e8-96c7-2dec309db6a4",
+      "task_id": "tsk_01a0d74d-279e-715e-a826-9c8c9110c513",
+      "attempt_id": "att_01a0d74d-f470-72bf-bd2f-f8a9e4f42685",
+      "decision": "accept",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-opus-5-5"
+      },
+      "decided_at": "2026-09-25T06:44:25.156Z",
+      "basis": {
+        "verdict_id": "ver_01a0d74e-beea-7360-a934-41648b267b2b",
+        "attempt_end_id": null,
+        "blocker_ids": []
+      },
+      "rationale": "All five criteria supported at high confidence by independent re-verification. Accept only: fix is uncommitted on fix/ttl-refresh-stored-at; commit and land authorization left to the user.",
+      "verification_exception": null
+    }
+  ],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": []
+}

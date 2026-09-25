@@ -1,0 +1,15 @@
+{"seq":1,"at":"2026-09-25T06:42:44.007Z","kind":"init","revision":0,"project_id":"prj_01a0d74d-51aa-7345-acd4-632e769e3552"}
+{"seq":2,"at":"2026-09-25T06:42:47.736Z","kind":"append","revision":1,"appended":1,"replayed":false,"record_ids":["top_01a0d74d-612b-70b1-ae44-49554ff72e67"]}
+{"seq":3,"at":"2026-09-25T06:42:51.781Z","kind":"append","revision":2,"appended":1,"replayed":false,"record_ids":["tsk_01a0d74d-70f7-730e-94b6-e26636a609b5"]}
+{"seq":4,"at":"2026-09-25T06:42:59.037Z","kind":"append","revision":3,"appended":1,"replayed":false,"record_ids":["dcl_01a0d74d-8d50-73ad-a6ef-bfd9832fbbb8"]}
+{"seq":5,"at":"2026-09-25T06:43:41.915Z","kind":"append","revision":4,"appended":1,"replayed":false,"record_ids":["wsp_01a0d74e-34cd-763c-9f22-83ae8df6f194"]}
+{"seq":6,"at":"2026-09-25T06:43:45.362Z","kind":"append","revision":5,"appended":1,"replayed":false,"record_ids":["att_01a0d74e-4245-7619-a555-bc68dca4f6ab"]}
+{"seq":7,"at":"2026-09-25T06:43:55.985Z","kind":"append","revision":6,"appended":1,"replayed":false,"record_ids":["clm_01a0d74e-6bc3-747e-950a-fa5071a5b6d3"]}
+{"seq":8,"at":"2026-09-25T06:44:06.555Z","kind":"append_rejected","revision":6,"code":"schema.unknown_evidence_kind","expected_revision":6}
+{"seq":9,"at":"2026-09-25T06:44:17.643Z","kind":"append","revision":7,"appended":1,"replayed":false,"record_ids":["chk_01a0d74e-c05e-73fc-baf9-c1caba1297b7"]}
+{"seq":10,"at":"2026-09-25T06:44:30.222Z","kind":"append_rejected","revision":7,"code":"schema.undefined_value","expected_revision":7}
+{"seq":11,"at":"2026-09-25T06:44:36.698Z","kind":"append","revision":8,"appended":1,"replayed":false,"record_ids":["ate_01a0d74f-0acb-7078-82db-895216ab4e6f"]}
+{"seq":12,"at":"2026-09-25T06:44:43.892Z","kind":"append_rejected","revision":8,"code":"invariant.settlement_basis_matrix","expected_revision":8}
+{"seq":13,"at":"2026-09-25T06:44:46.916Z","kind":"append_rejected","revision":8,"code":"invariant.settlement_basis_matrix","expected_revision":8}
+{"seq":14,"at":"2026-09-25T06:44:59.641Z","kind":"append_rejected","revision":8,"code":"invariant.settlement_basis_matrix","expected_revision":8}
+{"seq":15,"at":"2026-09-25T06:45:03.954Z","kind":"append_rejected","revision":8,"code":"invariant.settlement_basis_matrix","expected_revision":8}

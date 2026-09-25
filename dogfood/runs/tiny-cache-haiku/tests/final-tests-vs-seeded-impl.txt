@@ -1,0 +1,41 @@
+........F..                                                              [100%]
+=================================== FAILURES ===================================
+_______________________ test_expired_entry_stays_cached ________________________
+
+clock = <conftest.FakeClock object at 0x7f8ad885c210>
+
+    def test_expired_entry_stays_cached(clock):
+        """Regression test: expired entries should stay cached after refresh."""
+        load_user, calls = make_loader(clock)
+        # Initial call
+        load_user(1)
+        # Expire the entry
+        clock.advance(30)
+        # Recompute the expired entry
+        load_user(1)
+        # Advance less than TTL from the refresh time
+        clock.advance(29)
+        # Should still be cached, not recomputed
+>       assert load_user(1) == {"id": 1, "n": 2}
+E       AssertionError: assert {'id': 1, 'n': 3} == {'id': 1, 'n': 2}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'n': 3} != {'n': 2}
+E         Use -v to get more diff
+
+tests/test_cache.py:95: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_cache.py::test_first_call_computes
+PASSED tests/test_cache.py::test_hit_within_ttl
+PASSED tests/test_cache.py::test_distinct_arguments_are_cached_separately
+PASSED tests/test_cache.py::test_kwargs_are_part_of_the_key
+PASSED tests/test_cache.py::test_expired_entry_is_recomputed
+PASSED tests/test_cache.py::test_cache_info_counts_hits_and_misses
+PASSED tests/test_cache.py::test_cache_clear_empties_the_cache
+PASSED tests/test_cache.py::test_wraps_preserves_metadata
+PASSED tests/test_cache.py::test_rejects_non_positive_ttl[0]
+PASSED tests/test_cache.py::test_rejects_non_positive_ttl[-1]
+FAILED tests/test_cache.py::test_expired_entry_stays_cached - AssertionError:...
+1 failed, 10 passed in 0.03s

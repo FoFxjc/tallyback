@@ -1,0 +1,6 @@
+ M tests/test_cache.py
+ M tinycache/cache.py
+?? .tallyback/history.jsonl
+?? .tallyback/project.json
+?? .tallyback/runtime/bindings.json
+?? .tallyback/state.json

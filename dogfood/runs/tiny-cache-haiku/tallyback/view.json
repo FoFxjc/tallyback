@@ -1,0 +1,60 @@
+{
+  "generated_from_revision": 8,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d74d-70f7-730e-94b6-e26636a609b5",
+      "title": "Fix expired cache entries bug",
+      "topic_id": "top_01a0d74d-612b-70b1-ae44-49554ff72e67",
+      "declaration": {
+        "declaration_id": "dcl_01a0d74d-8d50-73ad-a6ef-bfd9832fbbb8",
+        "objective": "An expired cache entry is recomputed once and the refreshed value stays cached until its new TTL expires",
+        "criteria": []
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d74e-4245-7619-a555-bc68dca4f6ab",
+          "executor": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "workspace_id": "wsp_01a0d74e-34cd-763c-9f22-83ae8df6f194",
+          "repository_id": "repo_01a0d74d-51aa-7345-acd4-67ab28123d08",
+          "dispatched_at": "2026-09-25T06:43:45.349Z",
+          "ended": true
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d74e-6bc3-747e-950a-fa5071a5b6d3",
+          "statement": "Added regression test and fixed bug where expired cache entries were not staying cached",
+          "evidence_ids": [],
+          "claimed_by": {
+            "kind": "tool",
+            "id": "tallyback"
+          },
+          "claimed_at": "2026-09-25T06:43:55.971Z"
+        }
+      ],
+      "evidence": [],
+      "blockers": [],
+      "verification": [],
+      "settlement": null,
+      "status": {
+        "blocked": false,
+        "verified": false,
+        "settled": false,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "verify (record-check)"
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 0
+  }
+}
