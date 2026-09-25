@@ -1,0 +1,21 @@
+{
+  "experiment": "execution-fit",
+  "tallyback": {
+    "sha": "2f76847d64b4ffc15f8cce53f736d9e8b8b0fdf5",
+    "note": "skill with the Execution Fit Check (2f76847) + view retry continuation (abe9750); built from a detached worktree, unchanged during the experiments"
+  },
+  "models": {
+    "haiku": "claude-haiku-4-5-20251001",
+    "sonnet": "claude-sonnet-5",
+    "opus": "claude-opus-5-5"
+  },
+  "prompt": "../prompt.txt (the 3x3 benchmark prompt, verbatim)",
+  "fixtures": {
+    "retry-worker-v2": {
+      "implementation_file": "batcher/chunk.py",
+      "design": "retry-worker seed with the oversized-first-item test removed: the naive fix of the visible defect turns every visible test green while the empty-batch defect (criterion 4) remains. independent_check.py (hidden) is run by the harness after phase 1; on failure its report is relayed into the same session.",
+      "independent_check": "../fixtures/retry-worker-v2/independent_check.py"
+    },
+    "config-migrate": { "implementation_file": "cfgmigrate/migrate.py" }
+  }
+}
