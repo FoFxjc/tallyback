@@ -192,5 +192,12 @@ describe('bridge: Claude Code skill file', () => {
       expect(fit).toContain('attempts[].execution_fit');
       expect(fit).toContain('--supersedes <that decision_id>');
     });
+
+    it('is triggered by picking up an open Attempt, not only by dispatch', () => {
+      const start = raw.slice(raw.indexOf('## Start here'), raw.indexOf('### Execution Fit Check'));
+      expect(start).toContain('when you pick up an Attempt');
+      expect(start).toContain('git diff');
+      expect(start).toContain('is someone else');
+    });
   });
 });

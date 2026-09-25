@@ -13,7 +13,10 @@ description: Use when driving a Tallyback-tracked task through its lifecycle (de
    listed in `requires` — assessments, decisions, and statements are yours to judge; never
    invent any other part of the command.
 3. Repeat after each step.
-4. After `dispatch`, before changing anything: do the **Execution Fit Check** (below).
+4. Before changing anything — after your own `dispatch`, **or when you pick up an Attempt
+   that is already open** (a new session resuming work) — run `git status` and `git diff`,
+   then do the **Execution Fit Check** (below). An `execution_fit` already shown on that
+   Attempt is someone else's: record your own over it with `--supersedes`.
 
 Say who you are: Tallyback cannot know which agent is typing, so records you author are
 `unknown:unattributed` unless you pass `--actor <kind>:<id>` (e.g. `--actor executor:claude-code`)
