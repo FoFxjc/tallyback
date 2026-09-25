@@ -14,7 +14,7 @@
 | Evidence | 3 `observation` records with specific text (pre-fix `1 failed, 10 passed` with test name; post-fix `11 passed`; one-line diff / no API change). Self-reported observations, not machine-captured. | ledger |
 | Verdict | `tallyback verdict` (the ergonomic command): all 5 criteria `supported`, `final`, `high`; rationale maps each criterion to a specific check; **notes** "changes are uncommitted, so branch has not advanced". `issued_by` = the same executor. | ledger |
 | Settlement | `accept`, **explicitly not `land`**: "fix is uncommitted… commit and land authorization left to the user". | ledger |
-| `watch` | `claim_without_branch_advance` — correctly flags that the claim is not in Git. | `tallyback/watch.json` |
+| `watch` | During the run (transcript #33, printed by the `claim` step) `watch` reported `claim_without_branch_advance` — the claim was not in Git. The final `watch.json` is empty because settled attempts are excluded. | transcript, `tallyback/watch.json` |
 
 ## Divergences
 
