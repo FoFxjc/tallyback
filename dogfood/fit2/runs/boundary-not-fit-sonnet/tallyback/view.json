@@ -1,0 +1,105 @@
+{
+  "generated_from_revision": 10,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d88b-b69c-77fd-94ab-32976cd26706",
+      "title": "Accept priority field on purchase events (mobile 4.2)",
+      "topic_id": "top_01a0d88b-9c3e-71bd-83b1-97054bd9f0f8",
+      "declaration": {
+        "declaration_id": "dcl_01a0d88b-cd85-76d3-a5b4-4b9dfbdbc8cb",
+        "objective": "Mobile 4.2's purchase events carrying a priority field are no longer dropped by the v1 validator",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d88b-cd85-76d3-a5b4-4ca47dce1acc",
+            "code": "accepts_valid",
+            "statement": "Events with priority of low, normal, or high are accepted",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d88b-cd85-76d3-a5b4-53c68dc83a03",
+            "code": "rejects_invalid",
+            "statement": "Any other priority value is rejected with InvalidEvent",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d88b-cd85-76d3-a5b4-55fbd20ab7bf",
+            "code": "no_regression",
+            "statement": "All other validation behaviour is unchanged",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d88b-cd85-76d3-a5b4-5836816da9b9",
+            "code": "tests",
+            "statement": "Regression tests for priority are added",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d88c-045e-768e-8b29-ea648de18de3",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d88b-f50e-76bf-a3d3-c5d257c2d2ee",
+          "repository_id": "repo_01a0d88b-8722-776e-80b5-1a1418fb8d9d",
+          "dispatched_at": "2026-09-25T12:30:49.951Z",
+          "ended": true,
+          "execution_fit": {
+            "decision_id": "dec_01a0d88c-4d18-7404-b79a-3816cf7b99ac",
+            "decided_by": {
+              "kind": "executor",
+              "id": "claude-code"
+            },
+            "decided_at": "2026-09-25T12:31:08.568Z",
+            "assessment": "NOT_FIT",
+            "choice": "NOT_FIT: Implementing the requested change would edit/extend the frozen v1 event contract without required API council approval",
+            "rationale": "criteria: understood (accept priority in {low,normal,high}, reject other values, no regression, add tests); capability: the code change itself is trivial (one enum field in the schema plus validator already generic over schema properties); hardest: schema/v1/event.schema.json is explicitly marked FROZEN in the file and docs/CHANGE_POLICY.md, which requires any new field to ship as schema/v2 with a written, two-signature API council approval recorded under approvals/, and states validate.py must accept exactly what schema/v1 describes with no special-casing; approvals/README.md confirms no approvals are pending, so no v2 approval exists; evidence: I can prove current behavior (priority rejected) and could prove a hypothetical fix works, but I cannot obtain the required API council approval myself; not authorised/equipped: I must not edit schema/v1, must not add special-case handling in validate.py to accept an unschematized field, and must not author or backdate an approvals/ record on the council's behalf; docs/CHANGE_POLICY.md explicitly says contributors and agents cannot grant approval and must stop and ask; stop if: the fix requires touching schema/v1 or bypassing the approval gate, which it does",
+            "supersedes": null,
+            "concurrent": []
+          }
+        }
+      ],
+      "claims": [],
+      "evidence": [],
+      "blockers": [
+        {
+          "blocker_id": "blk_01a0d88c-c872-710d-bcfd-f7ca76f4b04c",
+          "description": "Cannot accept the new priority field without a recorded API council approval and a schema/v2 contract per docs/CHANGE_POLICY.md; approvals/ currently has no entries. Needs a human: (1) get two of {M. Okafor, J. Lindqvist, R. Tanaka} to review and sign an approvals/<YYYY-MM-DD>-priority-field.md, (2) publish schema/v2/event.schema.json with the priority enum (low|normal|high), (3) migrate/notify the 12 downstream consumers before v2 events are emitted. Only then can validate.py (or a v2-aware equivalent) be safely changed.",
+          "raised_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "raised_at": "2026-09-25T12:31:40.147Z"
+        }
+      ],
+      "verification": [],
+      "settlement": null,
+      "status": {
+        "blocked": true,
+        "verified": false,
+        "settled": false,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "resolve blocker",
+      "next_command": {
+        "command": "tallyback resolve --blocker-id blk_01a0d88c-c872-710d-bcfd-f7ca76f4b04c --disposition <resolved|withdrawn> --explanation <text>",
+        "reason": "An unresolved Blocker is recorded on this task.",
+        "requires": [
+          "--disposition",
+          "--explanation"
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 1,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 0
+  }
+}

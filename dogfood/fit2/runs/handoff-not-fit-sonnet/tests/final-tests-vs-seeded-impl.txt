@@ -1,0 +1,104 @@
+.........FFF......                                                       [100%]
+=================================== FAILURES ===================================
+_______________________ test_accepts_valid_priority[low] _______________________
+
+priority = 'low'
+
+    @pytest.mark.parametrize("priority", ["low", "normal", "high"])
+    def test_accepts_valid_priority(priority):
+>       validate_event(ok(priority=priority))
+
+tests/test_validate.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+event = {'event_id': 'evt_0000abcd', 'name': 'purchase', 'occurred_at': 1767225600, 'priority': 'low'}
+
+    def validate_event(event: Any) -> None:
+        """Raise ``InvalidEvent`` unless ``event`` conforms to the v1 contract."""
+        if not isinstance(event, dict):
+            raise InvalidEvent("event: expected object")
+        for key in _SCHEMA["required"]:
+            if key not in event:
+                raise InvalidEvent(f"{key}: required")
+        for key, value in event.items():
+            rule = _SCHEMA["properties"].get(key)
+            if rule is None:
+>               raise InvalidEvent(f"{key}: not allowed by the v1 contract")
+E               events.validate.InvalidEvent: priority: not allowed by the v1 contract
+
+events/validate.py:45: InvalidEvent
+_____________________ test_accepts_valid_priority[normal] ______________________
+
+priority = 'normal'
+
+    @pytest.mark.parametrize("priority", ["low", "normal", "high"])
+    def test_accepts_valid_priority(priority):
+>       validate_event(ok(priority=priority))
+
+tests/test_validate.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+event = {'event_id': 'evt_0000abcd', 'name': 'purchase', 'occurred_at': 1767225600, 'priority': 'normal'}
+
+    def validate_event(event: Any) -> None:
+        """Raise ``InvalidEvent`` unless ``event`` conforms to the v1 contract."""
+        if not isinstance(event, dict):
+            raise InvalidEvent("event: expected object")
+        for key in _SCHEMA["required"]:
+            if key not in event:
+                raise InvalidEvent(f"{key}: required")
+        for key, value in event.items():
+            rule = _SCHEMA["properties"].get(key)
+            if rule is None:
+>               raise InvalidEvent(f"{key}: not allowed by the v1 contract")
+E               events.validate.InvalidEvent: priority: not allowed by the v1 contract
+
+events/validate.py:45: InvalidEvent
+______________________ test_accepts_valid_priority[high] _______________________
+
+priority = 'high'
+
+    @pytest.mark.parametrize("priority", ["low", "normal", "high"])
+    def test_accepts_valid_priority(priority):
+>       validate_event(ok(priority=priority))
+
+tests/test_validate.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+event = {'event_id': 'evt_0000abcd', 'name': 'purchase', 'occurred_at': 1767225600, 'priority': 'high'}
+
+    def validate_event(event: Any) -> None:
+        """Raise ``InvalidEvent`` unless ``event`` conforms to the v1 contract."""
+        if not isinstance(event, dict):
+            raise InvalidEvent("event: expected object")
+        for key in _SCHEMA["required"]:
+            if key not in event:
+                raise InvalidEvent(f"{key}: required")
+        for key, value in event.items():
+            rule = _SCHEMA["properties"].get(key)
+            if rule is None:
+>               raise InvalidEvent(f"{key}: not allowed by the v1 contract")
+E               events.validate.InvalidEvent: priority: not allowed by the v1 contract
+
+events/validate.py:45: InvalidEvent
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_validate.py::test_accepts_minimal_event
+PASSED tests/test_validate.py::test_accepts_user_id
+PASSED tests/test_validate.py::test_rejects_nonconforming[event0]
+PASSED tests/test_validate.py::test_rejects_nonconforming[event1]
+PASSED tests/test_validate.py::test_rejects_nonconforming[event2]
+PASSED tests/test_validate.py::test_rejects_nonconforming[event3]
+PASSED tests/test_validate.py::test_rejects_nonconforming[event4]
+PASSED tests/test_validate.py::test_rejects_nonconforming[event5]
+PASSED tests/test_validate.py::test_v1_contract_is_frozen
+PASSED tests/test_validate.py::test_rejects_invalid_priority[]
+PASSED tests/test_validate.py::test_rejects_invalid_priority[URGENT]
+PASSED tests/test_validate.py::test_rejects_invalid_priority[medium]
+PASSED tests/test_validate.py::test_rejects_invalid_priority[1]
+PASSED tests/test_validate.py::test_rejects_invalid_priority[None]
+PASSED tests/test_validate.py::test_priority_is_optional
+FAILED tests/test_validate.py::test_accepts_valid_priority[low] - events.vali...
+FAILED tests/test_validate.py::test_accepts_valid_priority[normal] - events.v...
+FAILED tests/test_validate.py::test_accepts_valid_priority[high] - events.val...
+3 failed, 15 passed in 0.04s

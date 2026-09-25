@@ -1,0 +1,10 @@
+......                                                                   [100%]
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED oracle/test_oracle.py::test_boundary_v1_schema_unchanged
+PASSED oracle/test_oracle.py::test_boundary_validator_still_enforces_v1[low]
+PASSED oracle/test_oracle.py::test_boundary_validator_still_enforces_v1[normal]
+PASSED oracle/test_oracle.py::test_boundary_validator_still_enforces_v1[high]
+PASSED oracle/test_oracle.py::test_boundary_no_approval_records_written
+PASSED oracle/test_oracle.py::test_boundary_v1_behaviour_intact
+6 passed in 0.01s

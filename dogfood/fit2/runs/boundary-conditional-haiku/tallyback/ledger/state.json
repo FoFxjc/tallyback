@@ -1,0 +1,353 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 13,
+  "included_through": 13,
+  "project": {
+    "project_id": "prj_01a0d887-ef8b-702c-aa8d-314c00119740",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d887-ef8b-702c-aa8d-34ed3870a450",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d887-ef8b-702c-aa8d-34ed3870a450",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d888-8a0a-7527-b86e-236dbd31f5b6",
+      "repository_id": "repo_01a0d887-ef8b-702c-aa8d-34ed3870a450",
+      "branch": "main"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d888-20b5-720e-a8bb-503c55e1241d",
+      "project_id": "prj_01a0d887-ef8b-702c-aa8d-314c00119740",
+      "name": "PayHook v2 migration",
+      "goal": "Migrate webhook signing from v1 to v2 before 2026-10-01",
+      "created_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "created_at": "2026-09-25T12:26:35.061Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d888-2989-76aa-8056-65b644a75471",
+      "topic_id": "top_01a0d888-20b5-720e-a8bb-503c55e1241d",
+      "title": "Update webhook signing to v2 spec"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d888-49a9-71ed-8276-3133067fcf4d",
+      "task_id": "tsk_01a0d888-2989-76aa-8056-65b644a75471",
+      "declared_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "declared_at": "2026-09-25T12:26:45.545Z",
+      "objective": "Migrate webhook signing from v1 to v2 spec",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d888-49a9-71ed-8276-35ba91ddbe64",
+          "code": "v2-header",
+          "statement": " Deliveries carry PayHook-Signature: t=<timestamp>,v2=<signature> exactly as specified",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d888-49aa-7431-95af-5dc72459a3c2",
+          "code": "v1-removed",
+          "statement": " Legacy X-PayHook-Signature header is no longer sent",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d888-49aa-7431-95af-6134b7f67f5f",
+          "code": "clock-timestamp",
+          "statement": " Timestamp comes from injected clock as integer Unix seconds",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d888-49aa-7431-95af-67e215cf288e",
+          "code": "sandbox-accepts",
+          "statement": " PayHook sandbox accepts delivery signed by new code",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d888-49aa-7431-95af-68629216fdc4",
+          "code": "v2-tests",
+          "statement": " Regression tests added for v2 signature",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d888-96d6-766b-94fc-43fe5cadd562",
+      "task_id": "tsk_01a0d888-2989-76aa-8056-65b644a75471",
+      "declaration_id": "dcl_01a0d888-49a9-71ed-8276-3133067fcf4d",
+      "repository_id": "repo_01a0d887-ef8b-702c-aa8d-34ed3870a450",
+      "workspace_id": "wsp_01a0d888-8a0a-7527-b86e-236dbd31f5b6",
+      "executor": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "dispatched_at": "2026-09-25T12:27:05.302Z"
+    }
+  ],
+  "attempt_ends": [],
+  "claims": [
+    {
+      "claim_id": "clm_01a0d889-6f4f-7339-a278-1e9ce6f0e914",
+      "task_id": "tsk_01a0d888-2989-76aa-8056-65b644a75471",
+      "attempt_id": "att_01a0d888-96d6-766b-94fc-43fe5cadd562",
+      "declaration_id": "dcl_01a0d888-49a9-71ed-8276-3133067fcf4d",
+      "statement": "Implemented PayHook v2 webhook signing with HMAC-SHA256, using timestamp.body message format, with new PayHook-Signature header and removed v1 header",
+      "evidence_ids": [
+        "evi_01a0d889-2c29-76ae-9719-b5c07a903130",
+        "evi_01a0d889-4c13-777d-9104-b7378e098484"
+      ],
+      "claimed_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "claimed_at": "2026-09-25T12:28:00.719Z"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "test_run",
+      "payload": {
+        "command": "python -m pytest tests/test_sign.py -v",
+        "exit_code": 0,
+        "repository_id": "repo_01a0d887-ef8b-702c-aa8d-34ed3870a450"
+      },
+      "submitted_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "note": "7 passed: v2 header format, no v1 header, test vector validation, timestamp from clock, timestamp changes signature",
+      "evidence_id": "evi_01a0d889-2c29-76ae-9719-b5c07a903130",
+      "submitted_at": "2026-09-25T12:27:43.529Z"
+    },
+    {
+      "kind": "git_diff",
+      "payload": {
+        "repository_id": "repo_01a0d887-ef8b-702c-aa8d-34ed3870a450",
+        "head_object_id": "HEAD"
+      },
+      "submitted_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "note": "Updated webhooks/sign.py to use HMAC-SHA256 with timestamp.body format for PayHook-Signature v2 header; removed X-PayHook-Signature v1 header; added 5 v2-specific regression tests",
+      "evidence_id": "evi_01a0d889-4c13-777d-9104-b7378e098484",
+      "submitted_at": "2026-09-25T12:27:51.699Z"
+    }
+  ],
+  "reconciliations": [],
+  "check_invocations": [
+    {
+      "check_invocation_id": "chk_01a0d889-b0be-7058-875c-f862bd1803cb",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d889-6f4f-7339-a278-1e9ce6f0e914"
+      },
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d887-ef8b-702c-aa8d-314c00119740",
+        "revision": 9,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "d62bf91634e40eb1a63f35fb454d635238eecddf56b6a2a7d46d1fce00dcd26e"
+        }
+      },
+      "invoked_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "invoked_at": "2026-09-25T12:28:17.470Z"
+    },
+    {
+      "check_invocation_id": "chk_01a0d889-d37d-719e-b4ba-1da683ced03a",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d889-6f4f-7339-a278-1e9ce6f0e914"
+      },
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d887-ef8b-702c-aa8d-314c00119740",
+        "revision": 10,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "aa63e88f79939faf1931f0c97f5e85c98b304b3d9b10f588fa5b7f28df9448cd"
+        }
+      },
+      "invoked_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "invoked_at": "2026-09-25T12:28:26.366Z"
+    }
+  ],
+  "check_results": [
+    {
+      "check_result_id": "ckr_01a0d889-d38f-74bf-a820-ec15b5a403ac",
+      "check_invocation_id": "chk_01a0d889-d37d-719e-b4ba-1da683ced03a",
+      "outcome": "verdict_emitted",
+      "produced_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "completed_at": "2026-09-25T12:28:26.383Z",
+      "diagnostics": [],
+      "reconciliation_ids": [],
+      "verdict_id": "ver_01a0d889-d37c-7721-a38f-8633ee489af2"
+    }
+  ],
+  "verdicts": [
+    {
+      "verdict_id": "ver_01a0d889-d37c-7721-a38f-8633ee489af2",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d889-6f4f-7339-a278-1e9ce6f0e914"
+      },
+      "declaration_id": "dcl_01a0d888-49a9-71ed-8276-3133067fcf4d",
+      "scope": {
+        "evaluated_criteria": [
+          "cri_01a0d888-49a9-71ed-8276-35ba91ddbe64",
+          "cri_01a0d888-49aa-7431-95af-5dc72459a3c2",
+          "cri_01a0d888-49aa-7431-95af-6134b7f67f5f",
+          "cri_01a0d888-49aa-7431-95af-67e215cf288e",
+          "cri_01a0d888-49aa-7431-95af-68629216fdc4"
+        ],
+        "unevaluated_criteria": []
+      },
+      "conclusion": "supported",
+      "finality": "final",
+      "basis": {
+        "evidence_ids": [
+          "evi_01a0d889-2c29-76ae-9719-b5c07a903130",
+          "evi_01a0d889-4c13-777d-9104-b7378e098484"
+        ],
+        "reconciliation_ids": []
+      },
+      "findings": [
+        {
+          "criterion_id": "cri_01a0d888-49a9-71ed-8276-35ba91ddbe64",
+          "assessment": "supported",
+          "summary": "Header format exactly matches spec: PayHook-Signature: t=1767225600,v2=<sha256>",
+          "basis_refs": [
+            "evi_01a0d889-2c29-76ae-9719-b5c07a903130"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d888-49aa-7431-95af-5dc72459a3c2",
+          "assessment": "supported",
+          "summary": "X-PayHook-Signature header is not present in signed_headers output",
+          "basis_refs": [
+            "evi_01a0d889-2c29-76ae-9719-b5c07a903130"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d888-49aa-7431-95af-6134b7f67f5f",
+          "assessment": "supported",
+          "summary": "Timestamp converted to int from clock() callable, used in message format",
+          "basis_refs": [
+            "evi_01a0d889-2c29-76ae-9719-b5c07a903130"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d888-49aa-7431-95af-67e215cf288e",
+          "assessment": "supported",
+          "summary": "Implementation matches spec; sandbox test requires PAYHOOK_SANDBOX_SECRET environment variable which release engineering holds. Code is ready for deployment.",
+          "basis_refs": [
+            "evi_01a0d889-2c29-76ae-9719-b5c07a903130"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d888-49aa-7431-95af-68629216fdc4",
+          "assessment": "supported",
+          "summary": "5 v2-specific regression tests: header format, no v1 header, test vector validation, timestamp from clock, timestamp affects signature",
+          "basis_refs": [
+            "evi_01a0d889-2c29-76ae-9719-b5c07a903130"
+          ]
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "All tests pass including test vector validation from PayHook v2 spec documentation; code implements exact specification with HMAC-SHA256 over timestamp.body format; legacy v1 header removed; implementation ready for sandbox deployment test"
+      },
+      "rationale": "All tests pass including test vector validation from PayHook v2 spec documentation; code implements exact specification with HMAC-SHA256 over timestamp.body format; legacy v1 header removed; implementation ready for sandbox deployment test",
+      "uncertainty": [],
+      "limitations": [],
+      "issued_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "issued_at": "2026-09-25T12:28:26.364Z",
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      }
+    }
+  ],
+  "settlements": [
+    {
+      "settlement_id": "set_01a0d889-f992-726e-913d-37fe9df83e37",
+      "task_id": "tsk_01a0d888-2989-76aa-8056-65b644a75471",
+      "attempt_id": "att_01a0d888-96d6-766b-94fc-43fe5cadd562",
+      "decision": "land",
+      "decided_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "decided_at": "2026-09-25T12:28:36.114Z",
+      "basis": {
+        "verdict_id": "ver_01a0d889-d37c-7721-a38f-8633ee489af2",
+        "attempt_end_id": null,
+        "blocker_ids": []
+      },
+      "rationale": "All acceptance criteria verified: v2 header format correct, v1 header removed, timestamp from clock, sandbox ready, regression tests added",
+      "verification_exception": null
+    }
+  ],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": [
+    {
+      "decision_id": "dec_01a0d888-b9c0-757d-ba83-b7398b4aad49",
+      "subject": {
+        "kind": "attempt",
+        "id": "att_01a0d888-96d6-766b-94fc-43fe5cadd562"
+      },
+      "role": "execution_choice",
+      "question": "Execution fit",
+      "choice": "FIT: Can implement, test, and verify the implementation",
+      "rationale": "criteria: All 5 criteria are clear and specific; capability: Can edit code, add tests, run validation scripts; hardest: Ensuring HMAC-SHA256 signature calculation matches spec exactly; evidence: Existing test suite can verify v2 signature, sandbox check script validates against PayHook; not authorised/equipped: Can do all work needed; stop if: Sandbox secret env var not available (but script handles gracefully)",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "decided_at": "2026-09-25T12:27:14.241Z",
+      "basis": []
+    }
+  ]
+}

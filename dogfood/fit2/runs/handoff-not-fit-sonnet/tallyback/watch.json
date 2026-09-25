@@ -1,0 +1,14 @@
+{
+  "generated_from_revision": 17,
+  "policy": {
+    "stale_after_ms": 172800000
+  },
+  "findings": [],
+  "summary": {
+    "open_attempts": 0,
+    "stale": 0,
+    "lost": 0,
+    "claim_without_branch_advance": 0,
+    "unresolved": 0
+  }
+}

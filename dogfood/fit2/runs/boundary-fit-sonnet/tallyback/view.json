@@ -1,0 +1,137 @@
+{
+  "generated_from_revision": 12,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d885-e579-7707-a5bf-7d02489962d8",
+      "title": "Fix parse_duration: minutes use wrong seconds multiplier",
+      "topic_id": "top_01a0d885-c8bd-7083-a474-a7c3829d6e9f",
+      "declaration": {
+        "declaration_id": "dcl_01a0d885-fd1e-712a-8ecf-bbed03481ba3",
+        "objective": "parse_duration converts minutes correctly and remains correct for hours/seconds and invalid input, with regression tests",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d885-fd1e-712a-8ecf-bec7127feed7",
+            "code": "minutes",
+            "statement": "30m -> 1800, 1h30m -> 5400, 2h15m30s -> 8130",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d885-fd1e-712a-8ecf-c3ddef5a4440",
+            "code": "hours_seconds",
+            "statement": "Hours-only and seconds-only durations keep working",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d885-fd1e-712a-8ecf-c62f8cf09029",
+            "code": "invalid",
+            "statement": "Invalid input still rejected with InvalidDuration; grammar in durations/parse.py unchanged",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d885-fd1e-712a-8ecf-cbd4452a75a6",
+            "code": "tests",
+            "statement": "Regression tests covering minutes are added",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d886-35aa-763e-9f7c-f9039e96a00f",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d886-2716-7707-b963-dd484f2a9a3d",
+          "repository_id": "repo_01a0d885-ae8e-71fe-909e-9ee49f9bcf66",
+          "dispatched_at": "2026-09-25T12:24:29.354Z",
+          "ended": false,
+          "execution_fit": {
+            "decision_id": "dec_01a0d886-53b3-7625-a929-49f07b2df5bc",
+            "decided_by": {
+              "kind": "executor",
+              "id": "claude-code"
+            },
+            "decided_at": "2026-09-25T12:24:37.044Z",
+            "assessment": "FIT",
+            "choice": "FIT: one-line fix to the minutes multiplier plus regression tests, verifiable via pytest",
+            "rationale": "criteria: all four are concrete and testable via parse_duration's return values and pytest.raises; capability: root cause is a single wrong constant (_UNIT_SECONDS['m']=3600 instead of 60) in durations/parse.py, fix is trivial and does not touch the grammar/regex; hardest: making sure the fix doesn't disturb the existing invalid-input rejection tests or the parsing order logic; evidence: run pytest on tests/test_parse.py plus new minute cases, and manually eval parse_duration on the three example strings from the issue; not authorised/equipped: will not commit, push, merge, or run tallyback land/settle beyond what this task asks; stop if: pytest fails after the fix or any existing test regresses",
+            "supersedes": null,
+            "concurrent": []
+          }
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d886-db43-74ce-ac64-cb8fbb7b2ccf",
+          "statement": "Fixed the minutes multiplier in durations/parse.py (_UNIT_SECONDS['m'] 3600 -> 60), leaving the grammar (_PART regex, _ORDER, control flow) unchanged. Added regression tests for 30m, 1h30m, and 2h15m30s. Full pytest suite (14 tests, including all 8 invalid-input cases) passes.",
+          "evidence_ids": [
+            "evi_01a0d886-a7ad-72fa-940d-20dd6f8030b0",
+            "evi_01a0d886-bb28-731a-abe1-de76a8ced553"
+          ],
+          "claimed_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "claimed_at": "2026-09-25T12:25:11.747Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d886-a7ad-72fa-940d-20dd6f8030b0",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T12:24:58.541Z",
+          "note": "14 passed, 0 failed: test_hours, test_seconds, test_hours_and_seconds, new test_minutes (30m->1800), test_hours_and_minutes (1h30m->5400), test_hours_minutes_and_seconds (2h15m30s->8130), and all 8 test_rejects_invalid parametrizations. Fix: durations/parse.py _UNIT_SECONDS['m'] changed from 3600 to 60; regex/_PART, _ORDER, and control flow unchanged (confirmed via git diff, one-line change)."
+        },
+        {
+          "evidence_id": "evi_01a0d886-bb28-731a-abe1-de76a8ced553",
+          "kind": "observation",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T12:25:03.528Z"
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d887-09b9-73ac-bd3a-bfa59577165b",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "Full pytest run (14/14 passed) plus direct interpreter checks of the three issue examples and a git diff review confirming the grammar file's regex/order/control-flow are unchanged; only the wrong _UNIT_SECONDS['m'] constant was corrected."
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d887-47f1-773c-8fe6-b1f17294cd1b",
+        "decision": "accept",
+        "verification_exception": null,
+        "rationale": "All four declared acceptance criteria are supported with high confidence: minutes now convert correctly (30m->1800, 1h30m->5400, 2h15m30s->8130), hours-only/seconds-only durations still work, invalid input is still rejected with the grammar file's regex/order/control-flow unchanged, and regression tests were added. The change itself has not been committed to Git, so this accepts the work product without authorizing landing/merge."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "settled: accept",
+      "next_command": null
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 1
+  }
+}

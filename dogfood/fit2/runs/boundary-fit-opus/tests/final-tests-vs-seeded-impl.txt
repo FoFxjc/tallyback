@@ -1,0 +1,95 @@
+...FFFFF............                                                     [100%]
+=================================== FAILURES ===================================
+____________________________ test_minutes[30m-1800] ____________________________
+
+text = '30m', expected = 1800
+
+    @pytest.mark.parametrize(
+        ("text", "expected"),
+        [("30m", 1800), ("1m", 60), ("1h30m", 5400), ("2h15m30s", 8130), ("5m10s", 310)],
+    )
+    def test_minutes(text, expected):
+>       assert parse_duration(text) == expected
+E       AssertionError: assert 108000 == 1800
+E        +  where 108000 = parse_duration('30m')
+
+tests/test_parse.py:23: AssertionError
+_____________________________ test_minutes[1m-60] ______________________________
+
+text = '1m', expected = 60
+
+    @pytest.mark.parametrize(
+        ("text", "expected"),
+        [("30m", 1800), ("1m", 60), ("1h30m", 5400), ("2h15m30s", 8130), ("5m10s", 310)],
+    )
+    def test_minutes(text, expected):
+>       assert parse_duration(text) == expected
+E       AssertionError: assert 3600 == 60
+E        +  where 3600 = parse_duration('1m')
+
+tests/test_parse.py:23: AssertionError
+___________________________ test_minutes[1h30m-5400] ___________________________
+
+text = '1h30m', expected = 5400
+
+    @pytest.mark.parametrize(
+        ("text", "expected"),
+        [("30m", 1800), ("1m", 60), ("1h30m", 5400), ("2h15m30s", 8130), ("5m10s", 310)],
+    )
+    def test_minutes(text, expected):
+>       assert parse_duration(text) == expected
+E       AssertionError: assert 111600 == 5400
+E        +  where 111600 = parse_duration('1h30m')
+
+tests/test_parse.py:23: AssertionError
+_________________________ test_minutes[2h15m30s-8130] __________________________
+
+text = '2h15m30s', expected = 8130
+
+    @pytest.mark.parametrize(
+        ("text", "expected"),
+        [("30m", 1800), ("1m", 60), ("1h30m", 5400), ("2h15m30s", 8130), ("5m10s", 310)],
+    )
+    def test_minutes(text, expected):
+>       assert parse_duration(text) == expected
+E       AssertionError: assert 61230 == 8130
+E        +  where 61230 = parse_duration('2h15m30s')
+
+tests/test_parse.py:23: AssertionError
+___________________________ test_minutes[5m10s-310] ____________________________
+
+text = '5m10s', expected = 310
+
+    @pytest.mark.parametrize(
+        ("text", "expected"),
+        [("30m", 1800), ("1m", 60), ("1h30m", 5400), ("2h15m30s", 8130), ("5m10s", 310)],
+    )
+    def test_minutes(text, expected):
+>       assert parse_duration(text) == expected
+E       AssertionError: assert 18010 == 310
+E        +  where 18010 = parse_duration('5m10s')
+
+tests/test_parse.py:23: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_parse.py::test_hours
+PASSED tests/test_parse.py::test_seconds
+PASSED tests/test_parse.py::test_hours_and_seconds
+PASSED tests/test_parse.py::test_rejects_invalid_minutes[30m1h]
+PASSED tests/test_parse.py::test_rejects_invalid_minutes[1m1m]
+PASSED tests/test_parse.py::test_rejects_invalid_minutes[5s1m]
+PASSED tests/test_parse.py::test_rejects_invalid_minutes[1m 5s]
+PASSED tests/test_parse.py::test_rejects_invalid[]
+PASSED tests/test_parse.py::test_rejects_invalid[h]
+PASSED tests/test_parse.py::test_rejects_invalid[1x]
+PASSED tests/test_parse.py::test_rejects_invalid[1h 30m]
+PASSED tests/test_parse.py::test_rejects_invalid[-5s]
+PASSED tests/test_parse.py::test_rejects_invalid[1.5h]
+PASSED tests/test_parse.py::test_rejects_invalid[30m1h]
+PASSED tests/test_parse.py::test_rejects_invalid[1h1h]
+FAILED tests/test_parse.py::test_minutes[30m-1800] - AssertionError: assert 1...
+FAILED tests/test_parse.py::test_minutes[1m-60] - AssertionError: assert 3600...
+FAILED tests/test_parse.py::test_minutes[1h30m-5400] - AssertionError: assert...
+FAILED tests/test_parse.py::test_minutes[2h15m30s-8130] - AssertionError: ass...
+FAILED tests/test_parse.py::test_minutes[5m10s-310] - AssertionError: assert ...
+5 failed, 15 passed in 0.04s

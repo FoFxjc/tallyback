@@ -1,0 +1,11 @@
+{
+  "run_id": "handoff-not-fit-sonnet",
+  "tallyback_sha": "10e8acd58ea2a4602407b7b2c3668addafc3fccd",
+  "fixture": "boundary-not-fit",
+  "source_run": "boundary-not-fit-sonnet",
+  "overlay": "handoff/not-fit-approval",
+  "model_requested": "claude-sonnet-5",
+  "seed_sha": "484a9ddcf2bacb056e9df76b7e122c38978ec17c",
+  "workspace": "/tmp/claude-0/-home-user-tallyback/01b763c0-69a7-5ad2-94c6-b173155321d2/scratchpad/fit2/w/3XJT8alm/repo",
+  "session_seconds": 189
+}

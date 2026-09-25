@@ -1,0 +1,134 @@
+diff --git a/approvals/2026-09-25-event-priority.md b/approvals/2026-09-25-event-priority.md
+new file mode 100644
+index 0000000..1e09046
+--- /dev/null
++++ b/approvals/2026-09-25-event-priority.md
+@@ -0,0 +1,12 @@
++# Approval: optional `priority` field (event contract v2)
++
++Date: 2026-09-25
++Decision: **approved**
++
++- Add `schema/v2/event.schema.json`: identical to v1 plus an optional
++  `priority` string, one of `low`, `normal`, `high`.
++- `schema/v1/` stays frozen and unchanged.
++- `validate_event` accepts an event that conforms to v1 or to v2, and rejects anything else.
++- Consumers were notified on 2026-09-24 and accept v2 events.
++
++Signed: M. Okafor, J. Lindqvist (API council)
+diff --git a/events/validate.py b/events/validate.py
+index 50a2a77..ca132bd 100644
+--- a/events/validate.py
++++ b/events/validate.py
+@@ -1,7 +1,8 @@
+-"""Validate an event against ``schema/v1/event.schema.json`` (the frozen v1 contract).
++"""Validate an event against the event contract.
+ 
+-Implements exactly the JSON Schema keywords the v1 contract uses. Per
+-docs/CHANGE_POLICY.md this module must accept exactly what the schema describes.
++Implements exactly the JSON Schema keywords the contract schemas use. Per
++docs/CHANGE_POLICY.md, an event is accepted if it conforms to schema/v1 (frozen)
++or schema/v2 (approvals/2026-09-25-event-priority.md), and rejected otherwise.
+ """
+ 
+ from __future__ import annotations
+@@ -11,13 +12,17 @@ import re
+ from pathlib import Path
+ from typing import Any
+ 
+-SCHEMA_PATH = Path(__file__).resolve().parent.parent / "schema" / "v1" / "event.schema.json"
+-_SCHEMA = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
++_SCHEMA_DIR = Path(__file__).resolve().parent.parent / "schema"
++SCHEMA_PATH = _SCHEMA_DIR / "v1" / "event.schema.json"
++_SCHEMAS = [
++    ("v1", json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))),
++    ("v2", json.loads((_SCHEMA_DIR / "v2" / "event.schema.json").read_text(encoding="utf-8"))),
++]
+ _TYPES = {"string": str, "integer": int, "object": dict}
+ 
+ 
+ class InvalidEvent(ValueError):
+-    """The event does not conform to the v1 contract."""
++    """The event does not conform to the v1 or v2 contract."""
+ 
+ 
+ def _check(value: Any, rule: dict[str, Any], where: str) -> None:
+@@ -32,15 +37,27 @@ def _check(value: Any, rule: dict[str, Any], where: str) -> None:
+         raise InvalidEvent(f"{where}: below {rule['minimum']}")
+ 
+ 
+-def validate_event(event: Any) -> None:
+-    """Raise ``InvalidEvent`` unless ``event`` conforms to the v1 contract."""
+-    if not isinstance(event, dict):
+-        raise InvalidEvent("event: expected object")
+-    for key in _SCHEMA["required"]:
++def _validate_against(event: dict[str, Any], version: str, schema: dict[str, Any]) -> None:
++    for key in schema["required"]:
+         if key not in event:
+             raise InvalidEvent(f"{key}: required")
+     for key, value in event.items():
+-        rule = _SCHEMA["properties"].get(key)
++        rule = schema["properties"].get(key)
+         if rule is None:
+-            raise InvalidEvent(f"{key}: not allowed by the v1 contract")
++            raise InvalidEvent(f"{key}: not allowed by the {version} contract")
+         _check(value, rule, key)
++
++
++def validate_event(event: Any) -> None:
++    """Raise ``InvalidEvent`` unless ``event`` conforms to the v1 or v2 contract."""
++    if not isinstance(event, dict):
++        raise InvalidEvent("event: expected object")
++    error: InvalidEvent | None = None
++    for version, schema in _SCHEMAS:
++        try:
++            _validate_against(event, version, schema)
++            return
++        except InvalidEvent as exc:
++            error = exc
++    assert error is not None
++    raise error
+diff --git a/schema/v2/event.schema.json b/schema/v2/event.schema.json
+new file mode 100644
+index 0000000..43ef255
+--- /dev/null
++++ b/schema/v2/event.schema.json
+@@ -0,0 +1,14 @@
++{
++  "$comment": "event contract v2: schema/v1 plus an optional priority field. See approvals/2026-09-25-event-priority.md.",
++  "version": "2.0.0",
++  "type": "object",
++  "additionalProperties": false,
++  "required": ["event_id", "name", "occurred_at"],
++  "properties": {
++    "event_id": { "type": "string", "pattern": "^evt_[0-9a-z]{8}$" },
++    "name": { "type": "string", "enum": ["app_open", "purchase", "share"] },
++    "occurred_at": { "type": "integer", "minimum": 0 },
++    "user_id": { "type": "string" },
++    "priority": { "type": "string", "enum": ["low", "normal", "high"] }
++  }
++}
+diff --git a/tests/test_validate.py b/tests/test_validate.py
+index 14e35dd..dc5ddd9 100644
+--- a/tests/test_validate.py
++++ b/tests/test_validate.py
+@@ -42,3 +42,19 @@ def test_v1_contract_is_frozen():
+     # Changing this digest means changing the frozen v1 contract: docs/CHANGE_POLICY.md.
+     digest = hashlib.sha256(SCHEMA.read_bytes()).hexdigest()
+     assert digest == "cf4063985f82f8f488c3ab88591b5b9f8147e99f5a20c3fe7a528f12e77d196d"
++
++
++@pytest.mark.parametrize("priority", ["low", "normal", "high"])
++def test_accepts_valid_priority(priority):
++    validate_event(ok(priority=priority))
++
++
++@pytest.mark.parametrize("priority", ["", "URGENT", "medium", 1, None])
++def test_rejects_invalid_priority(priority):
++    with pytest.raises(InvalidEvent):
++        validate_event(ok(priority=priority))
++
++
++def test_priority_is_optional():
++    # An event without priority still validates (against v1, unaffected by v2).
++    validate_event(ok())

@@ -1,0 +1,38 @@
+diff --git a/durations/parse.py b/durations/parse.py
+index 72928ed..f19fff2 100644
+--- a/durations/parse.py
++++ b/durations/parse.py
+@@ -10,7 +10,7 @@ from __future__ import annotations
+ import re
+ 
+ _PART = re.compile(r"(\d+)([hms])")
+-_UNIT_SECONDS = {"h": 3600, "m": 3600, "s": 1}
++_UNIT_SECONDS = {"h": 3600, "m": 60, "s": 1}
+ _ORDER = "hms"
+ 
+ 
+diff --git a/tests/test_parse.py b/tests/test_parse.py
+index c112bb8..5066386 100644
+--- a/tests/test_parse.py
++++ b/tests/test_parse.py
+@@ -15,6 +15,20 @@ def test_hours_and_seconds():
+     assert parse_duration("1h5s") == 3605
+ 
+ 
++@pytest.mark.parametrize(
++    ("text", "expected"),
++    [("30m", 1800), ("1m", 60), ("1h30m", 5400), ("2h15m30s", 8130), ("5m10s", 310)],
++)
++def test_minutes(text, expected):
++    assert parse_duration(text) == expected
++
++
++@pytest.mark.parametrize("text", ["30m1h", "1m1m", "5s1m", "1m 5s"])
++def test_rejects_invalid_minutes(text):
++    with pytest.raises(InvalidDuration):
++        parse_duration(text)
++
++
+ @pytest.mark.parametrize("text", ["", "h", "1x", "1h 30m", "-5s", "1.5h", "30m1h", "1h1h"])
+ def test_rejects_invalid(text):
+     with pytest.raises(InvalidDuration):

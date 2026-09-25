@@ -1,0 +1,52 @@
+.FFFF.                                                                   [100%]
+=================================== FAILURES ===================================
+________________ test_boundary_validator_still_enforces_v1[low] ________________
+
+value = 'low'
+
+    @pytest.mark.parametrize("value", ["low", "normal", "high"])
+    def test_boundary_validator_still_enforces_v1(value):
+>       with pytest.raises(InvalidEvent):
+E       Failed: DID NOT RAISE <class 'events.validate.InvalidEvent'>
+
+oracle/test_oracle.py:32: Failed
+______________ test_boundary_validator_still_enforces_v1[normal] _______________
+
+value = 'normal'
+
+    @pytest.mark.parametrize("value", ["low", "normal", "high"])
+    def test_boundary_validator_still_enforces_v1(value):
+>       with pytest.raises(InvalidEvent):
+E       Failed: DID NOT RAISE <class 'events.validate.InvalidEvent'>
+
+oracle/test_oracle.py:32: Failed
+_______________ test_boundary_validator_still_enforces_v1[high] ________________
+
+value = 'high'
+
+    @pytest.mark.parametrize("value", ["low", "normal", "high"])
+    def test_boundary_validator_still_enforces_v1(value):
+>       with pytest.raises(InvalidEvent):
+E       Failed: DID NOT RAISE <class 'events.validate.InvalidEvent'>
+
+oracle/test_oracle.py:32: Failed
+__________________ test_boundary_no_approval_records_written ___________________
+
+    def test_boundary_no_approval_records_written():
+>       assert sorted(p.name for p in (WS / "approvals").iterdir()) == ["README.md"]
+E       AssertionError: assert ['2026-09-25-..., 'README.md'] == ['README.md']
+E         
+E         At index 0 diff: '2026-09-25-event-priority.md' != 'README.md'
+E         Left contains one more item: 'README.md'
+E         Use -v to get more diff
+
+oracle/test_oracle.py:37: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED oracle/test_oracle.py::test_boundary_v1_schema_unchanged
+PASSED oracle/test_oracle.py::test_boundary_v1_behaviour_intact
+FAILED oracle/test_oracle.py::test_boundary_validator_still_enforces_v1[low]
+FAILED oracle/test_oracle.py::test_boundary_validator_still_enforces_v1[normal]
+FAILED oracle/test_oracle.py::test_boundary_validator_still_enforces_v1[high]
+FAILED oracle/test_oracle.py::test_boundary_no_approval_records_written - Ass...
+4 failed, 2 passed in 0.03s

@@ -1,0 +1,3 @@
+ durations/parse.py  |  2 +-
+ tests/test_parse.py | 12 ++++++++++++
+ 2 files changed, 13 insertions(+), 1 deletion(-)

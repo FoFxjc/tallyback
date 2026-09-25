@@ -1,0 +1,355 @@
+diff --git a/.tallyback/.gitignore b/.tallyback/.gitignore
+new file mode 100644
+index 0000000..961ea9a
+--- /dev/null
++++ b/.tallyback/.gitignore
+@@ -0,0 +1,3 @@
++# Machine-local Tallyback state (SPEC §6): never commit.
++history.jsonl
++runtime/
+diff --git a/.tallyback/project.json b/.tallyback/project.json
+new file mode 100644
+index 0000000..0fcc1e7
+--- /dev/null
++++ b/.tallyback/project.json
+@@ -0,0 +1,9 @@
++{
++  "project_id": "prj_01a0d885-d971-729c-b32d-dfc2832b1795",
++  "repositories": [
++    {
++      "repository_id": "repo_01a0d885-d971-729c-b32d-e05c35d79a48",
++      "alias": "main"
++    }
++  ]
++}
+diff --git a/.tallyback/state.json b/.tallyback/state.json
+new file mode 100644
+index 0000000..41fdaef
+--- /dev/null
++++ b/.tallyback/state.json
+@@ -0,0 +1,289 @@
++{
++  "schema_version": "1.0.0",
++  "revision": 11,
++  "included_through": 11,
++  "project": {
++    "project_id": "prj_01a0d885-d971-729c-b32d-dfc2832b1795",
++    "repositories": [
++      {
++        "repository_id": "repo_01a0d885-d971-729c-b32d-e05c35d79a48",
++        "alias": "main"
++      }
++    ]
++  },
++  "repositories": [
++    {
++      "repository_id": "repo_01a0d885-d971-729c-b32d-e05c35d79a48",
++      "alias": "main"
++    }
++  ],
++  "workspaces": [
++    {
++      "workspace_id": "wsp_01a0d886-2911-725f-9d96-3bb7b7c1d996",
++      "repository_id": "repo_01a0d885-d971-729c-b32d-e05c35d79a48",
++      "branch": "main"
++    }
++  ],
++  "topics": [
++    {
++      "topic_id": "top_01a0d885-f156-74be-9bd7-93638b0e1f19",
++      "project_id": "prj_01a0d885-d971-729c-b32d-dfc2832b1795",
++      "name": "Parse Duration Bug Fix",
++      "goal": "",
++      "created_by": {
++        "kind": "unknown",
++        "id": "unattributed"
++      },
++      "created_at": "2026-09-25T12:24:11.862Z"
++    }
++  ],
++  "tasks": [
++    {
++      "task_id": "tsk_01a0d886-0168-74fb-87ed-28aef536b04a",
++      "topic_id": "top_01a0d885-f156-74be-9bd7-93638b0e1f19",
++      "title": "Fix parse_duration minutes mapping"
++    }
++  ],
++  "declarations": [
++    {
++      "declaration_id": "dcl_01a0d886-10a6-747e-8a90-517ca35d965e",
++      "task_id": "tsk_01a0d886-0168-74fb-87ed-28aef536b04a",
++      "declared_by": {
++        "kind": "unknown",
++        "id": "unattributed"
++      },
++      "declared_at": "2026-09-25T12:24:19.878Z",
++      "objective": "Fix parse_duration to correctly convert minutes (3600→60 unit mapping)",
++      "criteria": [
++        {
++          "criterion_id": "cri_01a0d886-10a7-750c-ad83-3ce3eb56aebd",
++          "code": "minutes_correct",
++          "statement": "Minutes are converted correctly: \"30m\" → 1800, \"1h30m\" → 5400, \"2h15m30s\" → 8130",
++          "required": true
++        },
++        {
++          "criterion_id": "cri_01a0d886-10a7-750c-ad83-40d490e7e06c",
++          "code": "hours_and_seconds_work",
++          "statement": "Hours-only and seconds-only durations keep working",
++          "required": true
++        },
++        {
++          "criterion_id": "cri_01a0d886-10a7-750c-ad83-47d0632290aa",
++          "code": "invalid_rejected",
++          "statement": "Invalid input is still rejected with InvalidDuration",
++          "required": true
++        },
++        {
++          "criterion_id": "cri_01a0d886-10a7-750c-ad83-489dd996bb58",
++          "code": "regression_tests",
++          "statement": "Add regression tests covering minutes",
++          "required": true
++        }
++      ]
++    }
++  ],
++  "attempts": [
++    {
++      "attempt_id": "att_01a0d886-5c80-7717-89df-0844bec55e6f",
++      "task_id": "tsk_01a0d886-0168-74fb-87ed-28aef536b04a",
++      "declaration_id": "dcl_01a0d886-10a6-747e-8a90-517ca35d965e",
++      "repository_id": "repo_01a0d885-d971-729c-b32d-e05c35d79a48",
++      "workspace_id": "wsp_01a0d886-2911-725f-9d96-3bb7b7c1d996",
++      "executor": {
++        "kind": "executor",
++        "id": "claude-code"
++      },
++      "dispatched_by": {
++        "kind": "unknown",
++        "id": "unattributed"
++      },
++      "dispatched_at": "2026-09-25T12:24:39.296Z"
++    }
++  ],
++  "attempt_ends": [],
++  "claims": [
++    {
++      "claim_id": "clm_01a0d887-0c90-74ef-af28-eb4bb4f85db6",
++      "task_id": "tsk_01a0d886-0168-74fb-87ed-28aef536b04a",
++      "attempt_id": "att_01a0d886-5c80-7717-89df-0844bec55e6f",
++      "declaration_id": "dcl_01a0d886-10a6-747e-8a90-517ca35d965e",
++      "statement": "Fixed parse_duration minutes unit mapping (3600→60), added 3 regression tests covering minute cases, all 14 tests pass",
++      "evidence_ids": [
++        "evi_01a0d886-ce14-77ad-8a3e-46abf467dec7"
++      ],
++      "claimed_by": {
++        "kind": "unknown",
++        "id": "unattributed"
++      },
++      "claimed_at": "2026-09-25T12:25:24.369Z"
++    }
++  ],
++  "evidence": [
++    {
++      "kind": "test_run",
++      "payload": {
++        "exit_code": 0,
++        "command": "python -m pytest tests/test_parse.py -v"
++      },
++      "submitted_by": {
++        "kind": "unknown",
++        "id": "unattributed"
++      },
++      "note": "All 14 tests pass including 3 new regression tests: test_minutes (30m→1800s), test_hours_and_minutes (1h30m→5400s), test_hours_minutes_and_seconds (2h15m30s→8130s)",
++      "evidence_id": "evi_01a0d886-ce14-77ad-8a3e-46abf467dec7",
++      "submitted_at": "2026-09-25T12:25:08.372Z"
++    }
++  ],
++  "reconciliations": [],
++  "check_invocations": [
++    {
++      "check_invocation_id": "chk_01a0d887-1dd3-726d-8fff-b4781548899a",
++      "subject": {
++        "kind": "claim",
++        "id": "clm_01a0d887-0c90-74ef-af28-eb4bb4f85db6"
++      },
++      "checker": {
++        "id": "operator-authored",
++        "version": "v1"
++      },
++      "evaluated_snapshot": {
++        "project_id": "prj_01a0d885-d971-729c-b32d-dfc2832b1795",
++        "revision": 8,
++        "digest": {
++          "algorithm": "sha-256",
++          "value": "74255e6b6b9364015e4646cb551a27fd3235fa35eabbdc45c2eb29c3ba713497"
++        }
++      },
++      "invoked_by": {
++        "kind": "unknown",
++        "id": "unattributed"
++      },
++      "invoked_at": "2026-09-25T12:25:28.787Z"
++    }
++  ],
++  "check_results": [
++    {
++      "check_result_id": "ckr_01a0d887-1de7-75ea-8377-9e54e1b65bca",
++      "check_invocation_id": "chk_01a0d887-1dd3-726d-8fff-b4781548899a",
++      "outcome": "verdict_emitted",
++      "produced_by": {
++        "kind": "unknown",
++        "id": "unattributed"
++      },
++      "completed_at": "2026-09-25T12:25:28.807Z",
++      "diagnostics": [],
++      "reconciliation_ids": [],
++      "verdict_id": "ver_01a0d887-1dd1-76ab-9873-7cc7d1365717"
++    }
++  ],
++  "verdicts": [
++    {
++      "verdict_id": "ver_01a0d887-1dd1-76ab-9873-7cc7d1365717",
++      "subject": {
++        "kind": "claim",
++        "id": "clm_01a0d887-0c90-74ef-af28-eb4bb4f85db6"
++      },
++      "declaration_id": "dcl_01a0d886-10a6-747e-8a90-517ca35d965e",
++      "scope": {
++        "evaluated_criteria": [
++          "cri_01a0d886-10a7-750c-ad83-3ce3eb56aebd",
++          "cri_01a0d886-10a7-750c-ad83-40d490e7e06c",
++          "cri_01a0d886-10a7-750c-ad83-47d0632290aa",
++          "cri_01a0d886-10a7-750c-ad83-489dd996bb58"
++        ],
++        "unevaluated_criteria": []
++      },
++      "conclusion": "supported",
++      "finality": "final",
++      "basis": {
++        "evidence_ids": [
++          "evi_01a0d886-ce14-77ad-8a3e-46abf467dec7"
++        ],
++        "reconciliation_ids": []
++      },
++      "findings": [
++        {
++          "criterion_id": "cri_01a0d886-10a7-750c-ad83-3ce3eb56aebd",
++          "assessment": "supported",
++          "summary": "minutes_correct: assessed as supported",
++          "basis_refs": []
++        },
++        {
++          "criterion_id": "cri_01a0d886-10a7-750c-ad83-40d490e7e06c",
++          "assessment": "supported",
++          "summary": "hours_and_seconds_work: assessed as supported",
++          "basis_refs": []
++        },
++        {
++          "criterion_id": "cri_01a0d886-10a7-750c-ad83-47d0632290aa",
++          "assessment": "supported",
++          "summary": "invalid_rejected: assessed as supported",
++          "basis_refs": []
++        },
++        {
++          "criterion_id": "cri_01a0d886-10a7-750c-ad83-489dd996bb58",
++          "assessment": "supported",
++          "summary": "regression_tests: assessed as supported",
++          "basis_refs": []
++        }
++      ],
++      "confidence": {
++        "level": "high",
++        "rationale": "All acceptance criteria verified by test execution: pytest run shows 14/14 tests passing, including new regression tests for 30m (1800s), 1h30m (5400s), and 2h15m30s (8130s). Existing tests for hours and seconds continue to pass. Invalid input rejection tests still pass. Code change: single line fix changing minutes unit from 3600 to 60 seconds."
++      },
++      "rationale": "All acceptance criteria verified by test execution: pytest run shows 14/14 tests passing, including new regression tests for 30m (1800s), 1h30m (5400s), and 2h15m30s (8130s). Existing tests for hours and seconds continue to pass. Invalid input rejection tests still pass. Code change: single line fix changing minutes unit from 3600 to 60 seconds.",
++      "uncertainty": [],
++      "limitations": [],
++      "issued_by": {
++        "kind": "unknown",
++        "id": "unattributed"
++      },
++      "issued_at": "2026-09-25T12:25:28.786Z",
++      "checker": {
++        "id": "operator-authored",
++        "version": "v1"
++      }
++    }
++  ],
++  "settlements": [
++    {
++      "settlement_id": "set_01a0d887-4353-73c8-88f6-678651f9f9d7",
++      "task_id": "tsk_01a0d886-0168-74fb-87ed-28aef536b04a",
++      "attempt_id": "att_01a0d886-5c80-7717-89df-0844bec55e6f",
++      "decision": "land",
++      "decided_by": {
++        "kind": "unknown",
++        "id": "unattributed"
++      },
++      "decided_at": "2026-09-25T12:25:38.387Z",
++      "basis": {
++        "verdict_id": "ver_01a0d887-1dd1-76ab-9873-7cc7d1365717",
++        "attempt_end_id": null,
++        "blocker_ids": []
++      },
++      "rationale": "All acceptance criteria verified by test execution. Code changes: 1-line fix to parse.py (minutes unit 3600→60), 3 regression tests added.",
++      "verification_exception": null
++    }
++  ],
++  "blockers": [],
++  "blocker_resolutions": [],
++  "decisions": [
++    {
++      "decision_id": "dec_01a0d886-7dd3-723c-acc9-8599acc3c5a6",
++      "subject": {
++        "kind": "attempt",
++        "id": "att_01a0d886-5c80-7717-89df-0844bec55e6f"
++      },
++      "role": "execution_choice",
++      "question": "Execution fit",
++      "choice": "FIT: All criteria are understood, capability to implement/verify is clear, evidence path exists via tests",
++      "rationale": "criteria: 4 acceptance criteria clearly stated from ISSUE.md; capability: can fix simple value change in parse.py and extend test suite; hardest: ensuring no regressions; evidence: pytest test execution output; not authorized: won't push (local work only); stop if: unexpected test failures",
++      "decided_by": {
++        "kind": "unknown",
++        "id": "unattributed"
++      },
++      "decided_at": "2026-09-25T12:24:47.827Z",
++      "basis": []
++    }
++  ]
++}
+diff --git a/durations/parse.py b/durations/parse.py
+index 72928ed..f19fff2 100644
+--- a/durations/parse.py
++++ b/durations/parse.py
+@@ -10,7 +10,7 @@ from __future__ import annotations
+ import re
+ 
+ _PART = re.compile(r"(\d+)([hms])")
+-_UNIT_SECONDS = {"h": 3600, "m": 3600, "s": 1}
++_UNIT_SECONDS = {"h": 3600, "m": 60, "s": 1}
+ _ORDER = "hms"
+ 
+ 
+diff --git a/tests/test_parse.py b/tests/test_parse.py
+index c112bb8..6c02538 100644
+--- a/tests/test_parse.py
++++ b/tests/test_parse.py
+@@ -15,6 +15,18 @@ def test_hours_and_seconds():
+     assert parse_duration("1h5s") == 3605
+ 
+ 
++def test_minutes():
++    assert parse_duration("30m") == 1800
++
++
++def test_hours_and_minutes():
++    assert parse_duration("1h30m") == 5400
++
++
++def test_hours_minutes_and_seconds():
++    assert parse_duration("2h15m30s") == 8130
++
++
+ @pytest.mark.parametrize("text", ["", "h", "1x", "1h 30m", "-5s", "1.5h", "30m1h", "1h1h"])
+ def test_rejects_invalid(text):
+     with pytest.raises(InvalidDuration):

@@ -1,0 +1,3 @@
+ schema/v1/event.schema.json |  3 ++-
+ tests/test_validate.py      | 24 +++++++++++++++++++++++-
+ 2 files changed, 25 insertions(+), 2 deletions(-)

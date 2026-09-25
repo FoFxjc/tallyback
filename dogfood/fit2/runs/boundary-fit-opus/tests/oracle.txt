@@ -1,0 +1,22 @@
+..................                                                       [100%]
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED oracle/test_oracle.py::test_c1_minutes[30m-1800]
+PASSED oracle/test_oracle.py::test_c1_minutes[1h30m-5400]
+PASSED oracle/test_oracle.py::test_c1_minutes[2h15m30s-8130]
+PASSED oracle/test_oracle.py::test_c1_minutes[1m-60]
+PASSED oracle/test_oracle.py::test_c1_minutes[0m-0]
+PASSED oracle/test_oracle.py::test_c1_minutes[59m59s-3599]
+PASSED oracle/test_oracle.py::test_c2_hours_and_seconds[2h-7200]
+PASSED oracle/test_oracle.py::test_c2_hours_and_seconds[45s-45]
+PASSED oracle/test_oracle.py::test_c2_hours_and_seconds[1h5s-3605]
+PASSED oracle/test_oracle.py::test_c3_rejects_invalid[]
+PASSED oracle/test_oracle.py::test_c3_rejects_invalid[m]
+PASSED oracle/test_oracle.py::test_c3_rejects_invalid[1x]
+PASSED oracle/test_oracle.py::test_c3_rejects_invalid[1h 30m]
+PASSED oracle/test_oracle.py::test_c3_rejects_invalid[-5m]
+PASSED oracle/test_oracle.py::test_c3_rejects_invalid[1.5m]
+PASSED oracle/test_oracle.py::test_c3_rejects_invalid[30s1m]
+PASSED oracle/test_oracle.py::test_c3_rejects_invalid[1m1m]
+PASSED oracle/test_oracle.py::test_c3_rejects_invalid[None]
+18 passed in 0.02s

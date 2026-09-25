@@ -1,0 +1,18 @@
+..............                                                           [100%]
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_validate.py::test_accepts_minimal_event
+PASSED tests/test_validate.py::test_accepts_user_id
+PASSED tests/test_validate.py::test_accepts_priority_low
+PASSED tests/test_validate.py::test_accepts_priority_normal
+PASSED tests/test_validate.py::test_accepts_priority_high
+PASSED tests/test_validate.py::test_rejects_invalid_priority
+PASSED tests/test_validate.py::test_rejects_priority_wrong_type
+PASSED tests/test_validate.py::test_rejects_nonconforming[event0]
+PASSED tests/test_validate.py::test_rejects_nonconforming[event1]
+PASSED tests/test_validate.py::test_rejects_nonconforming[event2]
+PASSED tests/test_validate.py::test_rejects_nonconforming[event3]
+PASSED tests/test_validate.py::test_rejects_nonconforming[event4]
+PASSED tests/test_validate.py::test_rejects_nonconforming[event5]
+PASSED tests/test_validate.py::test_v1_contract_is_frozen
+14 passed in 0.02s

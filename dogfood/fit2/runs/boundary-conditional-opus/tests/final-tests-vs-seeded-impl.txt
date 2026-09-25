@@ -1,0 +1,44 @@
+..FFFF                                                                   [100%]
+=================================== FAILURES ===================================
+_______________ test_v2_signature_matches_documented_test_vector _______________
+
+    def test_v2_signature_matches_documented_test_vector():
+        headers = signed_headers(VECTOR_BODY, VECTOR_SECRET, clock=lambda: VECTOR_TIMESTAMP)
+>       assert headers["PayHook-Signature"] == VECTOR_HEADER
+E       KeyError: 'PayHook-Signature'
+
+tests/test_sign.py:24: KeyError
+______________________ test_legacy_v1_header_is_not_sent _______________________
+
+    def test_legacy_v1_header_is_not_sent():
+        headers = signed_headers(VECTOR_BODY, VECTOR_SECRET, clock=lambda: VECTOR_TIMESTAMP)
+>       assert "X-PayHook-Signature" not in headers
+E       AssertionError: assert 'X-PayHook-Signature' not in {'Content-Type': 'application/json', 'X-PayHook-Signature': 'sha1=dcbee740fbaabeec1d39c50f088728f4f5e1e93d'}
+
+tests/test_sign.py:29: AssertionError
+______________ test_timestamp_comes_from_clock_as_integer_seconds ______________
+
+    def test_timestamp_comes_from_clock_as_integer_seconds():
+        headers = signed_headers(VECTOR_BODY, VECTOR_SECRET, clock=lambda: VECTOR_TIMESTAMP + 0.9)
+>       assert headers["PayHook-Signature"] == VECTOR_HEADER
+E       KeyError: 'PayHook-Signature'
+
+tests/test_sign.py:35: KeyError
+_____________________ test_signature_depends_on_timestamp ______________________
+
+    def test_signature_depends_on_timestamp():
+        a = signed_headers(VECTOR_BODY, VECTOR_SECRET, clock=lambda: 1)
+        b = signed_headers(VECTOR_BODY, VECTOR_SECRET, clock=lambda: 2)
+>       assert a["PayHook-Signature"].startswith("t=1,v2=")
+E       KeyError: 'PayHook-Signature'
+
+tests/test_sign.py:41: KeyError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_sign.py::test_sets_content_type
+PASSED tests/test_sign.py::test_signature_depends_on_body
+FAILED tests/test_sign.py::test_v2_signature_matches_documented_test_vector
+FAILED tests/test_sign.py::test_legacy_v1_header_is_not_sent - AssertionError...
+FAILED tests/test_sign.py::test_timestamp_comes_from_clock_as_integer_seconds
+FAILED tests/test_sign.py::test_signature_depends_on_timestamp - KeyError: 'P...
+4 failed, 2 passed in 0.03s

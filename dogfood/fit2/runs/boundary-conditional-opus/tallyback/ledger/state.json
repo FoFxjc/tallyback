@@ -1,0 +1,370 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 14,
+  "included_through": 14,
+  "project": {
+    "project_id": "prj_01a0d887-bce8-701f-9e01-2ae3fd2e56ad",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d887-bce8-701f-9e01-2f93db6fd797",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d887-bce8-701f-9e01-2f93db6fd797",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d888-0027-710b-b422-c48ccbd5c120",
+      "repository_id": "repo_01a0d887-bce8-701f-9e01-2f93db6fd797",
+      "branch": "fix/payhook-v2"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d887-cb8c-756a-b970-96f498bc152e",
+      "project_id": "prj_01a0d887-bce8-701f-9e01-2ae3fd2e56ad",
+      "name": "PayHook v2 signing",
+      "goal": "",
+      "created_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "created_at": "2026-09-25T12:26:13.260Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d887-db03-735b-8c70-f5bc4d9ae80c",
+      "topic_id": "top_01a0d887-cb8c-756a-b970-96f498bc152e",
+      "title": "Move webhook signing to PayHook v2"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d887-efd6-7182-9966-bba6b4fb0653",
+      "task_id": "tsk_01a0d887-db03-735b-8c70-f5bc4d9ae80c",
+      "declared_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "declared_at": "2026-09-25T12:26:22.550Z",
+      "objective": "Deliveries are signed with PayHook v2 per docs/payhook-v2.md",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d887-efd6-7182-9966-bf54a97d81b5",
+          "code": "header",
+          "statement": "Deliveries carry PayHook-Signature: t=<timestamp>,v2=<signature> exactly as specified; documented test vector matches",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d887-efd6-7182-9966-c30a9ad4650d",
+          "code": "no_legacy",
+          "statement": "The legacy X-PayHook-Signature header is no longer sent",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d887-efd6-7182-9966-c7a0fba5e318",
+          "code": "clock",
+          "statement": "Timestamp comes from injected clock as integer Unix seconds",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d887-efd6-7182-9966-c8b9dfaf09a0",
+          "code": "sandbox",
+          "statement": "python3 scripts/sandbox_check.py prints ACCEPTED",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d887-efd6-7182-9966-cd70480f2e53",
+          "code": "tests",
+          "statement": "Regression tests for the v2 signature exist",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d888-1098-777b-9768-1bb0d7f09f54",
+      "task_id": "tsk_01a0d887-db03-735b-8c70-f5bc4d9ae80c",
+      "declaration_id": "dcl_01a0d887-efd6-7182-9966-bba6b4fb0653",
+      "repository_id": "repo_01a0d887-bce8-701f-9e01-2f93db6fd797",
+      "workspace_id": "wsp_01a0d888-0027-710b-b422-c48ccbd5c120",
+      "executor": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_at": "2026-09-25T12:26:30.937Z"
+    }
+  ],
+  "attempt_ends": [],
+  "claims": [
+    {
+      "claim_id": "clm_01a0d888-a548-722d-9653-77c6f1f0e186",
+      "task_id": "tsk_01a0d887-db03-735b-8c70-f5bc4d9ae80c",
+      "attempt_id": "att_01a0d888-1098-777b-9768-1bb0d7f09f54",
+      "declaration_id": "dcl_01a0d887-efd6-7182-9966-bba6b4fb0653",
+      "statement": "Implemented v2 signing in webhooks/sign.py and added regression tests; header/no_legacy/clock/tests verified locally by pytest. Sandbox acceptance (criterion 'sandbox') was not run: PAYHOOK_SANDBOX_SECRET unavailable.",
+      "evidence_ids": [
+        "evi_01a0d888-a0dc-729c-be8d-78f07ba9dd3e",
+        "evi_01a0d888-a260-76bd-857f-5e62f5b7e077",
+        "evi_01a0d888-a3d3-7247-8088-cea33e9f57da"
+      ],
+      "claimed_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "claimed_at": "2026-09-25T12:27:09.000Z"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "test_run",
+      "payload": {
+        "exit_code": 0,
+        "command": "python3 -m pytest -q",
+        "repository_id": "repo_01a0d887-bce8-701f-9e01-2f93db6fd797",
+        "workspace_id": "wsp_01a0d888-0027-710b-b422-c48ccbd5c120",
+        "working_tree": "dirty"
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "note": "6 passed (uncommitted working tree on fix/payhook-v2). New tests: documented v2 test vector matches exactly, X-PayHook-Signature absent (headers == {Content-Type, PayHook-Signature}), clock float truncated to int seconds, signature depends on timestamp. Against the unfixed webhooks/sign.py the 4 new tests fail (4 failed, 2 passed).",
+      "evidence_id": "evi_01a0d888-a0dc-729c-be8d-78f07ba9dd3e",
+      "submitted_at": "2026-09-25T12:27:07.868Z"
+    },
+    {
+      "kind": "command_run",
+      "payload": {
+        "command": "python3 scripts/sandbox_check.py",
+        "exit_code": 2,
+        "repository_id": "repo_01a0d887-bce8-701f-9e01-2f93db6fd797",
+        "workspace_id": "wsp_01a0d888-0027-710b-b422-c48ccbd5c120"
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "note": "Printed 'PAYHOOK_SANDBOX_SECRET is not set (release engineering holds it); nothing was sent.' Sandbox acceptance NOT tested.",
+      "evidence_id": "evi_01a0d888-a260-76bd-857f-5e62f5b7e077",
+      "submitted_at": "2026-09-25T12:27:08.257Z"
+    },
+    {
+      "kind": "git_diff",
+      "payload": {
+        "repository_id": "repo_01a0d887-bce8-701f-9e01-2f93db6fd797",
+        "base_object_id": "e72a07b31eb938283ea3771119a5a49c76390dc0"
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "note": "Uncommitted diff: webhooks/sign.py (HMAC-SHA256 over '<int ts>.<body>', header PayHook-Signature: t=..,v2=..; v1 header removed), tests/test_sign.py (+4 tests).",
+      "evidence_id": "evi_01a0d888-a3d3-7247-8088-cea33e9f57da",
+      "submitted_at": "2026-09-25T12:27:08.627Z"
+    }
+  ],
+  "reconciliations": [],
+  "check_invocations": [
+    {
+      "check_invocation_id": "chk_01a0d888-a725-7608-a99a-c6ce33faec15",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d888-a548-722d-9653-77c6f1f0e186"
+      },
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d887-bce8-701f-9e01-2ae3fd2e56ad",
+        "revision": 10,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "e92e2555603e210bca30311bb48f77f8b8199bcc563a2f67e88f9ac5fa9853b3"
+        }
+      },
+      "invoked_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "invoked_at": "2026-09-25T12:27:09.477Z"
+    },
+    {
+      "check_invocation_id": "chk_01a0d888-c77f-77b8-94cc-49a2b57bd36d",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d888-a548-722d-9653-77c6f1f0e186"
+      },
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d887-bce8-701f-9e01-2ae3fd2e56ad",
+        "revision": 11,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "d557e6e6989733c931437ad5878ddcb2cc6f4961806cd2c7610563c6a5b4b208"
+        }
+      },
+      "invoked_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "invoked_at": "2026-09-25T12:27:17.760Z"
+    }
+  ],
+  "check_results": [
+    {
+      "check_result_id": "ckr_01a0d888-c790-745d-aa90-a88b83fc9722",
+      "check_invocation_id": "chk_01a0d888-c77f-77b8-94cc-49a2b57bd36d",
+      "outcome": "verdict_emitted",
+      "produced_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "completed_at": "2026-09-25T12:27:17.776Z",
+      "diagnostics": [],
+      "reconciliation_ids": [],
+      "verdict_id": "ver_01a0d888-c77e-704c-8e88-9fbfbc7d5d49"
+    }
+  ],
+  "verdicts": [
+    {
+      "verdict_id": "ver_01a0d888-c77e-704c-8e88-9fbfbc7d5d49",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d888-a548-722d-9653-77c6f1f0e186"
+      },
+      "declaration_id": "dcl_01a0d887-efd6-7182-9966-bba6b4fb0653",
+      "scope": {
+        "evaluated_criteria": [
+          "cri_01a0d887-efd6-7182-9966-bf54a97d81b5",
+          "cri_01a0d887-efd6-7182-9966-c30a9ad4650d",
+          "cri_01a0d887-efd6-7182-9966-c7a0fba5e318",
+          "cri_01a0d887-efd6-7182-9966-c8b9dfaf09a0",
+          "cri_01a0d887-efd6-7182-9966-cd70480f2e53"
+        ],
+        "unevaluated_criteria": []
+      },
+      "conclusion": "partially_supported",
+      "finality": "final",
+      "basis": {
+        "evidence_ids": [
+          "evi_01a0d888-a0dc-729c-be8d-78f07ba9dd3e",
+          "evi_01a0d888-a260-76bd-857f-5e62f5b7e077",
+          "evi_01a0d888-a3d3-7247-8088-cea33e9f57da"
+        ],
+        "reconciliation_ids": []
+      },
+      "findings": [
+        {
+          "criterion_id": "cri_01a0d887-efd6-7182-9966-bf54a97d81b5",
+          "assessment": "supported",
+          "summary": "Documented test vector reproduced exactly",
+          "basis_refs": [
+            "evi_01a0d888-a0dc-729c-be8d-78f07ba9dd3e"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d887-efd6-7182-9966-c30a9ad4650d",
+          "assessment": "supported",
+          "summary": "Headers are exactly Content-Type and PayHook-Signature",
+          "basis_refs": [
+            "evi_01a0d888-a0dc-729c-be8d-78f07ba9dd3e"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d887-efd6-7182-9966-c7a0fba5e318",
+          "assessment": "supported",
+          "summary": "clock()+0.9 yields t=1767225600 and same signature",
+          "basis_refs": [
+            "evi_01a0d888-a0dc-729c-be8d-78f07ba9dd3e"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d887-efd6-7182-9966-c8b9dfaf09a0",
+          "assessment": "unsupported",
+          "summary": "Not run: PAYHOOK_SANDBOX_SECRET unset; nothing was sent",
+          "basis_refs": [
+            "evi_01a0d888-a260-76bd-857f-5e62f5b7e077"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d887-efd6-7182-9966-cd70480f2e53",
+          "assessment": "supported",
+          "summary": "4 new regression tests, fail on unfixed code",
+          "basis_refs": [
+            "evi_01a0d888-a0dc-729c-be8d-78f07ba9dd3e"
+          ]
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "pytest reproduces the documented test vector exactly and the new tests fail on the old code; sandbox_check.py could not send (no secret), so live acceptance is unverified."
+      },
+      "rationale": "pytest reproduces the documented test vector exactly and the new tests fail on the old code; sandbox_check.py could not send (no secret), so live acceptance is unverified.",
+      "uncertainty": [
+        "Whether PayHook's live sandbox accepts the delivery is unknown until release engineering runs sandbox_check.py"
+      ],
+      "limitations": [
+        "No sandbox secret or verified network access to sandbox.payhook.example in this environment"
+      ],
+      "issued_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "issued_at": "2026-09-25T12:27:17.758Z",
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      }
+    }
+  ],
+  "settlements": [],
+  "blockers": [
+    {
+      "blocker_id": "blk_01a0d888-ec5f-7287-b175-c63bb904f58c",
+      "task_id": "tsk_01a0d887-db03-735b-8c70-f5bc4d9ae80c",
+      "description": "Criterion 'sandbox' unverified: python3 scripts/sandbox_check.py needs PAYHOOK_SANDBOX_SECRET (held by release engineering) and network access to sandbox.payhook.example; neither is available to this executor. Release engineering must run it on branch fix/payhook-v2 and confirm ACCEPTED.",
+      "raised_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "raised_at": "2026-09-25T12:27:27.199Z",
+      "attempt_id": "att_01a0d888-1098-777b-9768-1bb0d7f09f54"
+    }
+  ],
+  "blocker_resolutions": [],
+  "decisions": [
+    {
+      "decision_id": "dec_01a0d888-277c-744d-b914-af584c7c42b7",
+      "subject": {
+        "kind": "attempt",
+        "id": "att_01a0d888-1098-777b-9768-1bb0d7f09f54"
+      },
+      "role": "execution_choice",
+      "question": "Execution fit",
+      "choice": "CONDITIONAL: can implement and verify header/no_legacy/clock/tests locally; sandbox criterion cannot be verified here",
+      "rationale": "criteria: all 5 understood from docs/payhook-v2.md; capability: small HMAC change in webhooks/sign.py; hardest: exact byte format (timestamp int, '.' separator, lowercase hex) must reproduce the doc test vector; evidence: pytest incl. test vector for header/no_legacy/clock/tests; sandbox needs PAYHOOK_SANDBOX_SECRET (unset, held by release engineering) + network; not authorised/equipped: sandbox secret, commit/merge/land; stop if: test vector does not reproduce from the spec as written",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "decided_at": "2026-09-25T12:26:36.796Z",
+      "basis": []
+    }
+  ]
+}

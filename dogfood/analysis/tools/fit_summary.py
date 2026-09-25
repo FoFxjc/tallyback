@@ -73,6 +73,15 @@ print("\n## Verdicts")
 for v in s["verdicts"]:
     print(f"- {v['conclusion']}/{v['finality']}/{v['confidence']['level']} on claim {v['subject']['id'][-6:]}; "
           f"uncertainty={v.get('uncertainty')}; limitations={v.get('limitations')}")
+    codes = {c["criterion_id"]: c["code"] for d in s["declarations"] for c in d["criteria"]}
+    for f in v.get("findings", []):
+        print(f"    {codes.get(f['criterion_id'], f['criterion_id'][-6:])}={f['assessment']}: {f.get('summary', '')[:160]}")
+print("\n## Blockers")
+for b in s.get("blockers", []):
+    print(f"- {b['blocker_id'][-6:]} by {b['raised_by']}: {b['description'][:300]}")
+print("\n## Evidence")
+for e in s.get("evidence", []):
+    print(f"- {e['kind']}: {(e.get('note') or '')[:160]}")
 print("\n## Settlements")
 for x in s["settlements"]:
     print(f"- {x['decision']} attempt {x['attempt_id'][-6:]} verdict={x['basis'].get('verdict_id')} "

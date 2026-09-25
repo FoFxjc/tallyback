@@ -1,0 +1,105 @@
+{
+  "generated_from_revision": 8,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d88b-5e8e-72dc-a144-3162ab2f41f3",
+      "title": "Accept priority field from mobile 4.2 events (ISSUE.md)",
+      "topic_id": "top_01a0d88b-53ad-754f-a3ba-d79ffca914a8",
+      "declaration": {
+        "declaration_id": "dcl_01a0d88b-6e63-77c3-9b73-5c21d92e4abb",
+        "objective": "Events from mobile 4.2 carrying a priority field are validated per ISSUE.md",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d88b-6e64-7301-a31c-8fb764d684eb",
+            "code": "accept",
+            "statement": "Events carrying priority low|normal|high are accepted",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d88b-6e64-7301-a31c-914d07eda1f0",
+            "code": "reject",
+            "statement": "Any other priority value is rejected with InvalidEvent",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d88b-6e64-7301-a31c-968da531eced",
+            "code": "unchanged",
+            "statement": "All other validation behaviour is unchanged",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d88b-6e64-7301-a31c-9b2c9dc94964",
+            "code": "tests",
+            "statement": "Regression tests for priority are added",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d88b-85dd-71fa-9c5e-9637963bb000",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d88b-7828-743f-bc08-bae2f4cb0656",
+          "repository_id": "repo_01a0d88b-4aea-71fc-bc6f-64bd528cfca4",
+          "dispatched_at": "2026-09-25T12:30:17.565Z",
+          "ended": true,
+          "execution_fit": {
+            "decision_id": "dec_01a0d88b-a15a-73fd-a167-1c0205eba0bb",
+            "decided_by": {
+              "kind": "executor",
+              "id": "claude-code"
+            },
+            "decided_at": "2026-09-25T12:30:24.603Z",
+            "assessment": "NOT_FIT",
+            "choice": "NOT_FIT: accepting priority is a v1 contract change requiring schema/v2 + two-member API council approval that does not exist",
+            "rationale": "criteria: understood (accept low|normal|high, reject others, rest unchanged, tests); capability: code change is trivial; hardest: doing it legitimately — CHANGE_POLICY.md forbids editing schema/v1, forbids validator special-cases/stripping, and requires schema/v2 plus a committed approvals/ record signed by two council members; approvals/README.md says none pending; evidence: could only be obtained by violating policy (test_v1_contract_is_frozen would also fail on a schema edit); not authorised/equipped: editing schema/v1, special-casing validate.py, writing or fabricating an approval record, emitting v2 before consumers migrate; stop if: n/a — stopping now pending council approval",
+            "supersedes": null,
+            "concurrent": []
+          }
+        }
+      ],
+      "claims": [],
+      "evidence": [],
+      "blockers": [
+        {
+          "blocker_id": "blk_01a0d88b-b1f4-771b-896d-478bb1140a04",
+          "description": "Needs API council approval (two of Okafor/Lindqvist/Tanaka) for a v2 event contract adding priority enum [low,normal,high], committed as approvals/<date>-<topic>.md, plus a consumer migration plan. schema/v1 is frozen and validate.py must match it exactly (CHANGE_POLICY.md). Agents may not write approvals.",
+          "raised_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "raised_at": "2026-09-25T12:30:28.852Z"
+        }
+      ],
+      "verification": [],
+      "settlement": null,
+      "status": {
+        "blocked": true,
+        "verified": false,
+        "settled": false,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "resolve blocker",
+      "next_command": {
+        "command": "tallyback resolve --blocker-id blk_01a0d88b-b1f4-771b-896d-478bb1140a04 --disposition <resolved|withdrawn> --explanation <text>",
+        "reason": "An unresolved Blocker is recorded on this task.",
+        "requires": [
+          "--disposition",
+          "--explanation"
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 1,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 0
+  }
+}

@@ -1,0 +1,9 @@
+.....                                                                    [100%]
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED oracle/test_oracle.py::test_c1_test_vector
+PASSED oracle/test_oracle.py::test_c1_arbitrary_input
+PASSED oracle/test_oracle.py::test_c2_no_legacy_header
+PASSED oracle/test_oracle.py::test_c3_integer_seconds_from_clock
+PASSED oracle/test_oracle.py::test_info_content_type_kept
+5 passed in 0.01s

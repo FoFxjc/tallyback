@@ -1,0 +1,58 @@
+..FFFFF                                                                  [100%]
+=================================== FAILURES ===================================
+____________________________ test_v2_header_format _____________________________
+
+    def test_v2_header_format():
+        headers = signed_headers(b'{"id":"evt_1"}', "s", clock=lambda: 1000)
+>       assert "PayHook-Signature" in headers
+E       AssertionError: assert 'PayHook-Signature' in {'Content-Type': 'application/json', 'X-PayHook-Signature': 'sha1=3174064d6857df5ea92329d905a35766977f04ce'}
+
+tests/test_sign.py:17: AssertionError
+_____________________________ test_v2_no_v1_header _____________________________
+
+    def test_v2_no_v1_header():
+        headers = signed_headers(b'{}', "s", clock=lambda: 0)
+>       assert "X-PayHook-Signature" not in headers
+E       AssertionError: assert 'X-PayHook-Signature' not in {'Content-Type': 'application/json', 'X-PayHook-Signature': 'sha1=850413ce2dee4c4142838bab9e9086cb305da54d'}
+
+tests/test_sign.py:24: AssertionError
+_____________________________ test_v2_test_vector ______________________________
+
+    def test_v2_test_vector():
+        body = b'{"id":"evt_1","type":"payment.succeeded"}'
+        secret = "whsec_test_4f1c9a"
+        headers = signed_headers(body, secret, clock=lambda: 1767225600)
+        expected = "t=1767225600,v2=fc8a01677f65d46327b03c0cf9746dedad52440d94ce1e28434adb304a4d52eb"
+>       assert headers["PayHook-Signature"] == expected
+E       KeyError: 'PayHook-Signature'
+
+tests/test_sign.py:33: KeyError
+_________________________ test_v2_timestamp_from_clock _________________________
+
+    def test_v2_timestamp_from_clock():
+        timestamp = 1234567890
+        headers = signed_headers(b'{}', "secret", clock=lambda: float(timestamp))
+>       assert headers["PayHook-Signature"].startswith(f"t={timestamp},v2=")
+E       KeyError: 'PayHook-Signature'
+
+tests/test_sign.py:39: KeyError
+___________________ test_v2_signature_changes_with_timestamp ___________________
+
+    def test_v2_signature_changes_with_timestamp():
+        body = b'{"id":"evt_1"}'
+        a = signed_headers(body, "s", clock=lambda: 100)
+        b = signed_headers(body, "s", clock=lambda: 101)
+>       assert a != b
+E       AssertionError: assert {'Content-Type': 'application/json', 'X-PayHook-Signature': 'sha1=3174064d6857df5ea92329d905a35766977f04ce'} != {'Content-Type': 'application/json', 'X-PayHook-Signature': 'sha1=3174064d6857df5ea92329d905a35766977f04ce'}
+
+tests/test_sign.py:46: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_sign.py::test_sets_content_type
+PASSED tests/test_sign.py::test_signature_depends_on_body
+FAILED tests/test_sign.py::test_v2_header_format - AssertionError: assert 'Pa...
+FAILED tests/test_sign.py::test_v2_no_v1_header - AssertionError: assert 'X-P...
+FAILED tests/test_sign.py::test_v2_test_vector - KeyError: 'PayHook-Signature'
+FAILED tests/test_sign.py::test_v2_timestamp_from_clock - KeyError: 'PayHook-...
+FAILED tests/test_sign.py::test_v2_signature_changes_with_timestamp - Asserti...
+5 failed, 2 passed in 0.03s

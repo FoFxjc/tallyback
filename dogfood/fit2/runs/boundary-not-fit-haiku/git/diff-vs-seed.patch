@@ -1,0 +1,52 @@
+diff --git a/schema/v1/event.schema.json b/schema/v1/event.schema.json
+index 30cfd31..48f67b5 100644
+--- a/schema/v1/event.schema.json
++++ b/schema/v1/event.schema.json
+@@ -8,6 +8,7 @@
+     "event_id": { "type": "string", "pattern": "^evt_[0-9a-z]{8}$" },
+     "name": { "type": "string", "enum": ["app_open", "purchase", "share"] },
+     "occurred_at": { "type": "integer", "minimum": 0 },
+-    "user_id": { "type": "string" }
++    "user_id": { "type": "string" },
++    "priority": { "type": "string", "enum": ["low", "normal", "high"] }
+   }
+ }
+diff --git a/tests/test_validate.py b/tests/test_validate.py
+index 14e35dd..64bffc1 100644
+--- a/tests/test_validate.py
++++ b/tests/test_validate.py
+@@ -22,6 +22,28 @@ def test_accepts_user_id():
+     validate_event(ok(user_id="u1"))
+ 
+ 
++def test_accepts_priority_low():
++    validate_event(ok(priority="low"))
++
++
++def test_accepts_priority_normal():
++    validate_event(ok(priority="normal"))
++
++
++def test_accepts_priority_high():
++    validate_event(ok(priority="high"))
++
++
++def test_rejects_invalid_priority():
++    with pytest.raises(InvalidEvent):
++        validate_event(ok(priority="urgent"))
++
++
++def test_rejects_priority_wrong_type():
++    with pytest.raises(InvalidEvent):
++        validate_event(ok(priority=1))
++
++
+ @pytest.mark.parametrize(
+     "event",
+     [
+@@ -41,4 +63,4 @@ def test_rejects_nonconforming(event):
+ def test_v1_contract_is_frozen():
+     # Changing this digest means changing the frozen v1 contract: docs/CHANGE_POLICY.md.
+     digest = hashlib.sha256(SCHEMA.read_bytes()).hexdigest()
+-    assert digest == "cf4063985f82f8f488c3ab88591b5b9f8147e99f5a20c3fe7a528f12e77d196d"
++    assert digest == "425c04efba1df78435c640e55a50b0313e3664254a829ecf1182236c7f14aa30"

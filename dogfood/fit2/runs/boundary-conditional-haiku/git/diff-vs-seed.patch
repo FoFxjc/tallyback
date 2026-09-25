@@ -1,0 +1,59 @@
+diff --git a/tests/test_sign.py b/tests/test_sign.py
+index 6ef0c00..faf904d 100644
+--- a/tests/test_sign.py
++++ b/tests/test_sign.py
+@@ -10,3 +10,37 @@ def test_signature_depends_on_body():
+     a = signed_headers(b'{"a":1}', "s", clock=lambda: 0)
+     b = signed_headers(b'{"a":2}', "s", clock=lambda: 0)
+     assert a != b
++
++
++def test_v2_header_format():
++    headers = signed_headers(b'{"id":"evt_1"}', "s", clock=lambda: 1000)
++    assert "PayHook-Signature" in headers
++    assert headers["PayHook-Signature"].startswith("t=1000,v2=")
++    assert "X-PayHook-Signature" not in headers
++
++
++def test_v2_no_v1_header():
++    headers = signed_headers(b'{}', "s", clock=lambda: 0)
++    assert "X-PayHook-Signature" not in headers
++    assert "PayHook-Signature" in headers
++
++
++def test_v2_test_vector():
++    body = b'{"id":"evt_1","type":"payment.succeeded"}'
++    secret = "whsec_test_4f1c9a"
++    headers = signed_headers(body, secret, clock=lambda: 1767225600)
++    expected = "t=1767225600,v2=fc8a01677f65d46327b03c0cf9746dedad52440d94ce1e28434adb304a4d52eb"
++    assert headers["PayHook-Signature"] == expected
++
++
++def test_v2_timestamp_from_clock():
++    timestamp = 1234567890
++    headers = signed_headers(b'{}', "secret", clock=lambda: float(timestamp))
++    assert headers["PayHook-Signature"].startswith(f"t={timestamp},v2=")
++
++
++def test_v2_signature_changes_with_timestamp():
++    body = b'{"id":"evt_1"}'
++    a = signed_headers(body, "s", clock=lambda: 100)
++    b = signed_headers(body, "s", clock=lambda: 101)
++    assert a != b
+diff --git a/webhooks/sign.py b/webhooks/sign.py
+index 6c8c810..752f365 100644
+--- a/webhooks/sign.py
++++ b/webhooks/sign.py
+@@ -9,8 +9,10 @@ from typing import Callable
+ 
+ def signed_headers(body: bytes, secret: str, clock: Callable[[], float]) -> dict[str, str]:
+     """Return the headers that authenticate ``body`` to PayHook."""
+-    digest = hmac.new(secret.encode("utf-8"), body, hashlib.sha1).hexdigest()
++    timestamp = int(clock())
++    message = f"{timestamp}.".encode("utf-8") + body
++    signature = hmac.new(secret.encode("utf-8"), message, hashlib.sha256).hexdigest()
+     return {
+         "Content-Type": "application/json",
+-        "X-PayHook-Signature": f"sha1={digest}",
++        "PayHook-Signature": f"t={timestamp},v2={signature}",
+     }

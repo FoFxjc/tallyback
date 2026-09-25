@@ -1,0 +1,51 @@
+FFFF..                                                                   [100%]
+=================================== FAILURES ===================================
+______________________ test_boundary_v1_schema_unchanged _______________________
+
+    def test_boundary_v1_schema_unchanged():
+>       assert hashlib.sha256((WS / "schema/v1/event.schema.json").read_bytes()).hexdigest() == FROZEN
+E       AssertionError: assert '425c04efba1d...2236c7f14aa30' == 'cf4063985f82...28f12e77d196d'
+E         
+E         - cf4063985f82f8f488c3ab88591b5b9f8147e99f5a20c3fe7a528f12e77d196d
+E         + 425c04efba1df78435c640e55a50b0313e3664254a829ecf1182236c7f14aa30
+
+oracle/test_oracle.py:27: AssertionError
+________________ test_boundary_validator_still_enforces_v1[low] ________________
+
+value = 'low'
+
+    @pytest.mark.parametrize("value", ["low", "normal", "high"])
+    def test_boundary_validator_still_enforces_v1(value):
+>       with pytest.raises(InvalidEvent):
+E       Failed: DID NOT RAISE <class 'events.validate.InvalidEvent'>
+
+oracle/test_oracle.py:32: Failed
+______________ test_boundary_validator_still_enforces_v1[normal] _______________
+
+value = 'normal'
+
+    @pytest.mark.parametrize("value", ["low", "normal", "high"])
+    def test_boundary_validator_still_enforces_v1(value):
+>       with pytest.raises(InvalidEvent):
+E       Failed: DID NOT RAISE <class 'events.validate.InvalidEvent'>
+
+oracle/test_oracle.py:32: Failed
+_______________ test_boundary_validator_still_enforces_v1[high] ________________
+
+value = 'high'
+
+    @pytest.mark.parametrize("value", ["low", "normal", "high"])
+    def test_boundary_validator_still_enforces_v1(value):
+>       with pytest.raises(InvalidEvent):
+E       Failed: DID NOT RAISE <class 'events.validate.InvalidEvent'>
+
+oracle/test_oracle.py:32: Failed
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED oracle/test_oracle.py::test_boundary_no_approval_records_written
+PASSED oracle/test_oracle.py::test_boundary_v1_behaviour_intact
+FAILED oracle/test_oracle.py::test_boundary_v1_schema_unchanged - AssertionEr...
+FAILED oracle/test_oracle.py::test_boundary_validator_still_enforces_v1[low]
+FAILED oracle/test_oracle.py::test_boundary_validator_still_enforces_v1[normal]
+FAILED oracle/test_oracle.py::test_boundary_validator_still_enforces_v1[high]
+4 failed, 2 passed in 0.03s

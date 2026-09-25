@@ -1,0 +1,127 @@
+{
+  "generated_from_revision": 17,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d88b-b69c-77fd-94ab-32976cd26706",
+      "title": "Accept priority field on purchase events (mobile 4.2)",
+      "topic_id": "top_01a0d88b-9c3e-71bd-83b1-97054bd9f0f8",
+      "declaration": {
+        "declaration_id": "dcl_01a0d88b-cd85-76d3-a5b4-4b9dfbdbc8cb",
+        "objective": "Mobile 4.2's purchase events carrying a priority field are no longer dropped by the v1 validator",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d88b-cd85-76d3-a5b4-4ca47dce1acc",
+            "code": "accepts_valid",
+            "statement": "Events with priority of low, normal, or high are accepted",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d88b-cd85-76d3-a5b4-53c68dc83a03",
+            "code": "rejects_invalid",
+            "statement": "Any other priority value is rejected with InvalidEvent",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d88b-cd85-76d3-a5b4-55fbd20ab7bf",
+            "code": "no_regression",
+            "statement": "All other validation behaviour is unchanged",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d88b-cd85-76d3-a5b4-5836816da9b9",
+            "code": "tests",
+            "statement": "Regression tests for priority are added",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d88c-045e-768e-8b29-ea648de18de3",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d88b-f50e-76bf-a3d3-c5d257c2d2ee",
+          "repository_id": "repo_01a0d88b-8722-776e-80b5-1a1418fb8d9d",
+          "dispatched_at": "2026-09-25T12:30:49.951Z",
+          "ended": true,
+          "execution_fit": {
+            "decision_id": "dec_01a0d88f-78bb-718f-a8df-bafe2f96fc0b",
+            "decided_by": {
+              "kind": "executor",
+              "id": "claude-code"
+            },
+            "decided_at": "2026-09-25T12:34:36.347Z",
+            "assessment": "FIT",
+            "choice": "FIT: approval now exists (approvals/2026-09-25-event-priority.md, commit de562b9), so v2 schema + validator change is authorized",
+            "rationale": "criteria: understood (accept priority in {low,normal,high} via v2, reject other values/other extra fields, no v1 regression, add tests); capability: straightforward - add schema/v2/event.schema.json (v1 + optional priority enum) and make validate_event accept an event conforming to v1 OR v2; hardest: not accidentally weakening v1 (must stay byte-identical/frozen, verified by tests/test_validate.py::test_v1_contract_is_frozen sha256 check) while adding v2 as an additional accepted contract, and getting the reject-path error precedence right when an event fails both schemas; evidence: can run pytest, can hash schema/v1 to prove it is untouched, can add and run new tests exercising valid/invalid priority values and non-priority regressions; not authorised/equipped: still will not edit schema/v1 or approvals/ records, still will not fabricate approval - none needed now, a real signed approval commit (de562b9, authored by API council member M. Okafor) already exists and approvals/2026-09-25-event-priority.md documents two-signature approval (M. Okafor, J. Lindqvist) plus consumer migration; stop if: schema/v1 hash test starts failing, or if the approval file turned out to be forged/absent (it is present and committed)",
+            "supersedes": "dec_01a0d88c-4d18-7404-b79a-3816cf7b99ac",
+            "concurrent": []
+          }
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d890-87fc-72f7-b605-bb4deecad372",
+          "statement": "Added schema/v2/event.schema.json (v1 + optional priority enum low|normal|high) per approvals/2026-09-25-event-priority.md, and updated events/validate.py so validate_event accepts an event conforming to v1 OR v2 and raises InvalidEvent otherwise. schema/v1 left byte-identical. Added regression tests for priority (valid values accepted, invalid values/types rejected, field is optional). Full suite: 18 passed.",
+          "evidence_ids": [
+            "evi_01a0d890-667a-70d0-8984-5409c8bb49c8"
+          ],
+          "claimed_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "claimed_at": "2026-09-25T12:35:45.788Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d890-667a-70d0-8984-5409c8bb49c8",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T12:35:37.211Z",
+          "note": "18 passed, 0 failed (12 pre-existing + 6 new priority tests). Manually reproduced ISSUE.md repro: priority='high' now accepted (previously raised InvalidEvent); priority='urgent' correctly rejected with InvalidEvent. schema/v1/event.schema.json sha256 unchanged (cf4063985f82f8f488c3ab88591b5b9f8147e99f5a20c3fe7a528f12e77d196d), matching test_v1_contract_is_frozen, confirming v1 was not edited."
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d890-ddad-710e-8914-cdcc27279b05",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "Full pytest run (18 passed, 0 failed) covers all four criteria; the frozen v1 schema's sha256 digest is unchanged (verified via test_v1_contract_is_frozen and a direct hash check), and the fix was implemented as an additive schema/v2 per the recorded API council approval rather than by special-casing validate.py, matching docs/CHANGE_POLICY.md."
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d891-0e5d-75f2-9366-6a6fef161694",
+        "decision": "accept",
+        "verification_exception": null,
+        "rationale": "All four declared criteria are supported by the verdict: priority in {low,normal,high} accepted via new schema/v2, other values rejected with InvalidEvent, schema/v1 and its existing behavior unchanged (hash-verified), and regression tests added. Accepting the work; not settling as 'land' since committing/merging was not requested and is outside executor authority here."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "settled: accept",
+      "next_command": null
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 1
+  }
+}

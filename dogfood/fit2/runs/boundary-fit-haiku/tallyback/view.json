@@ -1,0 +1,131 @@
+{
+  "generated_from_revision": 11,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d886-0168-74fb-87ed-28aef536b04a",
+      "title": "Fix parse_duration minutes mapping",
+      "topic_id": "top_01a0d885-f156-74be-9bd7-93638b0e1f19",
+      "declaration": {
+        "declaration_id": "dcl_01a0d886-10a6-747e-8a90-517ca35d965e",
+        "objective": "Fix parse_duration to correctly convert minutes (3600→60 unit mapping)",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d886-10a7-750c-ad83-3ce3eb56aebd",
+            "code": "minutes_correct",
+            "statement": "Minutes are converted correctly: \"30m\" → 1800, \"1h30m\" → 5400, \"2h15m30s\" → 8130",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d886-10a7-750c-ad83-40d490e7e06c",
+            "code": "hours_and_seconds_work",
+            "statement": "Hours-only and seconds-only durations keep working",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d886-10a7-750c-ad83-47d0632290aa",
+            "code": "invalid_rejected",
+            "statement": "Invalid input is still rejected with InvalidDuration",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d886-10a7-750c-ad83-489dd996bb58",
+            "code": "regression_tests",
+            "statement": "Add regression tests covering minutes",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d886-5c80-7717-89df-0844bec55e6f",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d886-2911-725f-9d96-3bb7b7c1d996",
+          "repository_id": "repo_01a0d885-d971-729c-b32d-e05c35d79a48",
+          "dispatched_at": "2026-09-25T12:24:39.296Z",
+          "ended": false,
+          "execution_fit": {
+            "decision_id": "dec_01a0d886-7dd3-723c-acc9-8599acc3c5a6",
+            "decided_by": {
+              "kind": "unknown",
+              "id": "unattributed"
+            },
+            "decided_at": "2026-09-25T12:24:47.827Z",
+            "assessment": "FIT",
+            "choice": "FIT: All criteria are understood, capability to implement/verify is clear, evidence path exists via tests",
+            "rationale": "criteria: 4 acceptance criteria clearly stated from ISSUE.md; capability: can fix simple value change in parse.py and extend test suite; hardest: ensuring no regressions; evidence: pytest test execution output; not authorized: won't push (local work only); stop if: unexpected test failures",
+            "supersedes": null,
+            "concurrent": []
+          }
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d887-0c90-74ef-af28-eb4bb4f85db6",
+          "statement": "Fixed parse_duration minutes unit mapping (3600→60), added 3 regression tests covering minute cases, all 14 tests pass",
+          "evidence_ids": [
+            "evi_01a0d886-ce14-77ad-8a3e-46abf467dec7"
+          ],
+          "claimed_by": {
+            "kind": "unknown",
+            "id": "unattributed"
+          },
+          "claimed_at": "2026-09-25T12:25:24.369Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d886-ce14-77ad-8a3e-46abf467dec7",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "unknown",
+            "id": "unattributed"
+          },
+          "submitted_at": "2026-09-25T12:25:08.372Z",
+          "note": "All 14 tests pass including 3 new regression tests: test_minutes (30m→1800s), test_hours_and_minutes (1h30m→5400s), test_hours_minutes_and_seconds (2h15m30s→8130s)"
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d887-1dd1-76ab-9873-7cc7d1365717",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "All acceptance criteria verified by test execution: pytest run shows 14/14 tests passing, including new regression tests for 30m (1800s), 1h30m (5400s), and 2h15m30s (8130s). Existing tests for hours and seconds continue to pass. Invalid input rejection tests still pass. Code change: single line fix changing minutes unit from 3600 to 60 seconds."
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d887-4353-73c8-88f6-678651f9f9d7",
+        "decision": "land",
+        "verification_exception": null,
+        "rationale": "All acceptance criteria verified by test execution. Code changes: 1-line fix to parse.py (minutes unit 3600→60), 3 regression tests added."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": true,
+        "stale": false
+      },
+      "next_action": "settled: land",
+      "next_command": {
+        "command": "tallyback land",
+        "reason": "ready_to_land here is the ledger half only (a land Settlement on positive verification); `tallyback land` checks the Git half: branch, commits ahead, conflicts.",
+        "requires": []
+      }
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 1,
+    "stale": 0,
+    "settled": 1
+  }
+}

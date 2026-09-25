@@ -1,0 +1,5 @@
+ approvals/2026-09-25-event-priority.md | 12 ++++++++++
+ events/validate.py                     | 43 ++++++++++++++++++++++++----------
+ schema/v2/event.schema.json            | 14 +++++++++++
+ tests/test_validate.py                 | 16 +++++++++++++
+ 4 files changed, 72 insertions(+), 13 deletions(-)

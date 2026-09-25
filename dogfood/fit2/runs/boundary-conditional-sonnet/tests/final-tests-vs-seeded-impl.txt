@@ -1,0 +1,38 @@
+..FFF                                                                    [100%]
+=================================== FAILURES ===================================
+_____________________ test_matches_documented_test_vector ______________________
+
+    def test_matches_documented_test_vector():
+        # docs/payhook-v2.md "Test vector" table.
+        body = b'{"id":"evt_1","type":"payment.succeeded"}'
+        headers = signed_headers(body, "whsec_test_4f1c9a", clock=lambda: 1767225600)
+>       assert headers["PayHook-Signature"] == (
+            "t=1767225600,v2=fc8a01677f65d46327b03c0cf9746dedad52440d94ce1e28434adb304a4d52eb"
+        )
+E       KeyError: 'PayHook-Signature'
+
+tests/test_sign.py:19: KeyError
+_______________________ test_does_not_send_legacy_header _______________________
+
+    def test_does_not_send_legacy_header():
+        headers = signed_headers(b"{}", "s", clock=lambda: 0)
+>       assert "X-PayHook-Signature" not in headers
+E       AssertionError: assert 'X-PayHook-Signature' not in {'Content-Type': 'application/json', 'X-PayHook-Signature': 'sha1=850413ce2dee4c4142838bab9e9086cb305da54d'}
+
+tests/test_sign.py:26: AssertionError
+______________ test_timestamp_is_integer_unix_seconds_from_clock _______________
+
+    def test_timestamp_is_integer_unix_seconds_from_clock():
+        headers = signed_headers(b"{}", "s", clock=lambda: 1700000000.9)
+>       assert headers["PayHook-Signature"].startswith("t=1700000000,")
+E       KeyError: 'PayHook-Signature'
+
+tests/test_sign.py:31: KeyError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_sign.py::test_sets_content_type
+PASSED tests/test_sign.py::test_signature_depends_on_body
+FAILED tests/test_sign.py::test_matches_documented_test_vector - KeyError: 'P...
+FAILED tests/test_sign.py::test_does_not_send_legacy_header - AssertionError:...
+FAILED tests/test_sign.py::test_timestamp_is_integer_unix_seconds_from_clock
+3 failed, 2 passed in 0.03s

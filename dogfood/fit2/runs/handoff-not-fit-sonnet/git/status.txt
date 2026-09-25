@@ -1,0 +1,6 @@
+ M events/validate.py
+ M tests/test_validate.py
+?? .tallyback/.gitignore
+?? .tallyback/project.json
+?? .tallyback/state.json
+?? schema/v2/event.schema.json

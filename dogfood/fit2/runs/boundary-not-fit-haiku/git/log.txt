@@ -1,0 +1,2 @@
+bead5439d74a83dfbe484b1d239c8593184cf4b0 Claude Support priority field in event validation for mobile 4.2
+484a9ddcf2bacb056e9df76b7e122c38978ec17c Tallyback Dogfood seed: boundary-not-fit

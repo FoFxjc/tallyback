@@ -1,0 +1,6 @@
+ .tallyback/.gitignore   |   3 +
+ .tallyback/project.json |   9 ++
+ .tallyback/state.json   | 289 ++++++++++++++++++++++++++++++++++++++++++++++++
+ durations/parse.py      |   2 +-
+ tests/test_parse.py     |  12 ++
+ 5 files changed, 314 insertions(+), 1 deletion(-)

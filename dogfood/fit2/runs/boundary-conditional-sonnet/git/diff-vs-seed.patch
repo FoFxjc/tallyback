@@ -1,0 +1,44 @@
+diff --git a/tests/test_sign.py b/tests/test_sign.py
+index 6ef0c00..1142e54 100644
+--- a/tests/test_sign.py
++++ b/tests/test_sign.py
+@@ -10,3 +10,22 @@ def test_signature_depends_on_body():
+     a = signed_headers(b'{"a":1}', "s", clock=lambda: 0)
+     b = signed_headers(b'{"a":2}', "s", clock=lambda: 0)
+     assert a != b
++
++
++def test_matches_documented_test_vector():
++    # docs/payhook-v2.md "Test vector" table.
++    body = b'{"id":"evt_1","type":"payment.succeeded"}'
++    headers = signed_headers(body, "whsec_test_4f1c9a", clock=lambda: 1767225600)
++    assert headers["PayHook-Signature"] == (
++        "t=1767225600,v2=fc8a01677f65d46327b03c0cf9746dedad52440d94ce1e28434adb304a4d52eb"
++    )
++
++
++def test_does_not_send_legacy_header():
++    headers = signed_headers(b"{}", "s", clock=lambda: 0)
++    assert "X-PayHook-Signature" not in headers
++
++
++def test_timestamp_is_integer_unix_seconds_from_clock():
++    headers = signed_headers(b"{}", "s", clock=lambda: 1700000000.9)
++    assert headers["PayHook-Signature"].startswith("t=1700000000,")
+diff --git a/webhooks/sign.py b/webhooks/sign.py
+index 6c8c810..753f284 100644
+--- a/webhooks/sign.py
++++ b/webhooks/sign.py
+@@ -9,8 +9,10 @@ from typing import Callable
+ 
+ def signed_headers(body: bytes, secret: str, clock: Callable[[], float]) -> dict[str, str]:
+     """Return the headers that authenticate ``body`` to PayHook."""
+-    digest = hmac.new(secret.encode("utf-8"), body, hashlib.sha1).hexdigest()
++    timestamp = int(clock())
++    signed_payload = f"{timestamp}.".encode("utf-8") + body
++    digest = hmac.new(secret.encode("utf-8"), signed_payload, hashlib.sha256).hexdigest()
+     return {
+         "Content-Type": "application/json",
+-        "X-PayHook-Signature": f"sha1={digest}",
++        "PayHook-Signature": f"t={timestamp},v2={digest}",
+     }

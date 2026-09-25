@@ -1,0 +1,340 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 13,
+  "included_through": 13,
+  "project": {
+    "project_id": "prj_01a0d885-9de0-761c-a791-79700c799cb0",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d885-9de0-761c-a791-7f659b26e7ea",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d885-9de0-761c-a791-7f659b26e7ea",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d885-d8e8-734a-b4ba-6baa4aabb63b",
+      "repository_id": "repo_01a0d885-9de0-761c-a791-7f659b26e7ea",
+      "branch": "fix/duration-minutes"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d885-a825-779d-9a79-155d8ae1fc88",
+      "project_id": "prj_01a0d885-9de0-761c-a791-79700c799cb0",
+      "name": "durations-minutes-bug",
+      "goal": "",
+      "created_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "created_at": "2026-09-25T12:23:53.125Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d885-b565-74c5-982d-4e7c1fc59425",
+      "topic_id": "top_01a0d885-a825-779d-9a79-155d8ae1fc88",
+      "title": "Fix minutes conversion in parse_duration"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d885-c5f1-7146-9b6f-3690126cf1e7",
+      "task_id": "tsk_01a0d885-b565-74c5-982d-4e7c1fc59425",
+      "declared_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "declared_at": "2026-09-25T12:24:00.753Z",
+      "objective": "parse_duration converts minutes to 60 seconds each; job timeouts in minutes are correct",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d885-c5f1-7146-9b6f-3a4325d01087",
+          "code": "minutes",
+          "statement": "\"30m\"->1800, \"1h30m\"->5400, \"2h15m30s\"->8130",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d885-c5f1-7146-9b6f-3cf626b1a875",
+          "code": "no_regress",
+          "statement": "Hours-only and seconds-only durations keep working",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d885-c5f1-7146-9b6f-43ac7ee1dde3",
+          "code": "grammar",
+          "statement": "Invalid input still raises InvalidDuration; grammar in durations/parse.py unchanged",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d885-c5f1-7146-9b6f-44324982d287",
+          "code": "tests",
+          "statement": "Regression tests covering minutes are added",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d885-e68b-77c7-b73d-acf9c4d45999",
+      "task_id": "tsk_01a0d885-b565-74c5-982d-4e7c1fc59425",
+      "declaration_id": "dcl_01a0d885-c5f1-7146-9b6f-3690126cf1e7",
+      "repository_id": "repo_01a0d885-9de0-761c-a791-7f659b26e7ea",
+      "workspace_id": "wsp_01a0d885-d8e8-734a-b4ba-6baa4aabb63b",
+      "executor": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_at": "2026-09-25T12:24:09.100Z"
+    }
+  ],
+  "attempt_ends": [],
+  "claims": [
+    {
+      "claim_id": "clm_01a0d886-4dbc-777b-b567-611b9be9a28d",
+      "task_id": "tsk_01a0d885-b565-74c5-982d-4e7c1fc59425",
+      "attempt_id": "att_01a0d885-e68b-77c7-b73d-acf9c4d45999",
+      "declaration_id": "dcl_01a0d885-c5f1-7146-9b6f-3690126cf1e7",
+      "statement": "Fixed minutes multiplier in _UNIT_SECONDS (3600->60) and added regression tests for minutes; grammar untouched. Changes are uncommitted on branch fix/duration-minutes.",
+      "evidence_ids": [
+        "evi_01a0d886-388d-75db-a7a6-0f58c5396f87",
+        "evi_01a0d886-3a0b-7239-b540-1da841181076",
+        "evi_01a0d886-3bae-7598-94e8-e5a1caf08a62"
+      ],
+      "claimed_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "claimed_at": "2026-09-25T12:24:35.516Z"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "test_run",
+      "payload": {
+        "command": "python -m pytest -q",
+        "exit_code": 0,
+        "repository_id": "repo_01a0d885-9de0-761c-a791-7f659b26e7ea",
+        "workspace_id": "wsp_01a0d885-d8e8-734a-b4ba-6baa4aabb63b",
+        "working_tree": "dirty"
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "note": "20 passed on fixed working tree (incl. 5 test_minutes cases: 30m=1800, 1m=60, 1h30m=5400, 2h15m30s=8130, 5m10s=310; hours/seconds/invalid-input tests all pass)",
+      "evidence_id": "evi_01a0d886-388d-75db-a7a6-0f58c5396f87",
+      "submitted_at": "2026-09-25T12:24:30.093Z"
+    },
+    {
+      "kind": "test_run",
+      "payload": {
+        "command": "git stash push durations/parse.py && python -m pytest -q",
+        "exit_code": 1,
+        "repository_id": "repo_01a0d885-9de0-761c-a791-7f659b26e7ea",
+        "workspace_id": "wsp_01a0d885-d8e8-734a-b4ba-6baa4aabb63b"
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "note": "Against unfixed parse.py: 5 failed (all test_minutes cases), 15 passed — new regression tests catch the bug",
+      "evidence_id": "evi_01a0d886-3a0b-7239-b540-1da841181076",
+      "submitted_at": "2026-09-25T12:24:30.476Z"
+    },
+    {
+      "kind": "git_diff",
+      "payload": {
+        "repository_id": "repo_01a0d885-9de0-761c-a791-7f659b26e7ea",
+        "base_object_id": "08080f4a82c0c2f7887b4f3db280ab362f5ddc7a",
+        "path": "durations/parse.py"
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "note": "Only change to parse.py: _UNIT_SECONDS 'm' 3600 -> 60. _PART regex, _ORDER and validation logic untouched (grammar unchanged)",
+      "evidence_id": "evi_01a0d886-3bae-7598-94e8-e5a1caf08a62",
+      "submitted_at": "2026-09-25T12:24:30.895Z"
+    }
+  ],
+  "reconciliations": [],
+  "check_invocations": [
+    {
+      "check_invocation_id": "chk_01a0d886-6c09-71ce-91ea-d18b284e34c6",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d886-4dbc-777b-b567-611b9be9a28d"
+      },
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d885-9de0-761c-a791-79700c799cb0",
+        "revision": 10,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "6f3b4fa18b0a8f2d686be6c61db2f698741e046cba8813eb4152051acd00df4a"
+        }
+      },
+      "invoked_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "invoked_at": "2026-09-25T12:24:43.273Z"
+    }
+  ],
+  "check_results": [
+    {
+      "check_result_id": "ckr_01a0d886-6c19-71c8-8901-412e730aef87",
+      "check_invocation_id": "chk_01a0d886-6c09-71ce-91ea-d18b284e34c6",
+      "outcome": "verdict_emitted",
+      "produced_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "completed_at": "2026-09-25T12:24:43.289Z",
+      "diagnostics": [],
+      "reconciliation_ids": [],
+      "verdict_id": "ver_01a0d886-6c07-76be-907f-7bff2bffd582"
+    }
+  ],
+  "verdicts": [
+    {
+      "verdict_id": "ver_01a0d886-6c07-76be-907f-7bff2bffd582",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d886-4dbc-777b-b567-611b9be9a28d"
+      },
+      "declaration_id": "dcl_01a0d885-c5f1-7146-9b6f-3690126cf1e7",
+      "scope": {
+        "evaluated_criteria": [
+          "cri_01a0d885-c5f1-7146-9b6f-3a4325d01087",
+          "cri_01a0d885-c5f1-7146-9b6f-3cf626b1a875",
+          "cri_01a0d885-c5f1-7146-9b6f-43ac7ee1dde3",
+          "cri_01a0d885-c5f1-7146-9b6f-44324982d287"
+        ],
+        "unevaluated_criteria": []
+      },
+      "conclusion": "supported",
+      "finality": "final",
+      "basis": {
+        "evidence_ids": [
+          "evi_01a0d886-388d-75db-a7a6-0f58c5396f87",
+          "evi_01a0d886-3a0b-7239-b540-1da841181076",
+          "evi_01a0d886-3bae-7598-94e8-e5a1caf08a62"
+        ],
+        "reconciliation_ids": []
+      },
+      "findings": [
+        {
+          "criterion_id": "cri_01a0d885-c5f1-7146-9b6f-3a4325d01087",
+          "assessment": "supported",
+          "summary": "test_minutes asserts 30m=1800, 1h30m=5400, 2h15m30s=8130; all pass",
+          "basis_refs": [
+            "evi_01a0d886-388d-75db-a7a6-0f58c5396f87"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d885-c5f1-7146-9b6f-3cf626b1a875",
+          "assessment": "supported",
+          "summary": "test_hours, test_seconds, test_hours_and_seconds pass",
+          "basis_refs": [
+            "evi_01a0d886-388d-75db-a7a6-0f58c5396f87"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d885-c5f1-7146-9b6f-43ac7ee1dde3",
+          "assessment": "supported",
+          "summary": "diff touches only _UNIT_SECONDS; all 8 original invalid inputs + 4 new minute-related invalid inputs raise InvalidDuration",
+          "basis_refs": [
+            "evi_01a0d886-388d-75db-a7a6-0f58c5396f87",
+            "evi_01a0d886-3bae-7598-94e8-e5a1caf08a62"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d885-c5f1-7146-9b6f-44324982d287",
+          "assessment": "supported",
+          "summary": "5 new minute cases fail on unfixed code, pass on fix",
+          "basis_refs": [
+            "evi_01a0d886-388d-75db-a7a6-0f58c5396f87",
+            "evi_01a0d886-3a0b-7239-b540-1da841181076"
+          ]
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Full suite passes on the fix; new tests fail on the old code; diff confined to the multiplier constant."
+      },
+      "rationale": "Full suite passes on the fix; new tests fail on the old code; diff confined to the multiplier constant.",
+      "uncertainty": [],
+      "limitations": [
+        "Verified by the same executor that made the change (no independent checker)",
+        "Changes are uncommitted in the working tree; not committed/merged"
+      ],
+      "issued_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "issued_at": "2026-09-25T12:24:43.271Z",
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      }
+    }
+  ],
+  "settlements": [
+    {
+      "settlement_id": "set_01a0d886-84d9-703f-bd2a-5c884cae796a",
+      "task_id": "tsk_01a0d885-b565-74c5-982d-4e7c1fc59425",
+      "attempt_id": "att_01a0d885-e68b-77c7-b73d-acf9c4d45999",
+      "decision": "accept",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "decided_at": "2026-09-25T12:24:49.625Z",
+      "basis": {
+        "verdict_id": "ver_01a0d886-6c07-76be-907f-7bff2bffd582",
+        "attempt_end_id": null,
+        "blocker_ids": []
+      },
+      "rationale": "All four criteria supported by test runs (incl. new tests failing on unfixed code) and a diff confined to the minutes multiplier. Accept, not land: changes are uncommitted and integration was not authorized.",
+      "verification_exception": null
+    }
+  ],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": [
+    {
+      "decision_id": "dec_01a0d885-f909-764c-b2cd-46f6cab18a0f",
+      "subject": {
+        "kind": "attempt",
+        "id": "att_01a0d885-e68b-77c7-b73d-acf9c4d45999"
+      },
+      "role": "execution_choice",
+      "question": "Execution fit",
+      "choice": "FIT: one-constant bug in _UNIT_SECONDS, verifiable with pytest",
+      "rationale": "criteria: all four clear; capability: yes; hardest: making sure the grammar (regex/order/validation) stays byte-identical so criterion 3 holds, and adding tests that would fail on the old code; evidence: pytest run + git diff restricted to the _UNIT_SECONDS line + running new tests against the pre-fix code; not authorised: commit, merge, push, settle land; stop if: any existing test fails or the fix needs grammar changes",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "decided_at": "2026-09-25T12:24:13.833Z",
+      "basis": []
+    }
+  ]
+}

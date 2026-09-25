@@ -1,0 +1,48 @@
+{
+  "model_reported_by_cli": "claude-opus-5-5",
+  "model_usage": {
+    "claude-opus-5-5": {
+      "inputTokens": 34,
+      "outputTokens": 8884,
+      "cacheReadInputTokens": 684802,
+      "cacheCreationInputTokens": 25353,
+      "webSearchRequests": 0,
+      "costUSD": 0.5176004000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 344,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "num_turns": 20,
+  "duration_ms": 99720,
+  "total_cost_usd": 0.5176004000000001,
+  "result_is_error": false,
+  "tool_calls": 18,
+  "tool_calls_by_name": {
+    "Bash": 16,
+    "Skill": 1,
+    "Write": 1
+  },
+  "tallyback_invocations": 13,
+  "tallyback_failed_or_rejected": 1,
+  "tallyback_by_subcommand": {
+    "block": 2,
+    "decision": 1,
+    "declare": 1,
+    "dispatch": 1,
+    "evidence": 2,
+    "init": 1,
+    "task": 1,
+    "topic": 1,
+    "verdict": 1,
+    "view": 1,
+    "workspace": 1
+  },
+  "used_skill_tool": true,
+  "touched_tallyback_source": false,
+  "inspected_tallyback_wrapper": true,
+  "spawned_subagents": 0
+}

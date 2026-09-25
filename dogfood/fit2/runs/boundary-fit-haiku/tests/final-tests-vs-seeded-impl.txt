@@ -1,0 +1,43 @@
+...FFF........                                                           [100%]
+=================================== FAILURES ===================================
+_________________________________ test_minutes _________________________________
+
+    def test_minutes():
+>       assert parse_duration("30m") == 1800
+E       AssertionError: assert 108000 == 1800
+E        +  where 108000 = parse_duration('30m')
+
+tests/test_parse.py:19: AssertionError
+____________________________ test_hours_and_minutes ____________________________
+
+    def test_hours_and_minutes():
+>       assert parse_duration("1h30m") == 5400
+E       AssertionError: assert 111600 == 5400
+E        +  where 111600 = parse_duration('1h30m')
+
+tests/test_parse.py:23: AssertionError
+________________________ test_hours_minutes_and_seconds ________________________
+
+    def test_hours_minutes_and_seconds():
+>       assert parse_duration("2h15m30s") == 8130
+E       AssertionError: assert 61230 == 8130
+E        +  where 61230 = parse_duration('2h15m30s')
+
+tests/test_parse.py:27: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_parse.py::test_hours
+PASSED tests/test_parse.py::test_seconds
+PASSED tests/test_parse.py::test_hours_and_seconds
+PASSED tests/test_parse.py::test_rejects_invalid[]
+PASSED tests/test_parse.py::test_rejects_invalid[h]
+PASSED tests/test_parse.py::test_rejects_invalid[1x]
+PASSED tests/test_parse.py::test_rejects_invalid[1h 30m]
+PASSED tests/test_parse.py::test_rejects_invalid[-5s]
+PASSED tests/test_parse.py::test_rejects_invalid[1.5h]
+PASSED tests/test_parse.py::test_rejects_invalid[30m1h]
+PASSED tests/test_parse.py::test_rejects_invalid[1h1h]
+FAILED tests/test_parse.py::test_minutes - AssertionError: assert 108000 == 1800
+FAILED tests/test_parse.py::test_hours_and_minutes - AssertionError: assert 1...
+FAILED tests/test_parse.py::test_hours_minutes_and_seconds - AssertionError: ...
+3 failed, 11 passed in 0.03s

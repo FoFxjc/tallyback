@@ -1,0 +1,9 @@
+{
+  "run_id": "boundary-conditional-sonnet",
+  "tallyback_sha": "10e8acd58ea2a4602407b7b2c3668addafc3fccd",
+  "fixture": "boundary-conditional",
+  "model_requested": "claude-sonnet-5",
+  "seed_sha": "e72a07b31eb938283ea3771119a5a49c76390dc0",
+  "workspace": "/tmp/claude-0/-home-user-tallyback/01b763c0-69a7-5ad2-94c6-b173155321d2/scratchpad/fit2/w/pMR1MuD3/repo",
+  "session_seconds": 232
+}

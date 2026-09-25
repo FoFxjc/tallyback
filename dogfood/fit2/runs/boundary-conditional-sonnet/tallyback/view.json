@@ -1,0 +1,156 @@
+{
+  "generated_from_revision": 14,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d888-3dfe-753f-b810-d2e8240e3ff1",
+      "title": "Switch webhooks/sign.py to PayHook-Signature v2 header",
+      "topic_id": "top_01a0d888-29dd-777c-9206-56b474752141",
+      "declaration": {
+        "declaration_id": "dcl_01a0d888-68ec-75df-965e-d4f19fe75bc9",
+        "objective": "webhooks/sign.py sends PayHook-Signature v2 headers matching docs/payhook-v2.md, dropping the legacy v1 header, so deliveries are accepted after 2026-10-01",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d888-68ed-706e-958a-914fc552facb",
+            "code": "header_format",
+            "statement": "Deliveries carry PayHook-Signature: t=<timestamp>,v2=<signature> exactly as specified in docs/payhook-v2.md, and match the documented test vector",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d888-68ed-706e-958a-94ad8f577a1a",
+            "code": "no_legacy_header",
+            "statement": "The legacy X-PayHook-Signature header is no longer sent",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d888-68ed-706e-958a-98eac9e76fcb",
+            "code": "clock_source",
+            "statement": "The timestamp comes from the injected clock, as integer Unix seconds",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d888-68ed-706e-958a-9e66dbbd1ebc",
+            "code": "sandbox_accept",
+            "statement": "python3 scripts/sandbox_check.py prints ACCEPTED against the PayHook sandbox",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d888-68ed-706e-958a-a0b10b7d9ba5",
+            "code": "regression_tests",
+            "statement": "Regression tests exist covering the v2 signature",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d888-a6fd-733d-b95c-b73456a548ff",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d888-900d-7201-b931-1c8e7f849b29",
+          "repository_id": "repo_01a0d887-ca25-736a-8fb1-df57c680f3b8",
+          "dispatched_at": "2026-09-25T12:27:09.437Z",
+          "ended": true,
+          "execution_fit": {
+            "decision_id": "dec_01a0d888-f2d9-755b-8c16-66934ff66675",
+            "decided_by": {
+              "kind": "executor",
+              "id": "claude-code"
+            },
+            "decided_at": "2026-09-25T12:27:28.857Z",
+            "assessment": "CONDITIONAL",
+            "choice": "CONDITIONAL: can implement and verify the header format, dropped legacy header, clock source, and add regression tests locally; cannot execute the sandbox acceptance criterion end-to-end in this environment",
+            "rationale": "criteria: all 5 understood (header format/test vector, legacy header removal, integer-clock timestamp, sandbox ACCEPTED, regression tests); capability: straightforward HMAC-SHA256 change plus pytest tests, well within capability; hardest: criterion 4 (sandbox_accept) needs PAYHOOK_SANDBOX_SECRET which README says is held by release engineering and not in this repo, plus network egress to sandbox.payhook.example -- confirmed via urllib probe that the proxy returns 403 Forbidden for that host and the secret env var is unset; evidence: criteria 1/2/3/5 verifiable via unit tests reproducing the documented test vector and header assertions, run locally with pytest; criterion 4 verifiable only by someone with the sandbox secret and network access, i.e. release engineering; not authorised/equipped: will not fabricate a sandbox secret, will not claim ACCEPTED without actually invoking the sandbox, will not commit/merge/land without being asked; stop if: sandbox_check.py cannot be run to completion due to missing secret/network -- treat criterion 4 as unverified/conditional in the Verdict rather than claiming it supported",
+            "supersedes": null,
+            "concurrent": []
+          }
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d889-94f9-7130-801f-0c8751a162b3",
+          "statement": "webhooks/sign.py now builds PayHook-Signature: t=<int unix ts from clock>,v2=<hmac-sha256 hex over '<ts>.<body>'>, no longer sends X-PayHook-Signature, matches the documented test vector, and is covered by regression tests. The sandbox_accept criterion could not be executed in this environment (no PAYHOOK_SANDBOX_SECRET, no network route to sandbox.payhook.example) and remains unverified pending release engineering.",
+          "evidence_ids": [
+            "evi_01a0d889-673d-719c-a3c1-f356293e295b",
+            "evi_01a0d889-7817-719c-8343-c362c4b9c07c"
+          ],
+          "claimed_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "claimed_at": "2026-09-25T12:28:10.362Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d889-673d-719c-a3c1-f356293e295b",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T12:27:58.653Z",
+          "note": "5 passed: content-type, signature-depends-on-body, documented test vector (t=1767225600,v2=fc8a01677f65d46327b03c0cf9746dedad52440d94ce1e28434adb304a4d52eb), no legacy X-PayHook-Signature header, integer-truncated clock timestamp"
+        },
+        {
+          "evidence_id": "evi_01a0d889-7817-719c-8343-c362c4b9c07c",
+          "kind": "command_run",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T12:28:02.968Z",
+          "note": "Could not exercise the real sandbox: PAYHOOK_SANDBOX_SECRET is unset in this environment (README: held by release engineering, not in this repo) and a separate urllib probe to https://sandbox.payhook.example was rejected by the network proxy with 403 Forbidden. sandbox_check.py exited 2 before sending anything. Criterion sandbox_accept is unverified here, not passing."
+        }
+      ],
+      "blockers": [
+        {
+          "blocker_id": "blk_01a0d889-b32c-73da-a804-6d385cd14e12",
+          "description": "Acceptance criterion sandbox_accept (python3 scripts/sandbox_check.py prints ACCEPTED) cannot be executed from this environment: PAYHOOK_SANDBOX_SECRET is not set (held only by release engineering per README.md) and network egress to sandbox.payhook.example is rejected (403 via proxy). Release engineering needs to run scripts/sandbox_check.py with the real secret against the v2 code before deploy to confirm real-world acceptance.",
+          "raised_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "raised_at": "2026-09-25T12:28:18.092Z"
+        }
+      ],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d88a-3bc3-7656-8bff-c53261224891",
+          "conclusion": "partially_supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "The 4 code-level criteria are directly demonstrated by deterministic unit tests against the documented spec and test vector. The sandbox criterion's unsupported assessment is high-confidence about what happened here (secret/network genuinely unavailable), even though it says nothing about whether the real sandbox would accept the new header -- that requires release engineering's credentials."
+          }
+        }
+      ],
+      "settlement": null,
+      "status": {
+        "blocked": true,
+        "verified": false,
+        "settled": false,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "resolve blocker",
+      "next_command": {
+        "command": "tallyback resolve --blocker-id blk_01a0d889-b32c-73da-a804-6d385cd14e12 --disposition <resolved|withdrawn> --explanation <text>",
+        "reason": "An unresolved Blocker is recorded on this task.",
+        "requires": [
+          "--disposition",
+          "--explanation"
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 1,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 0
+  }
+}

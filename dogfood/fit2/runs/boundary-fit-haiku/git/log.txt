@@ -1,0 +1,2 @@
+56e41f2357839eefb6936721b0dbd29a98432c02 Claude Fix parse_duration minutes unit mapping (60s not 3600s)
+08080f4a82c0c2f7887b4f3db280ab362f5ddc7a Tallyback Dogfood seed: boundary-fit
