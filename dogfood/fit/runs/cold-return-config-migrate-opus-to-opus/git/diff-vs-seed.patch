@@ -1,0 +1,94 @@
+diff --git a/cfgmigrate/migrate.py b/cfgmigrate/migrate.py
+index c9b01d4..f9f911c 100644
+--- a/cfgmigrate/migrate.py
++++ b/cfgmigrate/migrate.py
+@@ -14,6 +14,7 @@ Schema history:
+ 
+ from __future__ import annotations
+ 
++import copy
+ from typing import Any, Callable
+ 
+ Config = dict[str, Any]
+@@ -26,11 +27,16 @@ class UnsupportedVersionError(ValueError):
+ 
+ 
+ def _v1_to_v2(old: Config) -> Config:
+-    return {
+-        "version": 2,
+-        "request_timeout": old["timeout"],
+-        "plugins": old.get("plugins", []),
+-    }
++    # Rebuild key by key so user-defined keys survive and keep their order.
++    new: Config = {}
++    for key, value in old.items():
++        if key == "timeout":
++            new["request_timeout"] = value
++        else:
++            new[key] = value
++    new["version"] = 2
++    new.setdefault("plugins", [])
++    return new
+ 
+ 
+ _MIGRATIONS: dict[int, Callable[[Config], Config]] = {
+@@ -46,7 +52,9 @@ def migrate(config: Config) -> Config:
+     if version > CURRENT_VERSION or (version < CURRENT_VERSION and version not in _MIGRATIONS):
+         raise UnsupportedVersionError(f"cannot migrate config version {version}")
+ 
+-    result = config
++    # Work on a deep copy: migrations must never mutate the caller's document, and
++    # the result must not share nested containers with it.
++    result = copy.deepcopy(config)
+     while result["version"] < CURRENT_VERSION:
+         result = _MIGRATIONS[result["version"]](result)
+     return result
+diff --git a/tests/test_migrate.py b/tests/test_migrate.py
+index b483b98..8198341 100644
+--- a/tests/test_migrate.py
++++ b/tests/test_migrate.py
+@@ -38,3 +38,44 @@ def test_current_version_is_returned_as_is():
+ def test_rejects_unsupported_versions(version):
+     with pytest.raises(UnsupportedVersionError):
+         migrate({"version": version, "timeout": 1})
++
++
++def test_preserves_unknown_top_level_and_nested_keys():
++    doc = v1(custom={"owner": "peter", "nested": {"tags": ["a", "b"], "n": None}}, extra=True)
++    assert migrate(doc) == {
++        "version": 2,
++        "request_timeout": 30,
++        "plugins": ["foo"],
++        "custom": {"owner": "peter", "nested": {"tags": ["a", "b"], "n": None}},
++        "extra": True,
++    }
++
++
++def test_issue_example():
++    doc = {"version": 1, "timeout": 30, "plugins": ["foo"], "custom": {"owner": "peter"}}
++    assert migrate(doc) == {
++        "version": 2,
++        "request_timeout": 30,
++        "plugins": ["foo"],
++        "custom": {"owner": "peter"},
++    }
++
++
++def test_does_not_mutate_input():
++    import copy
++
++    doc = v1(custom={"owner": "peter", "nested": {"tags": ["a"]}})
++    before = copy.deepcopy(doc)
++    out = migrate(doc)
++    assert doc == before
++    # The result must not alias the input's nested containers either.
++    out["custom"]["nested"]["tags"].append("b")
++    out["plugins"].append("bar")
++    assert doc == before
++
++
++def test_current_version_result_does_not_alias_input():
++    doc = {"version": 2, "request_timeout": 5, "plugins": [], "custom": {"k": [1]}}
++    out = migrate(doc)
++    out["custom"]["k"].append(2)
++    assert doc["custom"]["k"] == [1]

@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 6,
+  "included_through": 6,
+  "project": {
+    "project_id": "prj_01a0d84e-f0da-7215-a752-aed15beb4622",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d84e-f0da-7215-a752-b1dfd2520218",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d84e-f0da-7215-a752-b1dfd2520218",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d84f-2877-739c-a789-aee9e5c63b28",
+      "repository_id": "repo_01a0d84e-f0da-7215-a752-b1dfd2520218",
+      "branch": "fix/migrate-preserve-keys"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d84e-fc2e-7608-894a-9c422671ecd9",
+      "project_id": "prj_01a0d84e-f0da-7215-a752-aed15beb4622",
+      "name": "config-migration",
+      "goal": "",
+      "created_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "created_at": "2026-09-25T11:24:10.158Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d84f-07c4-77ba-9e05-e8002bab1ffd",
+      "topic_id": "top_01a0d84e-fc2e-7608-894a-9c422671ecd9",
+      "title": "Fix v1->v2 migration dropping user keys"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d84f-1a09-76a3-84cc-dcade1d012b5",
+      "task_id": "tsk_01a0d84f-07c4-77ba-9e05-e8002bab1ffd",
+      "declared_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "declared_at": "2026-09-25T11:24:17.802Z",
+      "objective": "Migrating a v1 config to v2 renames timeout, bumps version, and preserves all other user keys without mutating input",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d84f-1a0a-762f-aba1-045c26aa0c73",
+          "code": "rename",
+          "statement": "timeout is renamed to request_timeout",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d84f-1a0a-762f-aba1-0be6f028740f",
+          "code": "version",
+          "statement": "version is set to 2",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d84f-1a0a-762f-aba1-0d7d70575200",
+          "code": "preserve",
+          "statement": "all unrelated user-defined keys are preserved recursively",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d84f-1a0a-762f-aba1-127e0853b025",
+          "code": "no_mutation",
+          "statement": "the input object is not mutated",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d84f-1a0a-762f-aba1-17c770667420",
+          "code": "regression",
+          "statement": "regression tests cover preservation of unknown keys",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d84f-36be-77a8-89e8-2f68b61aa54b",
+      "task_id": "tsk_01a0d84f-07c4-77ba-9e05-e8002bab1ffd",
+      "declaration_id": "dcl_01a0d84f-1a09-76a3-84cc-dcade1d012b5",
+      "repository_id": "repo_01a0d84e-f0da-7215-a752-b1dfd2520218",
+      "workspace_id": "wsp_01a0d84f-2877-739c-a789-aee9e5c63b28",
+      "executor": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_at": "2026-09-25T11:24:25.151Z"
+    }
+  ],
+  "attempt_ends": [],
+  "claims": [],
+  "evidence": [],
+  "reconciliations": [],
+  "check_invocations": [],
+  "check_results": [],
+  "verdicts": [],
+  "settlements": [],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": [
+    {
+      "decision_id": "dec_01a0d84f-4e86-77cb-abe7-0278fd8f3b05",
+      "subject": {
+        "kind": "attempt",
+        "id": "att_01a0d84f-36be-77a8-89e8-2f68b61aa54b"
+      },
+      "role": "execution_choice",
+      "question": "Execution fit",
+      "choice": "FIT: small pure-function fix with direct unit-test verification",
+      "rationale": "criteria: all five are concrete and unambiguous; capability: single-module Python change; verification: pytest assertions on output equality, nested preservation, and deep-equality of input before/after; tools/authority: can edit and run tests on a feature branch; will not merge to main or push",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "decided_at": "2026-09-25T11:24:31.238Z",
+      "basis": []
+    }
+  ]
+}

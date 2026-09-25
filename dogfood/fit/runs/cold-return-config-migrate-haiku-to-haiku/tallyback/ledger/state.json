@@ -1,0 +1,329 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 13,
+  "included_through": 13,
+  "project": {
+    "project_id": "prj_01a0d84f-2a26-73e8-8b1c-3c9c3c88db8e",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d84f-2a26-73e8-8b1c-4335d25f006d",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d84f-2a26-73e8-8b1c-4335d25f006d",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d84f-774c-72aa-a170-2853992e9218",
+      "repository_id": "repo_01a0d84f-2a26-73e8-8b1c-4335d25f006d",
+      "branch": "main"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d84f-3ab4-7253-b31b-782a37e01ba5",
+      "project_id": "prj_01a0d84f-2a26-73e8-8b1c-3c9c3c88db8e",
+      "name": "config-migration-fix",
+      "goal": "",
+      "created_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "created_at": "2026-09-25T11:24:26.164Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d84f-4b61-7299-b289-9bdfa76dbec7",
+      "topic_id": "top_01a0d84f-3ab4-7253-b31b-782a37e01ba5",
+      "title": "Preserve user-defined keys in v1-to-v2 config migration"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d84f-60fb-75ec-9daa-76f060df469b",
+      "task_id": "tsk_01a0d84f-4b61-7299-b289-9bdfa76dbec7",
+      "declared_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "declared_at": "2026-09-25T11:24:35.963Z",
+      "objective": "Fix config migration to preserve user-defined keys and rename timeout correctly",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-7ae71f814187",
+          "code": "c1",
+          "statement": "Rename timeout to request_timeout",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-7d143eb9da6c",
+          "code": "c2",
+          "statement": "Set version to 2",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-81cc71768b7a",
+          "code": "c3",
+          "statement": "Preserve all unrelated user-defined keys recursively",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-8601f0672f2c",
+          "code": "c4",
+          "statement": "Do not mutate the input object",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-8b47843dd238",
+          "code": "c5",
+          "statement": "Add regression coverage for preservation of unknown keys",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d84f-8df5-7529-9bb7-e59eda227479",
+      "task_id": "tsk_01a0d84f-4b61-7299-b289-9bdfa76dbec7",
+      "declaration_id": "dcl_01a0d84f-60fb-75ec-9daa-76f060df469b",
+      "repository_id": "repo_01a0d84f-2a26-73e8-8b1c-4335d25f006d",
+      "workspace_id": "wsp_01a0d84f-774c-72aa-a170-2853992e9218",
+      "executor": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "dispatched_at": "2026-09-25T11:24:47.477Z"
+    }
+  ],
+  "attempt_ends": [
+    {
+      "attempt_end_id": "ate_01a0d852-b425-7464-a8f9-9681c1932d27",
+      "attempt_id": "att_01a0d84f-8df5-7529-9bb7-e59eda227479",
+      "outcome": "returned",
+      "reported_by": {
+        "kind": "executor",
+        "id": "claude-haiku-4-5"
+      },
+      "ended_at": "2026-09-25T11:28:13.861Z",
+      "reason": "Fix completed and verified; all criteria met"
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "clm_01a0d852-0d91-7115-9544-a08ed6a17618",
+      "task_id": "tsk_01a0d84f-4b61-7299-b289-9bdfa76dbec7",
+      "attempt_id": "att_01a0d84f-8df5-7529-9bb7-e59eda227479",
+      "declaration_id": "dcl_01a0d84f-60fb-75ec-9daa-76f060df469b",
+      "statement": "All acceptance criteria met: timeout renamed to request_timeout, version set to 2, user-defined keys preserved recursively, input object not mutated, and regression coverage added for unknown key preservation",
+      "evidence_ids": [
+        "evi_01a0d851-fa4d-7400-bcfd-e72d5e56d013"
+      ],
+      "claimed_by": {
+        "kind": "executor",
+        "id": "claude-haiku-4-5"
+      },
+      "claimed_at": "2026-09-25T11:27:31.217Z"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "test_run",
+      "payload": {
+        "exit_code": 0,
+        "command": "python -m pytest tests/ -v"
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-haiku-4-5"
+      },
+      "note": "14 passed in 0.02s: 10 existing tests + 4 new regression tests (test_preserves_unknown_keys, test_preserves_nested_unknown_keys, test_does_not_mutate_input, test_does_not_share_nested_objects_with_input)",
+      "evidence_id": "evi_01a0d851-fa4d-7400-bcfd-e72d5e56d013",
+      "submitted_at": "2026-09-25T11:27:26.286Z"
+    },
+    {
+      "kind": "git_commit",
+      "payload": {
+        "repository_id": "repo_01a0d84f-2a26-73e8-8b1c-4335d25f006d",
+        "object_id": "0a6ac07fb3134d29a6356bf4ca7ce2b5d0fbd086",
+        "object_format": "sha1"
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-haiku-4-5"
+      },
+      "note": "Fix config migration to properly preserve and isolate user-defined keys",
+      "evidence_id": "evi_01a0d852-7625-704d-b330-87c125fd78d9",
+      "submitted_at": "2026-09-25T11:27:57.989Z"
+    }
+  ],
+  "reconciliations": [],
+  "check_invocations": [
+    {
+      "check_invocation_id": "chk_01a0d852-4011-742e-aa79-eb1e7d0bf760",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d852-0d91-7115-9544-a08ed6a17618"
+      },
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d84f-2a26-73e8-8b1c-3c9c3c88db8e",
+        "revision": 8,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "4ec2408c1444f83725d02f936df6526533eb1aef001f492086f89ca2d20d9330"
+        }
+      },
+      "invoked_by": {
+        "kind": "executor",
+        "id": "claude-haiku-4-5"
+      },
+      "invoked_at": "2026-09-25T11:27:44.145Z"
+    }
+  ],
+  "check_results": [
+    {
+      "check_result_id": "ckr_01a0d852-4021-73bf-a298-69786f86e5b4",
+      "check_invocation_id": "chk_01a0d852-4011-742e-aa79-eb1e7d0bf760",
+      "outcome": "verdict_emitted",
+      "produced_by": {
+        "kind": "executor",
+        "id": "claude-haiku-4-5"
+      },
+      "completed_at": "2026-09-25T11:27:44.161Z",
+      "diagnostics": [],
+      "reconciliation_ids": [],
+      "verdict_id": "ver_01a0d852-400f-709b-b4fe-d8b78ab3f35e"
+    }
+  ],
+  "verdicts": [
+    {
+      "verdict_id": "ver_01a0d852-400f-709b-b4fe-d8b78ab3f35e",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d852-0d91-7115-9544-a08ed6a17618"
+      },
+      "declaration_id": "dcl_01a0d84f-60fb-75ec-9daa-76f060df469b",
+      "scope": {
+        "evaluated_criteria": [
+          "cri_01a0d84f-60fb-75ec-9daa-7ae71f814187",
+          "cri_01a0d84f-60fb-75ec-9daa-7d143eb9da6c",
+          "cri_01a0d84f-60fb-75ec-9daa-81cc71768b7a",
+          "cri_01a0d84f-60fb-75ec-9daa-8601f0672f2c",
+          "cri_01a0d84f-60fb-75ec-9daa-8b47843dd238"
+        ],
+        "unevaluated_criteria": []
+      },
+      "conclusion": "supported",
+      "finality": "final",
+      "basis": {
+        "evidence_ids": [
+          "evi_01a0d851-fa4d-7400-bcfd-e72d5e56d013"
+        ],
+        "reconciliation_ids": []
+      },
+      "findings": [
+        {
+          "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-7ae71f814187",
+          "assessment": "supported",
+          "summary": "timeout field renamed to request_timeout, verified by test_renames_timeout_to_request_timeout",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-7d143eb9da6c",
+          "assessment": "supported",
+          "summary": "version field set to 2, verified by test_sets_current_version",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-81cc71768b7a",
+          "assessment": "supported",
+          "summary": "unknown keys preserved recursively including nested structures, verified by test_preserves_nested_unknown_keys",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-8601f0672f2c",
+          "assessment": "supported",
+          "summary": "input object not mutated, verified by test_does_not_mutate_input and test_does_not_share_nested_objects_with_input",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-8b47843dd238",
+          "assessment": "supported",
+          "summary": "regression tests added for unknown key preservation scenarios",
+          "basis_refs": []
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "All 14 tests passing including 4 new regression tests covering unknown key preservation"
+      },
+      "rationale": "All 14 tests passing including 4 new regression tests covering unknown key preservation",
+      "uncertainty": [],
+      "limitations": [],
+      "issued_by": {
+        "kind": "executor",
+        "id": "claude-haiku-4-5"
+      },
+      "issued_at": "2026-09-25T11:27:44.144Z",
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      }
+    }
+  ],
+  "settlements": [
+    {
+      "settlement_id": "set_01a0d852-c62b-70e1-8a33-77442462c3d4",
+      "task_id": "tsk_01a0d84f-4b61-7299-b289-9bdfa76dbec7",
+      "attempt_id": "att_01a0d84f-8df5-7529-9bb7-e59eda227479",
+      "decision": "land",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-haiku-4-5"
+      },
+      "decided_at": "2026-09-25T11:28:18.476Z",
+      "basis": {
+        "verdict_id": "ver_01a0d852-400f-709b-b4fe-d8b78ab3f35e",
+        "attempt_end_id": "ate_01a0d852-b425-7464-a8f9-9681c1932d27",
+        "blocker_ids": []
+      },
+      "rationale": "All 5 acceptance criteria verified: (c1) timeout renamed to request_timeout, (c2) version set to 2, (c3) user-defined keys preserved recursively, (c4) input object not mutated, (c5) regression coverage added. All 14 tests passing. Code committed.",
+      "verification_exception": null
+    }
+  ],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": [
+    {
+      "decision_id": "dec_01a0d84f-ab8d-7658-881a-d7ec29245480",
+      "subject": {
+        "kind": "attempt",
+        "id": "att_01a0d84f-8df5-7529-9bb7-e59eda227479"
+      },
+      "role": "execution_choice",
+      "question": "Execution fit",
+      "choice": "FIT: Clear path to implement and verify all criteria",
+      "rationale": "criteria: all acceptance criteria are well-defined and straightforward; capability: I understand Python and can modify the migration code; verification: can run test suite and create new regression tests; tools/authority: have file edit access and can commit changes locally",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "decided_at": "2026-09-25T11:24:55.054Z",
+      "basis": []
+    }
+  ]
+}

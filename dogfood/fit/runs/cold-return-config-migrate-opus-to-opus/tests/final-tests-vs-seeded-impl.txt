@@ -1,0 +1,84 @@
+..........FFFF                                                           [100%]
+=================================== FAILURES ===================================
+_______________ test_preserves_unknown_top_level_and_nested_keys _______________
+
+    def test_preserves_unknown_top_level_and_nested_keys():
+        doc = v1(custom={"owner": "peter", "nested": {"tags": ["a", "b"], "n": None}}, extra=True)
+>       assert migrate(doc) == {
+            "version": 2,
+            "request_timeout": 30,
+            "plugins": ["foo"],
+            "custom": {"owner": "peter", "nested": {"tags": ["a", "b"], "n": None}},
+            "extra": True,
+        }
+E       AssertionError: assert {'plugins': [... 'version': 2} == {'custom': {'...out': 30, ...}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Right contains 2 more items:
+E         {'custom': {'nested': {'n': None, 'tags': ['a', 'b']}, 'owner': 'peter'},
+E          'extra': True}
+E         Use -v to get more diff
+
+tests/test_migrate.py:45: AssertionError
+______________________________ test_issue_example ______________________________
+
+    def test_issue_example():
+        doc = {"version": 1, "timeout": 30, "plugins": ["foo"], "custom": {"owner": "peter"}}
+>       assert migrate(doc) == {
+            "version": 2,
+            "request_timeout": 30,
+            "plugins": ["foo"],
+            "custom": {"owner": "peter"},
+        }
+E       AssertionError: assert {'plugins': [... 'version': 2} == {'custom': {'... 'version': 2}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Right contains 1 more item:
+E         {'custom': {'owner': 'peter'}}
+E         Use -v to get more diff
+
+tests/test_migrate.py:56: AssertionError
+__________________________ test_does_not_mutate_input __________________________
+
+    def test_does_not_mutate_input():
+        import copy
+    
+        doc = v1(custom={"owner": "peter", "nested": {"tags": ["a"]}})
+        before = copy.deepcopy(doc)
+        out = migrate(doc)
+        assert doc == before
+        # The result must not alias the input's nested containers either.
+>       out["custom"]["nested"]["tags"].append("b")
+E       KeyError: 'custom'
+
+tests/test_migrate.py:72: KeyError
+_______________ test_current_version_result_does_not_alias_input _______________
+
+    def test_current_version_result_does_not_alias_input():
+        doc = {"version": 2, "request_timeout": 5, "plugins": [], "custom": {"k": [1]}}
+        out = migrate(doc)
+        out["custom"]["k"].append(2)
+>       assert doc["custom"]["k"] == [1]
+E       assert [1, 2] == [1]
+E         
+E         Left contains one more item: 2
+E         Use -v to get more diff
+
+tests/test_migrate.py:81: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_migrate.py::test_sets_current_version
+PASSED tests/test_migrate.py::test_renames_timeout_to_request_timeout
+PASSED tests/test_migrate.py::test_keeps_plugins
+PASSED tests/test_migrate.py::test_missing_plugins_defaults_to_empty_list
+PASSED tests/test_migrate.py::test_current_version_is_returned_as_is
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[None]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[1]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[True]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[0]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[3]
+FAILED tests/test_migrate.py::test_preserves_unknown_top_level_and_nested_keys
+FAILED tests/test_migrate.py::test_issue_example - AssertionError: assert {'p...
+FAILED tests/test_migrate.py::test_does_not_mutate_input - KeyError: 'custom'
+FAILED tests/test_migrate.py::test_current_version_result_does_not_alias_input
+4 failed, 10 passed in 0.03s

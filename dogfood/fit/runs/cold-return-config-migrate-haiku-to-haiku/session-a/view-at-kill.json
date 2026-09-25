@@ -1,0 +1,88 @@
+{
+  "generated_from_revision": 6,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d84f-4b61-7299-b289-9bdfa76dbec7",
+      "title": "Preserve user-defined keys in v1-to-v2 config migration",
+      "topic_id": "top_01a0d84f-3ab4-7253-b31b-782a37e01ba5",
+      "declaration": {
+        "declaration_id": "dcl_01a0d84f-60fb-75ec-9daa-76f060df469b",
+        "objective": "Fix config migration to preserve user-defined keys and rename timeout correctly",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-7ae71f814187",
+            "code": "c1",
+            "statement": "Rename timeout to request_timeout",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-7d143eb9da6c",
+            "code": "c2",
+            "statement": "Set version to 2",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-81cc71768b7a",
+            "code": "c3",
+            "statement": "Preserve all unrelated user-defined keys recursively",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-8601f0672f2c",
+            "code": "c4",
+            "statement": "Do not mutate the input object",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-8b47843dd238",
+            "code": "c5",
+            "statement": "Add regression coverage for preservation of unknown keys",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d84f-8df5-7529-9bb7-e59eda227479",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d84f-774c-72aa-a170-2853992e9218",
+          "repository_id": "repo_01a0d84f-2a26-73e8-8b1c-4335d25f006d",
+          "dispatched_at": "2026-09-25T11:24:47.477Z",
+          "ended": false
+        }
+      ],
+      "claims": [],
+      "evidence": [],
+      "blockers": [],
+      "verification": [],
+      "settlement": null,
+      "status": {
+        "blocked": false,
+        "verified": false,
+        "settled": false,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "observe (claim)",
+      "next_command": {
+        "command": "tallyback claim --task-id tsk_01a0d84f-4b61-7299-b289-9bdfa76dbec7 --attempt-id att_01a0d84f-8df5-7529-9bb7-e59eda227479 --declaration-id dcl_01a0d84f-60fb-75ec-9daa-76f060df469b --statement <statement> --evidence <evi_…>",
+        "reason": "Record what the Attempt claims. Record Evidence first (`tallyback evidence --help`) and cite it with --evidence (repeatable).",
+        "requires": [
+          "--statement",
+          "--evidence"
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 0
+  }
+}

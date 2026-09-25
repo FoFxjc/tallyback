@@ -1,0 +1,124 @@
+{
+  "generated_from_revision": 13,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d84f-4b61-7299-b289-9bdfa76dbec7",
+      "title": "Preserve user-defined keys in v1-to-v2 config migration",
+      "topic_id": "top_01a0d84f-3ab4-7253-b31b-782a37e01ba5",
+      "declaration": {
+        "declaration_id": "dcl_01a0d84f-60fb-75ec-9daa-76f060df469b",
+        "objective": "Fix config migration to preserve user-defined keys and rename timeout correctly",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-7ae71f814187",
+            "code": "c1",
+            "statement": "Rename timeout to request_timeout",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-7d143eb9da6c",
+            "code": "c2",
+            "statement": "Set version to 2",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-81cc71768b7a",
+            "code": "c3",
+            "statement": "Preserve all unrelated user-defined keys recursively",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-8601f0672f2c",
+            "code": "c4",
+            "statement": "Do not mutate the input object",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d84f-60fb-75ec-9daa-8b47843dd238",
+            "code": "c5",
+            "statement": "Add regression coverage for preservation of unknown keys",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d84f-8df5-7529-9bb7-e59eda227479",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d84f-774c-72aa-a170-2853992e9218",
+          "repository_id": "repo_01a0d84f-2a26-73e8-8b1c-4335d25f006d",
+          "dispatched_at": "2026-09-25T11:24:47.477Z",
+          "ended": true
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d852-0d91-7115-9544-a08ed6a17618",
+          "statement": "All acceptance criteria met: timeout renamed to request_timeout, version set to 2, user-defined keys preserved recursively, input object not mutated, and regression coverage added for unknown key preservation",
+          "evidence_ids": [
+            "evi_01a0d851-fa4d-7400-bcfd-e72d5e56d013"
+          ],
+          "claimed_by": {
+            "kind": "executor",
+            "id": "claude-haiku-4-5"
+          },
+          "claimed_at": "2026-09-25T11:27:31.217Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d851-fa4d-7400-bcfd-e72d5e56d013",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-haiku-4-5"
+          },
+          "submitted_at": "2026-09-25T11:27:26.286Z",
+          "note": "14 passed in 0.02s: 10 existing tests + 4 new regression tests (test_preserves_unknown_keys, test_preserves_nested_unknown_keys, test_does_not_mutate_input, test_does_not_share_nested_objects_with_input)"
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d852-400f-709b-b4fe-d8b78ab3f35e",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "All 14 tests passing including 4 new regression tests covering unknown key preservation"
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d852-c62b-70e1-8a33-77442462c3d4",
+        "decision": "land",
+        "verification_exception": null,
+        "rationale": "All 5 acceptance criteria verified: (c1) timeout renamed to request_timeout, (c2) version set to 2, (c3) user-defined keys preserved recursively, (c4) input object not mutated, (c5) regression coverage added. All 14 tests passing. Code committed."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": true,
+        "stale": false
+      },
+      "next_action": "settled: land",
+      "next_command": {
+        "command": "tallyback land",
+        "reason": "ready_to_land here is the ledger half only (a land Settlement on positive verification); `tallyback land` checks the Git half: branch, commits ahead, conflicts.",
+        "requires": []
+      }
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 1,
+    "stale": 0,
+    "settled": 1
+  }
+}

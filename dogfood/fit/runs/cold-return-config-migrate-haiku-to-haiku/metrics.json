@@ -1,0 +1,47 @@
+{
+  "model_reported_by_cli": "claude-haiku-4-5-20251001",
+  "model_usage": {
+    "claude-haiku-4-5-20251001": {
+      "inputTokens": 427,
+      "outputTokens": 18290,
+      "cacheReadInputTokens": 2646298,
+      "cacheCreationInputTokens": 41160,
+      "webSearchRequests": 0,
+      "costUSD": 0.4388268,
+      "contextWindow": 200000,
+      "maxOutputTokens": 32000,
+      "thinkingTokens": 4818,
+      "canonicalModel": "claude-haiku-4-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "num_turns": 55,
+  "duration_ms": 209045,
+  "total_cost_usd": 0.4388268,
+  "result_is_error": false,
+  "tool_calls": 53,
+  "tool_calls_by_name": {
+    "Bash": 44,
+    "Edit": 4,
+    "Read": 4,
+    "Skill": 1
+  },
+  "tallyback_invocations": 27,
+  "tallyback_failed_or_rejected": 8,
+  "tallyback_by_subcommand": {
+    "claim": 1,
+    "decision": 1,
+    "end": 2,
+    "evidence": 5,
+    "land": 1,
+    "settle": 4,
+    "show": 8,
+    "verdict": 3,
+    "view": 2
+  },
+  "used_skill_tool": true,
+  "touched_tallyback_source": false,
+  "inspected_tallyback_wrapper": true,
+  "spawned_subagents": 0
+}

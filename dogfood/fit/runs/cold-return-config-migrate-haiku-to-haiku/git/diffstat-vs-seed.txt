@@ -1,0 +1,3 @@
+ cfgmigrate/migrate.py | 15 +++++++++------
+ tests/test_migrate.py | 26 ++++++++++++++++++++++++++
+ 2 files changed, 35 insertions(+), 6 deletions(-)

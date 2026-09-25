@@ -1,0 +1,74 @@
+diff --git a/cfgmigrate/migrate.py b/cfgmigrate/migrate.py
+index c9b01d4..99049fc 100644
+--- a/cfgmigrate/migrate.py
++++ b/cfgmigrate/migrate.py
+@@ -14,6 +14,7 @@ Schema history:
+ 
+ from __future__ import annotations
+ 
++import copy
+ from typing import Any, Callable
+ 
+ Config = dict[str, Any]
+@@ -26,11 +27,13 @@ class UnsupportedVersionError(ValueError):
+ 
+ 
+ def _v1_to_v2(old: Config) -> Config:
+-    return {
+-        "version": 2,
+-        "request_timeout": old["timeout"],
+-        "plugins": old.get("plugins", []),
+-    }
++    result = copy.deepcopy(old)
++    result["version"] = 2
++    if "timeout" in result:
++        result["request_timeout"] = result.pop("timeout")
++    if "plugins" not in result:
++        result["plugins"] = []
++    return result
+ 
+ 
+ _MIGRATIONS: dict[int, Callable[[Config], Config]] = {
+@@ -46,7 +49,7 @@ def migrate(config: Config) -> Config:
+     if version > CURRENT_VERSION or (version < CURRENT_VERSION and version not in _MIGRATIONS):
+         raise UnsupportedVersionError(f"cannot migrate config version {version}")
+ 
+-    result = config
++    result = copy.deepcopy(config)
+     while result["version"] < CURRENT_VERSION:
+         result = _MIGRATIONS[result["version"]](result)
+     return result
+diff --git a/tests/test_migrate.py b/tests/test_migrate.py
+index b483b98..1da6106 100644
+--- a/tests/test_migrate.py
++++ b/tests/test_migrate.py
+@@ -38,3 +38,29 @@ def test_current_version_is_returned_as_is():
+ def test_rejects_unsupported_versions(version):
+     with pytest.raises(UnsupportedVersionError):
+         migrate({"version": version, "timeout": 1})
++
++
++def test_preserves_unknown_keys():
++    doc = v1(custom={"owner": "peter"})
++    out = migrate(doc)
++    assert out["custom"] == {"owner": "peter"}
++
++
++def test_preserves_nested_unknown_keys():
++    doc = v1(custom={"owner": "peter", "nested": {"level": 2, "data": ["a", "b"]}})
++    out = migrate(doc)
++    assert out["custom"] == {"owner": "peter", "nested": {"level": 2, "data": ["a", "b"]}}
++
++
++def test_does_not_mutate_input():
++    doc = v1(custom={"owner": "peter"})
++    original_doc = {"version": 1, "timeout": 30, "plugins": ["foo"], "custom": {"owner": "peter"}}
++    migrate(doc)
++    assert doc == original_doc
++
++
++def test_does_not_share_nested_objects_with_input():
++    doc = v1(custom={"owner": "peter"})
++    out = migrate(doc)
++    out["custom"]["owner"] = "modified"
++    assert doc["custom"]["owner"] == "peter"
