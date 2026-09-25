@@ -1,0 +1,131 @@
+{
+  "generated_from_revision": 13,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d84a-ab38-72de-851f-1de1935ad3d2",
+      "title": "Fix v1->v2 config migration losing unknown keys",
+      "topic_id": "top_01a0d84a-91dc-77b7-94a2-4da6509f0007",
+      "declaration": {
+        "declaration_id": "dcl_01a0d84a-faf7-711c-a359-aa88fee10fcb",
+        "objective": "Fix v1->v2 config migration so it preserves all unrelated user-defined keys recursively, renames timeout->request_timeout, sets version=2, does not mutate input, and has regression coverage",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d84a-faf8-7387-b9aa-a5602c1a04e8",
+            "code": "rename",
+            "statement": "timeout key is renamed to request_timeout",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d84a-faf8-7387-b9aa-a80773de208b",
+            "code": "version",
+            "statement": "version field is set to 2",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d84a-faf8-7387-b9aa-acc9293f3833",
+            "code": "preserve",
+            "statement": "all unrelated user-defined keys (including nested) are preserved",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d84a-faf8-7387-b9aa-b36be2cca495",
+            "code": "immutable",
+            "statement": "the input config object is not mutated",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d84a-faf8-7387-b9aa-b73867991a01",
+            "code": "test",
+            "statement": "regression test exists covering preservation of unknown keys",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d84b-2a38-74ec-af26-d3669c565059",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d84b-1663-725b-bf50-ab54f511ac08",
+          "repository_id": "repo_01a0d84a-86d2-70ef-bd19-5cf7919452f2",
+          "dispatched_at": "2026-09-25T11:19:59.801Z",
+          "ended": false
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d84d-71b1-7110-8e4c-be1ae8f92556",
+          "statement": "_v1_to_v2 rewritten to shallow-copy the input dict (new = dict(old)) instead of building a fresh dict from a fixed key set; this renames timeout->request_timeout, sets version=2, defaults plugins, and generically preserves every other key (including nested dicts/lists, by reference) without mutating the original. Added tests for nested-key preservation and non-mutation.",
+          "evidence_ids": [
+            "evi_01a0d84d-3fec-75c4-838a-6afd6350d1de",
+            "evi_01a0d84d-514b-76c6-bc53-c3c9ff7f4187"
+          ],
+          "claimed_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "claimed_at": "2026-09-25T11:22:29.169Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d84d-3fec-75c4-838a-6afd6350d1de",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T11:22:16.428Z",
+          "note": "13 passed, 0 failed: covers rename, version bump, plugins default, unknown-key preservation (shallow and deeply nested + multiple top-level extras), non-mutation, idempotent current-version passthrough, and unsupported-version rejection"
+        },
+        {
+          "evidence_id": "evi_01a0d84d-514b-76c6-bc53-c3c9ff7f4187",
+          "kind": "observation",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T11:22:20.875Z",
+          "note": "Independent verification beyond pytest, targeting criteria 3 (recursive preserve) and 4 (immutable) specifically"
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d84d-a598-777a-9931-ed3ff048b4b8",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "pytest suite (evi test_run, 13/13 pass) directly exercises rename, version, plugins-default, and non-mutation; independent manual probe (evi observation) with 2-level nested dict + list confirms recursive preservation and non-mutation beyond what the added tests cover, ruling out a shallow implementation that only special-cases one known key"
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d84d-d7ce-71ab-a8f8-cbb92a78b265",
+        "decision": "accept",
+        "verification_exception": null,
+        "rationale": "All 5 declared acceptance criteria are supported with high confidence by a passing 13-test pytest run plus an independent manual probe of deep nesting and non-mutation. Fix and tests are complete in the working tree; not settling as 'land' since committing/merging was not requested by the user."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "settled: accept",
+      "next_command": null
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 1
+  }
+}

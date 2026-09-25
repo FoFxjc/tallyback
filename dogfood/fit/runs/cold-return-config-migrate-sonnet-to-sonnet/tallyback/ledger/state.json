@@ -1,0 +1,348 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 13,
+  "included_through": 13,
+  "project": {
+    "project_id": "prj_01a0d84a-86d2-70ef-bd19-59ecd0e97845",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d84a-86d2-70ef-bd19-5cf7919452f2",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d84a-86d2-70ef-bd19-5cf7919452f2",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d84b-1663-725b-bf50-ab54f511ac08",
+      "repository_id": "repo_01a0d84a-86d2-70ef-bd19-5cf7919452f2",
+      "branch": "main"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d84a-91dc-77b7-94a2-4da6509f0007",
+      "project_id": "prj_01a0d84a-86d2-70ef-bd19-59ecd0e97845",
+      "name": "v1-config-migration-fix",
+      "goal": "",
+      "created_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "created_at": "2026-09-25T11:19:20.797Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d84a-ab38-72de-851f-1de1935ad3d2",
+      "topic_id": "top_01a0d84a-91dc-77b7-94a2-4da6509f0007",
+      "title": "Fix v1->v2 config migration losing unknown keys"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d84a-faf7-711c-a359-aa88fee10fcb",
+      "task_id": "tsk_01a0d84a-ab38-72de-851f-1de1935ad3d2",
+      "declared_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "declared_at": "2026-09-25T11:19:47.704Z",
+      "objective": "Fix v1->v2 config migration so it preserves all unrelated user-defined keys recursively, renames timeout->request_timeout, sets version=2, does not mutate input, and has regression coverage",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d84a-faf8-7387-b9aa-a5602c1a04e8",
+          "code": "rename",
+          "statement": "timeout key is renamed to request_timeout",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d84a-faf8-7387-b9aa-a80773de208b",
+          "code": "version",
+          "statement": "version field is set to 2",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d84a-faf8-7387-b9aa-acc9293f3833",
+          "code": "preserve",
+          "statement": "all unrelated user-defined keys (including nested) are preserved",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d84a-faf8-7387-b9aa-b36be2cca495",
+          "code": "immutable",
+          "statement": "the input config object is not mutated",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d84a-faf8-7387-b9aa-b73867991a01",
+          "code": "test",
+          "statement": "regression test exists covering preservation of unknown keys",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d84b-2a38-74ec-af26-d3669c565059",
+      "task_id": "tsk_01a0d84a-ab38-72de-851f-1de1935ad3d2",
+      "declaration_id": "dcl_01a0d84a-faf7-711c-a359-aa88fee10fcb",
+      "repository_id": "repo_01a0d84a-86d2-70ef-bd19-5cf7919452f2",
+      "workspace_id": "wsp_01a0d84b-1663-725b-bf50-ab54f511ac08",
+      "executor": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "dispatched_at": "2026-09-25T11:19:59.801Z"
+    }
+  ],
+  "attempt_ends": [],
+  "claims": [
+    {
+      "claim_id": "clm_01a0d84d-71b1-7110-8e4c-be1ae8f92556",
+      "task_id": "tsk_01a0d84a-ab38-72de-851f-1de1935ad3d2",
+      "attempt_id": "att_01a0d84b-2a38-74ec-af26-d3669c565059",
+      "declaration_id": "dcl_01a0d84a-faf7-711c-a359-aa88fee10fcb",
+      "statement": "_v1_to_v2 rewritten to shallow-copy the input dict (new = dict(old)) instead of building a fresh dict from a fixed key set; this renames timeout->request_timeout, sets version=2, defaults plugins, and generically preserves every other key (including nested dicts/lists, by reference) without mutating the original. Added tests for nested-key preservation and non-mutation.",
+      "evidence_ids": [
+        "evi_01a0d84d-3fec-75c4-838a-6afd6350d1de",
+        "evi_01a0d84d-514b-76c6-bc53-c3c9ff7f4187"
+      ],
+      "claimed_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "claimed_at": "2026-09-25T11:22:29.169Z"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "test_run",
+      "payload": {
+        "command": "python3 -m pytest tests/ -v",
+        "exit_code": 0,
+        "repository_id": "repo_01a0d84a-86d2-70ef-bd19-5cf7919452f2",
+        "workspace_id": "wsp_01a0d84b-1663-725b-bf50-ab54f511ac08"
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "note": "13 passed, 0 failed: covers rename, version bump, plugins default, unknown-key preservation (shallow and deeply nested + multiple top-level extras), non-mutation, idempotent current-version passthrough, and unsupported-version rejection",
+      "evidence_id": "evi_01a0d84d-3fec-75c4-838a-6afd6350d1de",
+      "submitted_at": "2026-09-25T11:22:16.428Z"
+    },
+    {
+      "kind": "observation",
+      "payload": {
+        "text": "Manual probe outside the test suite: migrate() on a doc with custom={owner, nested:{deep:[1,2,3]}} returns a new dict object (doc is out == False); the original doc dict compares equal to a pre-call deepcopy snapshot (unmutated); custom subtree is preserved with correct values including 2-level nesting and a list."
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "note": "Independent verification beyond pytest, targeting criteria 3 (recursive preserve) and 4 (immutable) specifically",
+      "evidence_id": "evi_01a0d84d-514b-76c6-bc53-c3c9ff7f4187",
+      "submitted_at": "2026-09-25T11:22:20.875Z"
+    }
+  ],
+  "reconciliations": [],
+  "check_invocations": [
+    {
+      "check_invocation_id": "chk_01a0d84d-a59a-707b-8d51-e32c8466ba6e",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d84d-71b1-7110-8e4c-be1ae8f92556"
+      },
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d84a-86d2-70ef-bd19-59ecd0e97845",
+        "revision": 10,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "a825599a077d6a1ec23d62ac5919988fed10d6f3b3dd4ecdbea151ce2a558f05"
+        }
+      },
+      "invoked_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "invoked_at": "2026-09-25T11:22:42.458Z"
+    }
+  ],
+  "check_results": [
+    {
+      "check_result_id": "ckr_01a0d84d-a5aa-74fb-94f2-13bc56cc4acd",
+      "check_invocation_id": "chk_01a0d84d-a59a-707b-8d51-e32c8466ba6e",
+      "outcome": "verdict_emitted",
+      "produced_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "completed_at": "2026-09-25T11:22:42.474Z",
+      "diagnostics": [],
+      "reconciliation_ids": [],
+      "verdict_id": "ver_01a0d84d-a598-777a-9931-ed3ff048b4b8"
+    }
+  ],
+  "verdicts": [
+    {
+      "verdict_id": "ver_01a0d84d-a598-777a-9931-ed3ff048b4b8",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d84d-71b1-7110-8e4c-be1ae8f92556"
+      },
+      "declaration_id": "dcl_01a0d84a-faf7-711c-a359-aa88fee10fcb",
+      "scope": {
+        "evaluated_criteria": [
+          "cri_01a0d84a-faf8-7387-b9aa-a5602c1a04e8",
+          "cri_01a0d84a-faf8-7387-b9aa-a80773de208b",
+          "cri_01a0d84a-faf8-7387-b9aa-acc9293f3833",
+          "cri_01a0d84a-faf8-7387-b9aa-b36be2cca495",
+          "cri_01a0d84a-faf8-7387-b9aa-b73867991a01"
+        ],
+        "unevaluated_criteria": []
+      },
+      "conclusion": "supported",
+      "finality": "final",
+      "basis": {
+        "evidence_ids": [
+          "evi_01a0d84d-3fec-75c4-838a-6afd6350d1de",
+          "evi_01a0d84d-514b-76c6-bc53-c3c9ff7f4187"
+        ],
+        "reconciliation_ids": []
+      },
+      "findings": [
+        {
+          "criterion_id": "cri_01a0d84a-faf8-7387-b9aa-a5602c1a04e8",
+          "assessment": "supported",
+          "summary": "out['request_timeout']==30 and 'timeout' not in out, verified by test_renames_timeout_to_request_timeout",
+          "basis_refs": [
+            "evi_01a0d84d-3fec-75c4-838a-6afd6350d1de"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d84a-faf8-7387-b9aa-a80773de208b",
+          "assessment": "supported",
+          "summary": "migrate(v1())['version']==2, verified by test_sets_current_version",
+          "basis_refs": [
+            "evi_01a0d84d-3fec-75c4-838a-6afd6350d1de"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d84a-faf8-7387-b9aa-acc9293f3833",
+          "assessment": "supported",
+          "summary": "custom dict with nested dict+list preserved unchanged at output, both via new test_preserves_deeply_nested_and_multiple_unknown_keys and manual probe; implementation copies via dict(old) rather than reconstructing from a fixed key allowlist",
+          "basis_refs": [
+            "evi_01a0d84d-3fec-75c4-838a-6afd6350d1de",
+            "evi_01a0d84d-514b-76c6-bc53-c3c9ff7f4187"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d84a-faf8-7387-b9aa-b36be2cca495",
+          "assessment": "supported",
+          "summary": "original input dict compares equal to a pre-call snapshot after migrate() runs, and output is a distinct dict object",
+          "basis_refs": [
+            "evi_01a0d84d-514b-76c6-bc53-c3c9ff7f4187"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d84a-faf8-7387-b9aa-b73867991a01",
+          "assessment": "supported",
+          "summary": "test_preserves_unknown_keys and test_preserves_deeply_nested_and_multiple_unknown_keys added; test_does_not_mutate_input also added",
+          "basis_refs": [
+            "evi_01a0d84d-3fec-75c4-838a-6afd6350d1de"
+          ]
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "pytest suite (evi test_run, 13/13 pass) directly exercises rename, version, plugins-default, and non-mutation; independent manual probe (evi observation) with 2-level nested dict + list confirms recursive preservation and non-mutation beyond what the added tests cover, ruling out a shallow implementation that only special-cases one known key"
+      },
+      "rationale": "pytest suite (evi test_run, 13/13 pass) directly exercises rename, version, plugins-default, and non-mutation; independent manual probe (evi observation) with 2-level nested dict + list confirms recursive preservation and non-mutation beyond what the added tests cover, ruling out a shallow implementation that only special-cases one known key",
+      "uncertainty": [],
+      "limitations": [],
+      "issued_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "issued_at": "2026-09-25T11:22:42.456Z",
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      }
+    }
+  ],
+  "settlements": [
+    {
+      "settlement_id": "set_01a0d84d-d7ce-71ab-a8f8-cbb92a78b265",
+      "task_id": "tsk_01a0d84a-ab38-72de-851f-1de1935ad3d2",
+      "attempt_id": "att_01a0d84b-2a38-74ec-af26-d3669c565059",
+      "decision": "accept",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "decided_at": "2026-09-25T11:22:55.310Z",
+      "basis": {
+        "verdict_id": "ver_01a0d84d-a598-777a-9931-ed3ff048b4b8",
+        "attempt_end_id": null,
+        "blocker_ids": []
+      },
+      "rationale": "All 5 declared acceptance criteria are supported with high confidence by a passing 13-test pytest run plus an independent manual probe of deep nesting and non-mutation. Fix and tests are complete in the working tree; not settling as 'land' since committing/merging was not requested by the user.",
+      "verification_exception": null
+    }
+  ],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": [
+    {
+      "decision_id": "dec_01a0d84b-4483-727a-ad10-8639438353ee",
+      "subject": {
+        "kind": "attempt",
+        "id": "att_01a0d84b-2a38-74ec-af26-d3669c565059"
+      },
+      "role": "execution_choice",
+      "question": "Execution fit",
+      "choice": "FIT: root cause is _v1_to_v2 rebuilding a fresh dict, dropping unknown keys; fix + tests are straightforward and verifiable",
+      "rationale": "criteria: all 5 acceptance criteria understood and map directly to code changes; capability: pure Python dict manipulation, well within capability; verification: pytest regression tests give direct evidence for rename/version/preserve/test criteria, and can add an explicit mutation-check test for immutable; tools/authority: have edit+test tools, will not settle land or push without being asked",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "decided_at": "2026-09-25T11:20:06.532Z",
+      "basis": []
+    },
+    {
+      "decision_id": "dec_01a0d84c-de52-713f-a4ca-f8d26db08e3c",
+      "subject": {
+        "kind": "attempt",
+        "id": "att_01a0d84b-2a38-74ec-af26-d3669c565059"
+      },
+      "role": "execution_choice",
+      "question": "Execution fit",
+      "choice": "FIT: verified prior session's fix (shallow dict copy in _v1_to_v2) actually satisfies all 5 criteria, including recursive/nested key preservation and non-mutation, via manual probing with deeply nested structures",
+      "rationale": "criteria: all 5 acceptance criteria understood; capability: pure Python dict manipulation, within capability; verification: ran full pytest suite (12/12 pass) plus an independent manual script with nested custom.nested.deep structure confirming input dict unmutated, output is a distinct object, and nested keys survive; tools/authority: have edit+test tools, will not settle land/push without being asked",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "decided_at": "2026-09-25T11:21:51.442Z",
+      "basis": [],
+      "supersedes": "dec_01a0d84b-4483-727a-ad10-8639438353ee"
+    }
+  ]
+}

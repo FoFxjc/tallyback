@@ -1,0 +1,45 @@
+diff --git a/cfgmigrate/migrate.py b/cfgmigrate/migrate.py
+index c9b01d4..9f801a9 100644
+--- a/cfgmigrate/migrate.py
++++ b/cfgmigrate/migrate.py
+@@ -26,11 +26,11 @@ class UnsupportedVersionError(ValueError):
+ 
+ 
+ def _v1_to_v2(old: Config) -> Config:
+-    return {
+-        "version": 2,
+-        "request_timeout": old["timeout"],
+-        "plugins": old.get("plugins", []),
+-    }
++    new = dict(old)
++    new["version"] = 2
++    new["request_timeout"] = new.pop("timeout")
++    new.setdefault("plugins", [])
++    return new
+ 
+ 
+ _MIGRATIONS: dict[int, Callable[[Config], Config]] = {
+diff --git a/tests/test_migrate.py b/tests/test_migrate.py
+index b483b98..74e05ee 100644
+--- a/tests/test_migrate.py
++++ b/tests/test_migrate.py
+@@ -29,6 +29,19 @@ def test_missing_plugins_defaults_to_empty_list():
+     assert migrate(doc)["plugins"] == []
+ 
+ 
++def test_preserves_unknown_keys():
++    doc = v1(custom={"owner": "peter"})
++    out = migrate(doc)
++    assert out["custom"] == {"owner": "peter"}
++
++
++def test_does_not_mutate_input():
++    doc = v1(custom={"owner": "peter"})
++    original = {k: v for k, v in doc.items()}
++    migrate(doc)
++    assert doc == original
++
++
+ def test_current_version_is_returned_as_is():
+     doc = {"version": 2, "request_timeout": 5, "plugins": []}
+     assert migrate(doc) == doc

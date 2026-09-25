@@ -1,0 +1,39 @@
+....FF.......                                                            [100%]
+=================================== FAILURES ===================================
+_________________________ test_preserves_unknown_keys __________________________
+
+    def test_preserves_unknown_keys():
+        doc = v1(custom={"owner": "peter"})
+        out = migrate(doc)
+>       assert out["custom"] == {"owner": "peter"}
+E       KeyError: 'custom'
+
+tests/test_migrate.py:35: KeyError
+____________ test_preserves_deeply_nested_and_multiple_unknown_keys ____________
+
+    def test_preserves_deeply_nested_and_multiple_unknown_keys():
+        doc = v1(
+            custom={"owner": "peter", "nested": {"deep": [1, 2, {"k": "v"}]}},
+            extra_top_level="unrelated",
+        )
+        out = migrate(doc)
+>       assert out["custom"] == {"owner": "peter", "nested": {"deep": [1, 2, {"k": "v"}]}}
+E       KeyError: 'custom'
+
+tests/test_migrate.py:44: KeyError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_migrate.py::test_sets_current_version
+PASSED tests/test_migrate.py::test_renames_timeout_to_request_timeout
+PASSED tests/test_migrate.py::test_keeps_plugins
+PASSED tests/test_migrate.py::test_missing_plugins_defaults_to_empty_list
+PASSED tests/test_migrate.py::test_does_not_mutate_input
+PASSED tests/test_migrate.py::test_current_version_is_returned_as_is
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[None]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[1]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[True]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[0]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[3]
+FAILED tests/test_migrate.py::test_preserves_unknown_keys - KeyError: 'custom'
+FAILED tests/test_migrate.py::test_preserves_deeply_nested_and_multiple_unknown_keys
+2 failed, 11 passed in 0.03s

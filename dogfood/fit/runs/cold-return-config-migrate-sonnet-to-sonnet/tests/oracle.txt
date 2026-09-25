@@ -1,0 +1,25 @@
+.....F                                                                   [100%]
+=================================== FAILURES ===================================
+_______________ test_info_output_does_not_alias_input_containers _______________
+
+    def test_info_output_does_not_alias_input_containers():
+        doc = issue_doc()
+        out = migrate(doc)
+        out["custom"]["owner"] = "changed"
+        out["plugins"].append("bar")
+>       assert doc["custom"]["owner"] == "peter"
+E       AssertionError: assert 'changed' == 'peter'
+E         
+E         - peter
+E         + changed
+
+oracle/test_oracle.py:72: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED oracle/test_oracle.py::test_c1_c2_issue_example_exact
+PASSED oracle/test_oracle.py::test_c3_preserves_unknown_keys_recursively
+PASSED oracle/test_oracle.py::test_c3_nested_key_named_timeout_is_not_renamed
+PASSED oracle/test_oracle.py::test_c3_missing_plugins_does_not_inject_unrelated_changes
+PASSED oracle/test_oracle.py::test_c4_input_not_mutated
+FAILED oracle/test_oracle.py::test_info_output_does_not_alias_input_containers
+1 failed, 5 passed in 0.02s

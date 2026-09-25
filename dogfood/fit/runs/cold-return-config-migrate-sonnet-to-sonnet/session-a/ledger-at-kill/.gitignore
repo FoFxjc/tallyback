@@ -1,0 +1,3 @@
+# Machine-local Tallyback state (SPEC §6): never commit.
+history.jsonl
+runtime/
