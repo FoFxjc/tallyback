@@ -174,8 +174,19 @@ function deriveNextAction(snapshot: Snapshot, task: Task, projections: Projectio
   // settlement via verification_exception does (`src/land/report.ts`'s own fixtures). A
   // settled task is a terminal resting state regardless of whether the check chain ran, so
   // that check has to short-circuit ahead of steps 4-7, not sit behind them.
+  //
+  // Only Settlements of the *latest* Attempt count here. `retry` settles an Attempt but
+  // leaves the Task available (TB-LC-003): once a newer Attempt is dispatched, guidance
+  // follows that Attempt instead of echoing the earlier retry forever.
+  const taskAttempts = snapshot.attempts.filter((a) => a.task_id === task.task_id);
+  const newestAttempt = pickLatest(
+    taskAttempts,
+    (a) => a.dispatched_at,
+    (a) => a.attempt_id,
+  );
   const effectiveSettlements = effectiveRecords(snapshot.settlements).filter(
-    (s) => s.task_id === task.task_id,
+    (s) =>
+      s.task_id === task.task_id && (!newestAttempt || s.attempt_id === newestAttempt.attempt_id),
   );
   if (effectiveSettlements.length > 0) {
     const latestSettlement = pickLatest(
@@ -247,7 +258,7 @@ function deriveNextCommand(
       requires: ['--disposition', '--explanation'],
     };
   }
-  if (nextAction.startsWith('settled: ')) {
+  if (nextAction.startsWith('settled: ') && nextAction !== 'settled: retry') {
     if (!status.ready_to_land) return null;
     return {
       command: 'tallyback land',
@@ -266,7 +277,24 @@ function deriveNextCommand(
     };
   }
   const attempts = snapshot.attempts.filter((a) => a.task_id === t);
-  if (nextAction === 'dispatch') {
+  // `retry` is not terminal (TB-LC-003): the next step is a new Attempt — after the retried
+  // one is ended, because an open Attempt keeps its Workspace (TB-LC-004).
+  if (nextAction === 'settled: retry') {
+    const retried = pickLatest(
+      attempts,
+      (a) => a.dispatched_at,
+      (a) => a.attempt_id,
+    )!;
+    if (!snapshot.attempt_ends.some((e) => e.attempt_id === retried.attempt_id)) {
+      return {
+        command: `tallyback end --attempt-id ${retried.attempt_id} --outcome <returned|failed|cancelled> --reason <text>`,
+        reason:
+          'The Attempt was settled `retry` but is still open; end it so a new Attempt can use the Workspace.',
+        requires: ['--outcome', '--reason'],
+      };
+    }
+  }
+  if (nextAction === 'dispatch' || nextAction === 'settled: retry') {
     const repositories = snapshot.repositories;
     const repo = repositories.length === 1 ? repositories[0]!.repository_id : '<repo_…>';
     const workspaces = snapshot.workspaces.filter(
@@ -284,7 +312,10 @@ function deriveNextCommand(
       command:
         `tallyback dispatch --task-id ${t} --declaration-id ${declaration.declaration_id} ` +
         `--repository-id ${repo} --workspace-id ${ws} --executor <kind:id>`,
-      reason: 'Start an Attempt; --executor names who does the work.',
+      reason:
+        nextAction === 'settled: retry'
+          ? 'The last Attempt was settled `retry`; the Task stays open. Start a new Attempt.'
+          : 'Start an Attempt; --executor names who does the work.',
       requires: [
         ...(repositories.length === 1 ? [] : ['--repository-id']),
         ...(workspaces.length === 1 ? [] : ['--workspace-id']),

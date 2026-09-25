@@ -259,3 +259,18 @@ n = 1 per model — the next benchmark round, not this check, should carry the c
 - **Settlement basis matrix**: unchanged by design; it held in every run.
 - **`artifact {}`**: an empty artifact payload is valid under the frozen contract.
 - **`land` without a merge request**: a judgement recorded by the CLI, not one it should make.
+
+## R11 — `retry` is not terminal in `view` (TB-LC-003; found dogfooding the Fit retry path)
+
+- **Reproduced**: `end` → `settle --decision retry` → `view`: `next_action: "settled: retry"`,
+  `next_command: null`; after dispatching a new Attempt, `view` still said `settled: retry`
+  — guidance never resumed, although TB-LC-003 says retry "leaves the Task available".
+- **Root cause**: `deriveNextAction` short-circuited on any effective Settlement of the Task,
+  including a `retry` of an earlier Attempt.
+- **Change** (view projection only): Settlements count only for the Task's latest Attempt;
+  `settled: retry` gets a `next_command` — `end` the retried Attempt if still open (an open
+  Attempt keeps its Workspace, TB-LC-004), then `dispatch` a new one. `status` and the
+  contract are unchanged; `settled: retry` still echoes immediately after a retry.
+- **Regression**: `test/view.test.ts` (retry continues).
+- **Dogfood**: decision → superseding decision → end → settle retry → view (`end`/`dispatch`
+  next) → dispatch → view `observe (claim)` on the new Attempt.

@@ -225,6 +225,47 @@ describe('View — every Settlement decision is presentable; no Task-lifecycle f
     expect(views[0]!.settlement?.decision).toBe('retry');
   });
 
+  it('`retry` is not terminal: it points at a new Attempt, and guidance follows that Attempt (TB-LC-003)', async () => {
+    const fixture = await buildLedger('tallyback-view-retry-continues-');
+    const settled = await fixture.store.settle({
+      task_id: fixture.task_id,
+      attempt_id: fixture.attempt_id,
+      ...settleInput('retry'),
+    });
+    expect(settled.ok).toBe(true);
+    let view = buildTaskViews(fixture.store.currentSnapshot())[0]!;
+    expect(view.next_action).toBe('settled: retry');
+    // The retried Attempt is still open, and an open Attempt keeps its Workspace (TB-LC-004).
+    expect(view.next_command?.command).toContain(
+      `tallyback end --attempt-id ${fixture.attempt_id}`,
+    );
+    const ended = await fixture.store.endAttempt({
+      attempt_id: fixture.attempt_id,
+      outcome: 'returned',
+      reported_by: AGENT,
+    });
+    expect(ended.ok).toBe(true);
+    view = buildTaskViews(fixture.store.currentSnapshot())[0]!;
+    expect(view.next_command?.command).toContain(`tallyback dispatch --task-id ${fixture.task_id}`);
+
+    // Dispatch timestamps order attempts; make sure the second is strictly later.
+    await new Promise((r) => setTimeout(r, 5));
+    const second = await fixture.store.dispatch({
+      task_id: fixture.task_id,
+      declaration_id: fixture.declaration_id,
+      repository_id: fixture.repository_id,
+      workspace_id: fixture.workspace_id,
+      executor: AGENT,
+      dispatched_by: ALICE,
+    });
+    expect(second.ok, JSON.stringify(second)).toBe(true);
+    view = buildTaskViews(fixture.store.currentSnapshot())[0]!;
+    expect(view.next_action).toBe('observe (claim)');
+    expect(view.next_command?.command).toContain(
+      second.ok ? second.attempt.attempt_id : 'unreachable',
+    );
+  });
+
   it('`abandon`-settled task is still surfaced by default View; `next_action` echoes the decision', async () => {
     const fixture = await buildLedger('tallyback-view-abandon-present-');
     const settled = await fixture.store.settle({
