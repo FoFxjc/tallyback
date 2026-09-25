@@ -124,6 +124,16 @@ before               after --keep A
   snapshot invalid writes nothing.
 - **A repair bumps the revision**, so any holder of the old one must re-read.
 
+### Header repair
+
+`project.json` is only a bootstrap header; `state.json` is the authority (SPEC §5.1). If
+the two end up disagreeing on the repository list — a crash between the two writes of
+an init or migration, or a hand edit of one file — every command fails closed with
+`invariant.project_repositories_mismatch`. `validate` reports it as reconcilable, and
+`tallyback reconcile --repair-header` rewrites `project.json` from the `state.json` Project
+record. It never goes the other way, never runs without the flag, and never repairs a
+project **identity** mismatch — that header may belong to a different project entirely.
+
 ## 6. What reconciliation will not do
 
 - It will not pick a head. Every forked lineage needs its own `--keep`; a run that cannot

@@ -33,7 +33,8 @@
 import { lineageKey, validate_snapshot } from '../contract/index.js';
 import type { AnyRecord, Snapshot } from '../contract/index.js';
 import { findSupersessionConflicts, type SupersessionLineage } from '../contract/index.js';
-import { allRecords, cloneSnapshot, recordId } from './snapshot.js';
+import type { LedgerDiagnosis } from './diagnose.js';
+import { allRecords, cloneSnapshot, recordId, type ProjectManifest } from './snapshot.js';
 
 /** Stable `mutation.*` / `invariant.*` outcome codes for a reconciliation run. */
 export const RECONCILE_CODES = {
@@ -57,6 +58,14 @@ export interface ReconcilePlan {
   rewrites: ReconcileRewrite[];
   /** The resulting snapshot. Not written by `planReconciliation`. */
   snapshot: Snapshot;
+  /**
+   * Set when `project.json`'s repository declarations disagree with the authoritative
+   * `state.json` Project record and the run was asked to repair the header.
+   */
+  header?: {
+    from: ProjectManifest['repositories'];
+    to: ProjectManifest['repositories'];
+  };
 }
 
 export type ReconcileOutcome =
@@ -173,10 +182,73 @@ export function planReconciliation(snapshot: Snapshot, keep: readonly string[]):
 // ---------------------------------------------------------------------------
 
 /**
- * Reconcile a ledger's forked lineages on disk.
+ * Plan a repair from one diagnosis: collapse forked lineages (with `keep`) and, when the
+ * caller explicitly asked for it, rewrite a `project.json` whose repository list disagrees
+ * with the authoritative `state.json` Project record.
+ *
+ * The header repair is opt-in for the same reason `keep` is: TB-REF-015 fails closed
+ * rather than letting one file silently win. SPEC §5.1 does name `state.json` the
+ * authority, so once a human asks, the header is rebuilt from it — never the reverse.
+ */
+function planLedgerRepair(
+  diagnosis: LedgerDiagnosis,
+  keep: readonly string[],
+  repairHeader: boolean,
+): ReconcileOutcome {
+  const snapshot = diagnosis.snapshot;
+  if (!snapshot) {
+    return {
+      ok: false,
+      code: 'schema.unknown_property',
+      message: `${diagnosis.root} has no readable state.json to reconcile`,
+      conflicts: [],
+    };
+  }
+  const headerProblem = diagnosis.problems.find(
+    (p) => p.code === 'invariant.project_repositories_mismatch',
+  );
+  const blocking = diagnosis.problems.filter(
+    (p) => !p.reconcilable || (p === headerProblem && !repairHeader),
+  );
+  if (blocking.length > 0) {
+    const hint =
+      headerProblem && !repairHeader && blocking.every((p) => p === headerProblem)
+        ? '; pass --repair-header to rewrite project.json from state.json'
+        : '';
+    return {
+      ok: false,
+      code: blocking[0]!.code,
+      message:
+        `this ledger has ${blocking.length} problem(s) reconciliation cannot fix; ` +
+        `fix them first: ${blocking.map((p) => `${p.code} (${p.layer})`).join(', ')}${hint}`,
+      conflicts: diagnosis.conflicts,
+    };
+  }
+
+  let plan: ReconcilePlan;
+  if (diagnosis.conflicts.length > 0 || !headerProblem || keep.length > 0) {
+    const planned = planReconciliation(snapshot, keep);
+    if (!planned.ok) return planned;
+    plan = planned.plan;
+  } else {
+    // Header-only repair: state.json is left exactly as it is.
+    plan = { conflicts: [], rewrites: [], snapshot };
+  }
+  if (headerProblem && diagnosis.manifest) {
+    plan.header = {
+      from: diagnosis.manifest.repositories,
+      to: snapshot.project.repositories,
+    };
+  }
+  return { ok: true, plan };
+}
+
+/**
+ * Reconcile a ledger's forked lineages on disk, and — with `repairHeader` — a
+ * `project.json` whose repository declarations disagree with `state.json`.
  *
  * Reads the portable snapshot **without** validating it into existence (that is the whole
- * point — the file is currently invalid), plans the collapse, and writes the result under
+ * point — the file is currently invalid), plans the repair, and writes the result under
  * the store's single-writer lock only after the repaired snapshot validates. A dry run
  * plans and reports without writing.
  */
@@ -185,35 +257,22 @@ export async function reconcileLedger(options: {
   keep: readonly string[];
   /** Plan and report only; write nothing. Default false. */
   dryRun?: boolean;
+  /** Rewrite a disagreeing project.json repository list from state.json. Default false. */
+  repairHeader?: boolean;
 }): Promise<ReconcileOutcome & { wrote?: boolean }> {
   const { diagnoseLedger } = await import('./diagnose.js');
   const { acquireLock, LockError } = await import('./lock.js');
-  const { storeLockPath, ledgerRoot, writeSnapshot } = await import('./snapshot.js');
+  const { storeLockPath, ledgerRoot, writeProject, writeSnapshot } = await import('./snapshot.js');
+  const repairHeader = options.repairHeader === true;
 
   // A dry run never writes, so it never needs the lock: plan against a best-effort read
   // and report it.
   if (options.dryRun) {
-    const diagnosis = await diagnoseLedger(options.projectRoot);
-    if (!diagnosis.snapshot) {
-      return {
-        ok: false,
-        code: 'schema.unknown_property',
-        message: `${options.projectRoot} has no readable state.json to reconcile`,
-        conflicts: [],
-      };
-    }
-    const blocking = diagnosis.problems.filter((p) => !p.reconcilable);
-    if (blocking.length > 0) {
-      return {
-        ok: false,
-        code: blocking[0]!.code,
-        message:
-          `this ledger has ${blocking.length} problem(s) reconciliation cannot fix; ` +
-          `fix them first: ${blocking.map((p) => `${p.code} (${p.layer})`).join(', ')}`,
-        conflicts: diagnosis.conflicts,
-      };
-    }
-    const planned = planReconciliation(diagnosis.snapshot, options.keep);
+    const planned = planLedgerRepair(
+      await diagnoseLedger(options.projectRoot),
+      options.keep,
+      repairHeader,
+    );
     return planned.ok ? { ...planned, wrote: false } : planned;
   }
 
@@ -238,29 +297,22 @@ export async function reconcileLedger(options: {
     throw err;
   }
   try {
-    const diagnosis = await diagnoseLedger(options.projectRoot);
-    if (!diagnosis.snapshot) {
-      return {
-        ok: false,
-        code: 'schema.unknown_property',
-        message: `${options.projectRoot} has no readable state.json to reconcile`,
-        conflicts: [],
-      };
-    }
-    const blocking = diagnosis.problems.filter((p) => !p.reconcilable);
-    if (blocking.length > 0) {
-      return {
-        ok: false,
-        code: blocking[0]!.code,
-        message:
-          `this ledger has ${blocking.length} problem(s) reconciliation cannot fix; ` +
-          `fix them first: ${blocking.map((p) => `${p.code} (${p.layer})`).join(', ')}`,
-        conflicts: diagnosis.conflicts,
-      };
-    }
-    const planned = planReconciliation(diagnosis.snapshot, options.keep);
+    const planned = planLedgerRepair(
+      await diagnoseLedger(options.projectRoot),
+      options.keep,
+      repairHeader,
+    );
     if (!planned.ok) return planned;
-    await writeSnapshot(root, planned.plan.snapshot);
+    const { plan } = planned;
+    // state.json first: it is the authority. A crash between the two writes leaves the
+    // same header mismatch this run started from — still reported, still repairable.
+    if (plan.rewrites.length > 0) await writeSnapshot(root, plan.snapshot);
+    if (plan.header) {
+      await writeProject(root, {
+        project_id: plan.snapshot.project.project_id,
+        repositories: plan.header.to,
+      });
+    }
     return { ...planned, wrote: true };
   } finally {
     await handle.release();

@@ -885,6 +885,33 @@ function checkCanonicalReferencesConsistent(ctx: GraphContext): ValidationResult
   const inconsistent = (message: string): ValidationResult =>
     failResult('invariant.reference_inconsistent', message);
 
+  // SPEC §5.2: a Repository is generated once at project init and stored in the portable
+  // project manifest. A Repository record the Project does not declare has no place in
+  // project.json either, so it would silently split the three copies of the repository
+  // set (project.json, the Project record, the Repository collection) — and an append
+  // could otherwise mint one after init, around TB-LC-007's "the Project is never
+  // mutated through append_records".
+  const project = ctx.records.find((rec) => recordTypeOf(rec)?.type === 'project');
+  if (project) {
+    const declared = new Set<string>();
+    const refs = field(project, 'repositories');
+    if (Array.isArray(refs)) {
+      for (const ref of refs) {
+        const repoId = strField(ref, 'repository_id');
+        if (repoId !== null) declared.add(repoId);
+      }
+    }
+    for (const rec of ctx.records) {
+      if (recordTypeOf(rec)?.type !== 'repository') continue;
+      const repoId = strField(rec, 'repository_id');
+      if (repoId !== null && !declared.has(repoId)) {
+        return inconsistent(
+          `repository ${repoId} is not declared by project ${String(strField(project, 'project_id'))}`,
+        );
+      }
+    }
+  }
+
   for (const rec of ctx.records) {
     const info = recordTypeOf(rec);
     if (!info) continue;

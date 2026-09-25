@@ -22,7 +22,14 @@
  */
 
 import { join } from 'node:path';
-import { diagnoseLedger, newId, nowIso, reconcileLedger, Store } from './ledger/index.js';
+import {
+  diagnoseLedger,
+  newId,
+  nowIso,
+  reconcileLedger,
+  Store,
+  type LedgerDiagnosis,
+} from './ledger/index.js';
 import {
   applyMigration,
   previewMigration,
@@ -70,7 +77,15 @@ type Args = Record<string, string | string[]>;
  * literal string `"true"` in an immutable Settlement. A value is a value; only a declared
  * boolean flag stands alone.
  */
-const BOOLEAN_FLAGS = new Set(['apply', 'preview', 'dry-run', 'help', 'allow-partial', 'all']);
+const BOOLEAN_FLAGS = new Set([
+  'apply',
+  'preview',
+  'dry-run',
+  'help',
+  'allow-partial',
+  'all',
+  'repair-header',
+]);
 
 function parseArgs(argv: string[]): { command: string; args: Args } {
   const [command, ...rest] = argv;
@@ -631,6 +646,15 @@ async function dispatch(
  * histories is caught here, before the branch lands, rather than surfacing later as an
  * unopenable ledger. Problems it can repair are flagged `reconcilable`.
  */
+/** The `tallyback reconcile …` invocation that would fix a diagnosis, if any would. */
+function reconcileHint(diagnosis: LedgerDiagnosis): string | null {
+  const flags = diagnosis.conflicts.map((c) => `--keep <one of ${c.heads.join('|')}>`);
+  if (diagnosis.problems.some((p) => p.code === 'invariant.project_repositories_mismatch')) {
+    flags.push('--repair-header');
+  }
+  return flags.length > 0 ? `tallyback reconcile ${flags.join(' ')}` : null;
+}
+
 async function runValidate(projectRoot: string): Promise<void> {
   const diagnosis = await diagnoseLedger(projectRoot);
   print({
@@ -644,9 +668,7 @@ async function runValidate(projectRoot: string): Promise<void> {
       heads: c.heads,
     })),
     // What to run next, when there is something to run.
-    next: diagnosis.conflicts.length
-      ? `tallyback reconcile ${diagnosis.conflicts.map((c) => `--keep <one of ${c.heads.join('|')}>`).join(' ')}`
-      : null,
+    next: reconcileHint(diagnosis),
   });
   if (!diagnosis.ok) {
     process.stderr.write(
@@ -668,9 +690,12 @@ async function runValidate(projectRoot: string): Promise<void> {
  */
 async function runReconcile(projectRoot: string, args: Args): Promise<void> {
   const keep = strArray(args, 'keep');
-  const dryRun = args['dry-run'] === 'true' || keep.length === 0;
+  const repairHeader = args['repair-header'] === 'true';
+  // Nothing is written without an explicit decision: a `--keep` per fork, or
+  // `--repair-header` to rebuild project.json from the authoritative state.json.
+  const dryRun = args['dry-run'] === 'true' || (keep.length === 0 && !repairHeader);
 
-  const outcome = await reconcileLedger({ projectRoot, keep, dryRun });
+  const outcome = await reconcileLedger({ projectRoot, keep, dryRun, repairHeader });
   if (!outcome.ok) {
     print({
       ok: false,
@@ -693,6 +718,7 @@ async function runReconcile(projectRoot: string, args: Args): Promise<void> {
     dry_run: dryRun,
     revision: outcome.plan.snapshot.revision,
     rewrites: outcome.plan.rewrites,
+    ...(outcome.plan.header ? { header: outcome.plan.header } : {}),
   });
 }
 

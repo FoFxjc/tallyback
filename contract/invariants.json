@@ -213,11 +213,13 @@
       ],
       "validator": "referential.canonical_references_consistent",
       "violation_code": "invariant.reference_inconsistent",
-      "summary": "A reference that resolves must also agree on lineage: an Attempt\u2019s Declaration declares its Task and its Workspace belongs to its Repository; a Claim sits on an Attempt of the same Task and Declaration; a Settlement/Blocker cites an Attempt of its own Task; a Project repository ref matches the Repository record; a CheckInvocation never evaluates a revision ahead of the snapshot.",
+      "summary": "A reference that resolves must also agree on lineage: an Attempt\u2019s Declaration declares its Task and its Workspace belongs to its Repository; a Claim sits on an Attempt of the same Task and Declaration; a Settlement/Blocker cites an Attempt of its own Task; a Project repository ref matches the Repository record, and every Repository record is declared by the Project; a CheckInvocation never evaluates a revision ahead of the snapshot.",
       "spec_anchor": "reference-integrity",
       "conformance_cases": [
         "snapshot/attempt-workspace-foreign-repository",
-        "snapshot/claim-foreign-attempt"
+        "snapshot/claim-foreign-attempt",
+        "snapshot/repository-undeclared",
+        "mutation/reject-undeclared-repository"
       ]
     },
     {

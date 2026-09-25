@@ -177,8 +177,14 @@ export async function diagnoseLedger(projectRoot: string): Promise<LedgerDiagnos
           layer: 'state',
           code: 'invariant.project_repositories_mismatch',
           message:
-            'project.json repository declarations do not match the state.json Project record',
-          reconcilable: false,
+            'project.json repository declarations do not match the state.json Project record ' +
+            '(state.json is authoritative: `tallyback reconcile --repair-header` rewrites ' +
+            'project.json from it)',
+          // project.json is only a bootstrap header (SPEC §5.1); with the SAME project
+          // identity, its repository list is fully derivable from the authoritative
+          // Project record. An identity mismatch above stays unreconcilable: that header
+          // may belong to a different project altogether.
+          reconcilable: true,
         });
       }
     }

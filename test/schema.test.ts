@@ -54,6 +54,7 @@ const INVALID_EXPECTATIONS: Record<string, string[]> = {
   'attempt-workspace-foreign-repository': ['invariant.reference_inconsistent'],
   'claim-unresolved-attempt': ['invariant.attempt_unresolved'],
   'claim-foreign-attempt': ['invariant.reference_inconsistent'],
+  'repository-undeclared': ['invariant.reference_inconsistent'],
   // Canonical set-array semantics (TB-CAN-001 / TB-CAN-002).
   'set-array-unsorted': ['schema.set_array_unsorted'],
   'set-array-duplicate': ['schema.set_array_duplicate'],

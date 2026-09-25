@@ -37,7 +37,7 @@ const accepted = loadFixtures('accepted');
 
 describe('mutation fixture hygiene', () => {
   it('covers the full mutation vector matrix', () => {
-    expect(rejected.length).toBe(9);
+    expect(rejected.length).toBe(10);
     expect(accepted.length).toBe(4);
   });
 

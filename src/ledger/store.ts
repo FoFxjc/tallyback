@@ -518,7 +518,14 @@ export class LedgerStore {
         }`,
       );
     }
-    this.assertHeadersAgree(this.manifest, disk);
+    // Re-read the header too, and compare the two files as they are on disk NOW. Comparing
+    // against the manifest this instance cached at `load()` would turn a header that another
+    // process legitimately rewrote alongside `state.json` (a migration, a repair) into a
+    // spurious `project_repositories_mismatch` on this instance's next command — while
+    // still failing closed on a genuine on-disk contradiction.
+    const manifest = await readProject(this.root);
+    this.assertHeadersAgree(manifest, disk);
+    this.manifest = deepFreeze(manifest);
     // Recompute the journal sequence on EVERY reload, not only when `state.json`'s
     // revision changed. A rejected append or an idempotent replay writes a journal entry
     // (`append_rejected` / `append_replayed`) WITHOUT advancing that revision at all, so

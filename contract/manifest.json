@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "tree": {
     "algorithm": "sha-256",
-    "value": "68ec51d54008e432193630c67849dc09c53462e7a67f5b17bdc5542cdadfddfc"
+    "value": "6e314d39abd3de3add389ab85ccca787e81cf32d69a47c787ff320aa0c0a94b5"
   },
   "artifacts": {
     "spec": {
@@ -84,7 +84,7 @@
       "role": "normative",
       "digest": {
         "algorithm": "sha-256",
-        "value": "6334eb5685ee432573bbd7c089e0667392e5fec2303b29955ea3c6f188dce4df"
+        "value": "d1204f7fde3d91596a15c3ce8f3aabef5e8d76828e0ee961b3ffe39f650b8c2d"
       }
     },
     "fixtures": {
@@ -92,7 +92,7 @@
       "role": "normative",
       "digest": {
         "algorithm": "sha-256",
-        "value": "9d1266924422fdb80dbfbeb80514b500919b9a20abd61a81a9b6875693baba8d"
+        "value": "787920d7fcdcf0dcfc606774c2de8dc7085b6e8d2603df0c96937d8eb96ea482"
       }
     },
     "validator": {
@@ -106,6 +106,6 @@
   },
   "self_digest": {
     "algorithm": "sha-256",
-    "value": "96f5dcddae15bc8b3d599709535c837ba0a91d03257b969b30887451f7b36f24"
+    "value": "8d9c842214532f094212df19b9cc7122a15cfbd3b6d43bc20809905563b462b4"
   }
 }
