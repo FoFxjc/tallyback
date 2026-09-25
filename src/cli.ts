@@ -46,7 +46,7 @@ import {
 } from './view/index.js';
 import { buildWatchReport, createWatchResolver } from './watch/index.js';
 import { canMutateContractVersion, handshake } from './version.js';
-import { COMMAND_SPECS, renderUsage } from './cli-spec.js';
+import { checkUsage, COMMAND_SPECS, renderUsage } from './cli-spec.js';
 import {
   ACTOR_KINDS,
   ATTEMPT_END_OUTCOMES,
@@ -389,6 +389,11 @@ async function run(): Promise<void> {
     process.stdout.write(renderUsage(spec));
     return;
   }
+
+  // Unknown input fails closed, before any ledger is opened or written: an undeclared
+  // flag, a repeated single-value flag, or a stray positional token is a usage error.
+  const problem = checkUsage(command, args, positionals);
+  if (problem) throw new CliError(problem.message, problem.code);
 
   // Read-only / capability commands first (no ledger, no preflight).
   if (command === 'handshake') {
@@ -1305,7 +1310,10 @@ async function runMigrate(projectRoot: string, args: Args, submitter: Actor): Pr
 
 run().catch((err) => {
   if (err instanceof CliError) {
-    process.stderr.write(`error: ${err.message}\n`);
+    // Same shape as every other rejected outcome: machine-readable on stdout, a one-line
+    // `code: message` on stderr. The command did not run.
+    print({ ok: false, code: err.code, message: err.message });
+    process.stderr.write(`${err.code}: ${err.message}\n`);
     process.exitCode = 1;
     return;
   }

@@ -645,6 +645,32 @@ export const COMMAND_SPECS: ReadonlyMap<string, CommandSpec> = new Map(
   commands.map((c) => [c.name, c]),
 );
 
+/** Edit distance, for "did you mean" suggestions only. */
+function distance(a: string, b: string): number {
+  const row = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    let prev = row[0]!;
+    row[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const cur = row[j]!;
+      row[j] = Math.min(row[j]! + 1, row[j - 1]! + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = cur;
+    }
+  }
+  return row[b.length]!;
+}
+
+/** The declared flag an unknown one most plausibly meant, if any is close. */
+function closestFlag(name: string, flags: FlagSpec[]): string | null {
+  let best: { flag: string; score: number } | null = null;
+  for (const f of flags) {
+    const contains = name.includes(f.name) || f.name.includes(name);
+    const score = contains ? 0 : distance(name, f.name);
+    if (score <= 3 && (!best || score < best.score)) best = { flag: f.name, score };
+  }
+  return best?.flag ?? null;
+}
+
 /** A usage problem found before any command logic runs. */
 export interface UsageProblem {
   code:
@@ -677,10 +703,12 @@ export function checkUsage(
     const flag = declared.get(name);
     if (!flag) {
       const accepted = spec.flags.map((f) => `--${f.name}`).join(' ') || '(none)';
+      const suggestion = closestFlag(name, spec.flags);
       return {
         code: 'cli.unknown_flag',
         message:
           `\`${command}\` does not accept --${name}; nothing was recorded. ` +
+          (suggestion ? `Did you mean --${suggestion}? ` : '') +
           `Accepted flags: ${accepted}. See \`tallyback ${command} --help\`.`,
       };
     }
