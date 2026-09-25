@@ -5,15 +5,32 @@ description: Use when driving a Tallyback-tracked task through its lifecycle (de
 
 # Tallyback loop
 
+## Start here
+
+1. Run `tallyback view`.
+2. Follow its `next_action`: the top-level one when the ledger has no Task yet, otherwise
+   each task's own. Fill only the `<placeholder>` values it lists under `requires`;
+   never invent any other part of the command.
+3. Repeat after each step.
+
+If `view` returns `"code": "mutation.ledger_not_initialized"`, this repository has no
+ledger yet: run the `next_action.command` it gives (`tallyback init`), then `view` again.
+Any other `{ "ok": false }` code is a real problem with an existing ledger — report it;
+do not re-initialize over it.
+
+Do not infer Tallyback state from filesystem errors, Git status, passing tests, or a
+worker saying "done". Work is only settled when `view` shows a Settlement
+(`next_action: "settled: <decision>"`).
+
 Tallyback externalizes the state of delegated work: what was promised, who attempted it,
 what came back, what was verified, and what was settled. This skill is the semantic layer
 over the `tallyback` CLI — it tells you which phase applies now and what must already be
 true before you run it. It is not a passthrough: typing a raw `tallyback` command is always
 still an option, but decide the phase and precondition first.
 
-## Handshake first
+## Handshake before mutating
 
-Before anything else, run:
+Before the first mutating command, run:
 
 ```
 tallyback handshake

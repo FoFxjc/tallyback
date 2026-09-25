@@ -24,6 +24,7 @@
 import { join } from 'node:path';
 import {
   diagnoseLedger,
+  isLedgerAbsent,
   newId,
   nowIso,
   reconcileLedger,
@@ -37,7 +38,12 @@ import {
   type MigrationOutcome,
 } from './check/migration-workflow.js';
 import { buildLandReport, createGitResolver, type LandReport } from './land/index.js';
-import { buildTaskViews, DEFAULT_STALE_AFTER_MS, summarizeTaskViews } from './view/index.js';
+import {
+  buildTaskViews,
+  DEFAULT_STALE_AFTER_MS,
+  deriveLedgerNextAction,
+  summarizeTaskViews,
+} from './view/index.js';
 import { buildWatchReport, createWatchResolver } from './watch/index.js';
 import { canMutateContractVersion, handshake } from './version.js';
 import {
@@ -267,6 +273,56 @@ function preflight(schemaVersion: string): void {
 }
 
 // ---------------------------------------------------------------------------
+// Ledger absence (bootstrap state)
+// ---------------------------------------------------------------------------
+
+/**
+ * Reported when the project root provably has no ledger (neither portable file exists).
+ * The counterpart of `mutation.ledger_already_initialized`, in the same namespace.
+ */
+const LEDGER_NOT_INITIALIZED = 'mutation.ledger_not_initialized';
+
+/** Quote a value for a POSIX shell only when it needs it. */
+function shellArg(value: string): string {
+  return /^[\w@%+=:,./-]+$/.test(value) ? value : `'${value.replace(/'/g, `'\\''`)}'`;
+}
+
+/**
+ * Open the ledger for a command that needs one.
+ *
+ * "No ledger here" is a machine-known state, so it is reported as a structured outcome
+ * with one runnable recovery command, not as the filesystem exception `Store.open` hits
+ * first. Only proven absence (`isLedgerAbsent`) is classified this way: a partial,
+ * unreadable, corrupt, or contradictory ledger rethrows its own failure unchanged.
+ *
+ * `tallyback init` with no `--repository` registers init's own documented default
+ * repository, so the command below is exact without guessing an alias here.
+ */
+async function openLedger(projectRoot: string, explicitRoot?: string): Promise<Store | null> {
+  try {
+    return await Store.open(projectRoot);
+  } catch (err) {
+    if (!(await isLedgerAbsent(projectRoot))) throw err;
+    const message = `No Tallyback ledger exists at ${join(projectRoot, '.tallyback')}.`;
+    print({
+      ok: false,
+      code: LEDGER_NOT_INITIALIZED,
+      message,
+      next_action: {
+        command:
+          explicitRoot === undefined
+            ? 'tallyback init'
+            : `tallyback init --project-root ${shellArg(explicitRoot)}`,
+        reason: 'Initialize Tallyback before viewing or recording tracked work.',
+      },
+    });
+    process.stderr.write(`${LEDGER_NOT_INITIALIZED}: ${message}\n`);
+    process.exitCode = 1;
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Command handlers
 // ---------------------------------------------------------------------------
 
@@ -363,7 +419,8 @@ async function run(): Promise<void> {
   }
 
   // Everything below mutates (or reads) an existing ledger.
-  const store = await Store.open(projectRoot);
+  const store = await openLedger(projectRoot, optionalStr(args, 'project-root'));
+  if (!store) return;
   store.setSubmitter(submitter);
 
   if (command === 'show') {
@@ -1118,7 +1175,15 @@ async function runView(store: Store, args: Args): Promise<void> {
   const views = buildTaskViews(snapshot, taskIds.length > 0 ? taskIds : undefined, policy);
   const summary = summarizeTaskViews(views);
 
-  print({ generated_from_revision: snapshot.revision, tasks: views, summary });
+  // An initialized ledger with no Task has no per-task next_action to follow yet; name the
+  // next missing record instead of leaving an empty `tasks` array to be interpreted.
+  const ledgerNext = taskIds.length === 0 ? deriveLedgerNextAction(snapshot) : null;
+  print({
+    generated_from_revision: snapshot.revision,
+    tasks: views,
+    summary,
+    ...(ledgerNext ? { next_action: ledgerNext } : {}),
+  });
   process.stderr.write(
     `view: ${summary.task_count} task(s), ${summary.blocked} blocked, ` +
       `${summary.ready_to_land} ready_to_land, ${summary.stale} stale, ${summary.settled} settled\n`,

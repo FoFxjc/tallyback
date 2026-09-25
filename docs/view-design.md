@@ -148,6 +148,22 @@ names as the loop's explicit commands.
 `summary` is a small rollup over `tasks[].status`, not a second source of truth — it is
 computed from the same array the caller already has.
 
+### Before the first Task
+
+An initialized ledger with no Task has no per-task `next_action` to follow, so an
+unfiltered `view` adds one ledger-level `next_action` naming the next missing record —
+a Topic, then a Task — as `{ command, reason, requires }`. `command` is exactly one
+command; `<placeholder>` tokens are values only the caller can supply, and `requires`
+lists their flags. A value View can determine mechanically (the only Topic's id) is
+filled in; one it cannot (a name, a title, which of several Topics) is never invented.
+The field is absent once any Task exists.
+
+With no ledger at all, `view` (like every command that opens the ledger) returns
+`{ "ok": false, "code": "mutation.ledger_not_initialized", "message", "next_action":
+{ "command": "tallyback init", "reason" } }` and exits 1 — but only when neither
+`project.json` nor `state.json` exists. A partial, unreadable, corrupt, or contradictory
+ledger keeps its own failure.
+
 ## 6. Non-goals (v1)
 
 - No HTML/Markdown/CSV rendering, no template selection (§2).

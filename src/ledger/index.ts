@@ -86,6 +86,7 @@ export {
   getCollection,
   idPrefix,
   isCanonicalId,
+  isLedgerAbsent,
   ledgerRoot,
   LEDGER_RECORD_TYPES,
   newId,

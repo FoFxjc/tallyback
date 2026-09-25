@@ -345,6 +345,50 @@ export function buildTaskViews(
   return tasks.map((task) => buildTaskView(snapshot, task, projections));
 }
 
+/**
+ * Ledger-level guidance for an initialized ledger that has no Task yet, when the next
+ * missing accountability record is mechanically identifiable. Advice, never a transition:
+ * nothing here writes, and a value the caller must choose is named in `requires` as a
+ * `<placeholder>` in `command` rather than invented.
+ */
+export interface LedgerNextAction {
+  /** Exactly one command. `<…>` placeholders are values only the caller can supply. */
+  command: string;
+  reason: string;
+  /** The flags whose `<…>` placeholder values the caller must supply. */
+  requires: string[];
+}
+
+/**
+ * The next missing record before any per-task `next_action` can exist: a Topic, then a
+ * Task. Null once the ledger has a Task — from there each TaskView's own `next_action`
+ * (declare, dispatch, …) is the guidance.
+ */
+export function deriveLedgerNextAction(snapshot: Snapshot): LedgerNextAction | null {
+  if (snapshot.tasks.length > 0) return null;
+  if (snapshot.topics.length === 0) {
+    return {
+      command: 'tallyback topic --name <name>',
+      reason: 'No Topic exists yet; every Task belongs to a Topic.',
+      requires: ['--name'],
+    };
+  }
+  if (snapshot.topics.length === 1) {
+    return {
+      command: `tallyback task --topic-id ${snapshot.topics[0]!.topic_id} --title <title>`,
+      reason: 'No Task exists yet; create one to declare and track delegated work against.',
+      requires: ['--title'],
+    };
+  }
+  return {
+    command: 'tallyback task --topic-id <topic-id> --title <title>',
+    reason:
+      `No Task exists yet, and ${snapshot.topics.length} Topics exist; choose one ` +
+      '(`tallyback list --what topics`).',
+    requires: ['--topic-id', '--title'],
+  };
+}
+
 /** A literal count rollup over `views[].status` — not a second source of truth (design §5). */
 export function summarizeTaskViews(views: TaskView[]): ViewSummary {
   return {

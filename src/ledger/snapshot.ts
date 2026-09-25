@@ -18,7 +18,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
-import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { v7 } from 'uuid';
 import {
@@ -421,6 +421,28 @@ export function findProjectRoot(startDir: string): string {
 /** The `.tallyback` ledger directory under a project root. */
 export function ledgerRoot(projectRoot: string): string {
   return join(projectRoot, '.tallyback');
+}
+
+/**
+ * Whether `projectRoot` provably holds no ledger: NEITHER portable file exists.
+ *
+ * This is the one absence state a caller may report as "not initialized". Anything else —
+ * one file present without the other (a partial init or a hand deletion), a permission
+ * error, `.tallyback` being a plain file — is not proven absence and returns false, so the
+ * caller surfaces the original failure instead of hiding a damaged ledger behind a
+ * friendly bootstrap hint.
+ */
+export async function isLedgerAbsent(projectRoot: string): Promise<boolean> {
+  const root = ledgerRoot(projectRoot);
+  for (const file of ['project.json', 'state.json']) {
+    try {
+      await lstat(join(root, file));
+      return false;
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') return false;
+    }
+  }
+  return true;
 }
 
 /** The machine-local `runtime/` directory (locks, bindings, caches) — never committed. */

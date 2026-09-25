@@ -4,6 +4,21 @@ All notable changes to Tallyback are recorded here. Versions follow [Semantic
 Versioning](https://semver.org/). The v1 contract (`contract/`) is **frozen**
 and evolves independently under its own version.
 
+## [Unreleased]
+
+### Fixed
+
+- **Bootstrap states are protocol-readable.** In a project with no ledger, every
+  command that opens one (`view`, `show`, `list`, the mutating commands, …) now
+  returns a structured `mutation.ledger_not_initialized` outcome whose
+  `next_action.command` is `tallyback init`, and exits 1, instead of a raw
+  `ENOENT` for `.tallyback/project.json`. Only proven absence (neither portable
+  file exists) is classified this way; partial, corrupt, and contradictory
+  ledgers keep their own failures.
+- **`view` names the first missing records.** An initialized ledger with no Task
+  now carries a ledger-level `next_action` (create a Topic, then a Task), naming
+  any value the caller must supply instead of inventing it.
+
 ## [0.1.0] — 2026-09-23
 
 Initial public release of Tallyback. The v1 wire-format contract is frozen and
