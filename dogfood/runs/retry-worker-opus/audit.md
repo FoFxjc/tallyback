@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | Repository / tests | Identified **both** defects before editing; fixed in one edit. Added 3 regression tests + a 2000-case property test; **all fail on the seed** (5 failed incl. the 2 originals). Visible 13/13. **Oracle 20/20.** Independent 50,000-case property check in a fresh clone. | `tests/`, transcript #22-36 |
 | Git | Committed `6f6bc1c` on `fix/chunk-oversized`; not merged. | `git/log.txt` |
-| Declarations | A probe `--objective "x"` created a junk declaration (third run in a row with this pattern for Opus); superseded by one with 6 criteria. Disclosed in-session. | ledger |
+| Declarations | A probe `--objective "x"` created a junk declaration (the same probe pattern as tiny-cache-opus; 2 of 3 Opus runs); superseded by one with 6 criteria. Disclosed in-session. | ledger |
 | Attempt | One Attempt on a branch-bound workspace; ended `returned` with reason "Fix committed at 6f6bc1c on fix/chunk-oversized". | ledger |
 | Evidence | **`git_commit`** (repo + object id — inspectable), `test_run` with repository/workspace context, two `observation`s (pre/post counts naming the failing tests; the fresh-clone property check). | ledger |
 | Claim | Accurate; 3 evidence ids. | ledger |
