@@ -92,3 +92,13 @@ failed after 5 retries`. Benchmark consequences: two false `check_failed` result
 - **Uncertainty**: `record-check` still requires complete raw records by design (it is the
   Check boundary's low-level interface); the fix is diagnostics and redirection, not a new
   authoring path.
+
+## N1 — Global flags before the command word (found while dogfooding R4)
+
+- **Reproduced**: `tallyback --project-root <dir> view` → `unknown command "--project-root"`.
+  Not a benchmark finding (runs used the cwd); found by this repair loop's own dogfooding.
+- **Change**: leading `--key value` / `--key=value` pairs are collected before the command
+  word and validated by the same fail-closed check.
+- **Regression**: `test/cli-fail-closed.test.ts` (flags before the command word).
+- **Dogfood**: `--project-root <dir> init`, `--project-root=<dir> view` work; a leading
+  `--bogus x` is still `cli.unknown_flag`; bare `tallyback` and `tallyback --help` unchanged.

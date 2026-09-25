@@ -134,3 +134,16 @@ describe('unknown input never reaches the ledger', () => {
     expect(run.json['code']).toBe('cli.unknown_flag');
   });
 });
+
+describe('flags before the command word', () => {
+  it('accepts global flags ahead of the command and still validates them', async () => {
+    const root = await tempRoot('tallyback-closed-');
+    await execFileAsync(TSX, [CLI, '--project-root', root, 'init'], { cwd: ROOT });
+    const view = await execFileAsync(TSX, [CLI, `--project-root=${root}`, 'view'], { cwd: ROOT });
+    expect(JSON.parse(view.stdout)).toHaveProperty('generated_from_revision', 0);
+    const bogus = await execFileAsync(TSX, [CLI, '--project-root', root, '--bogus', 'x', 'view'], {
+      cwd: ROOT,
+    }).catch((e: { stdout: string }) => e);
+    expect(JSON.parse(bogus.stdout)).toMatchObject({ ok: false, code: 'cli.unknown_flag' });
+  }, 60_000);
+});

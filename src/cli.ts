@@ -95,9 +95,29 @@ const BOOLEAN_FLAGS = new Set([
 ]);
 
 function parseArgs(argv: string[]): { command: string; args: Args; positionals: string[] } {
-  const [command, ...rest] = argv;
   const args: Args = {};
   const positionals: string[] = [];
+  // Flags may precede the command word (`tallyback --project-root x view`). Leading
+  // `--key value` / `--key=value` pairs are collected first and validated with the rest.
+  let start = 0;
+  while (start < argv.length && argv[start]!.startsWith('--') && argv[start] !== '--help') {
+    const token = argv[start]!;
+    const eq = token.indexOf('=');
+    if (eq > 2) {
+      args[token.slice(2, eq)] = token.slice(eq + 1);
+      start += 1;
+    } else if (BOOLEAN_FLAGS.has(token.slice(2))) {
+      args[token.slice(2)] = 'true';
+      start += 1;
+    } else {
+      if (argv[start + 1] === undefined) {
+        throw new CliError(`${token} requires a value`, 'cli.missing_flag');
+      }
+      args[token.slice(2)] = argv[start + 1]!;
+      start += 2;
+    }
+  }
+  const [command, ...rest] = argv.slice(start);
 
   const set = (key: string, value: string): void => {
     // Repeatable flag: collect into an array; single flag: scalar string.
