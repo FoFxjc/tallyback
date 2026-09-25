@@ -74,7 +74,7 @@ the real gate.
 ### Verify
 
 - **Precondition**: a Claim exists naming the Declaration and criteria being checked.
-- **Commands**: `tallyback begin-check`, `tallyback record-check`
+- **Commands**: `tallyback verdict` (per criterion: `--criterion <code>=<assessment>`, and say what supports it with `--finding <code>=<summary>` / `--finding-basis <code>=<evi_…>`); `begin-check` / `record-check` are the low-level form that takes raw records
 - **Guardrail**: a passing check does not automatically accept the Task. Verify records a CheckInvocation/CheckResult and, within it, Reconciliations and/or a Verdict — it never itself settles the Task.
 
 ### Settle

@@ -128,3 +128,26 @@ code"` records the result text.
 - **Uncertainty**: `artifact {}` is still accepted — the contract allows an empty artifact
   payload; refusing it would be a contract change. Whether agents now use `--note` is for the
   next benchmark to show.
+
+## R6 — Per-criterion findings in `tallyback verdict` (F15, 5/5 uses)
+
+- **Reproduced**: `tallyback verdict --criterion <code>=supported …` records
+  `summary: "<code>: assessed as supported"`, `basis_refs: []` for every criterion; the
+  source said "This slice has no per-criterion evidence syntax". In the benchmark the
+  criterion-level reasoning survived only in one free-text rationale.
+- **Root cause**: missing authoring surface, not a contract gap — `Finding.summary` and
+  `Finding.basis_refs` exist in the frozen schema.
+- **Change**: optional repeatable `--finding <code|cri_…>=<summary>` and
+  `--finding-basis <code|cri_…>=<evi_…|rec_…>`. References must exist in the ledger and name
+  an assessed criterion; cited references are also added to the Verdict's basis. Absent
+  flags keep today's behaviour (generic summary, empty `basis_refs`) — nothing is inferred.
+  `verdict --help` shows an example; the skill's Verify phase names `verdict` as the normal
+  path and `record-check` as the raw-record form.
+- **Regression**: `test/cli-verdict-findings.test.ts`; existing `verdict-cli.test.ts`
+  unchanged and passing.
+- **Dogfood**: finding summary + per-criterion basis recorded and `validate` ok; four misuse
+  shapes (unknown code, unknown evidence id, missing `=`, duplicate) rejected with
+  `cli.invalid_value` and `state.json` unchanged.
+- **Uncertainty**: findings remain optional. Requiring them would force authors to write
+  something per criterion but risks boilerplate; the next benchmark should show whether
+  agents use them once visible.

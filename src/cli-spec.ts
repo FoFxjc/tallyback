@@ -530,6 +530,19 @@ const commands: CommandSpec[] = [
         placeholder: 'text',
         description: 'why, citing the checks',
       },
+      {
+        name: 'finding',
+        repeatable: true,
+        placeholder: '<code|cri_…>=<summary>',
+        description: 'what was found for that criterion (recorded as its finding summary)',
+      },
+      {
+        name: 'finding-basis',
+        repeatable: true,
+        placeholder: '<code|cri_…>=<evi_…|rec_…>',
+        description:
+          'the Evidence/Reconciliation that supports that criterion; repeat per reference',
+      },
       { name: 'attempt', placeholder: 'att_…', description: 'the Attempt (default: the claim’s)' },
       { name: 'allow-partial', boolean: true, description: 'allow leaving criteria unassessed' },
       {
@@ -578,6 +591,9 @@ const commands: CommandSpec[] = [
     examples: [
       'tallyback verdict --claim <clm_…> --criterion refresh=supported --criterion tests=supported ' +
         '--confidence high --rationale "…" --evidence <evi_…>',
+      'tallyback verdict --claim <clm_…> --criterion preserve=supported ' +
+        '--finding "preserve=nested custom keys survive; test_nested fails on the unfixed code" ' +
+        '--finding-basis preserve=<evi_…> --confidence high --rationale "…"',
     ],
     mutates: true,
   },

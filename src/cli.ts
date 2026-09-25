@@ -1106,8 +1106,8 @@ async function runVerdict(store: Store, args: Args, submitter: Actor): Promise<u
 
   // -- Validate evidence / reconciliation references ------------------------
   const evidenceFlag = strArray(args, 'evidence');
-  const evidenceIds = evidenceFlag.length > 0 ? evidenceFlag : claim.evidence_ids;
-  const reconciliationIds = strArray(args, 'reconciliation');
+  const evidenceIds = [...(evidenceFlag.length > 0 ? evidenceFlag : claim.evidence_ids)];
+  const reconciliationIds = [...strArray(args, 'reconciliation')];
   const knownEvidence = new Set(snapshot.evidence.map((e) => e.evidence_id));
   const knownReconciliation = new Set(snapshot.reconciliations.map((r) => r.reconciliation_id));
   const missingEvidence = evidenceIds.filter((id) => !knownEvidence.has(id));
@@ -1175,18 +1175,66 @@ async function runVerdict(store: Store, args: Args, submitter: Actor): Promise<u
   }
   const issuedBy = actor(args, 'actor', submitter);
 
+  // -- Per-criterion findings (optional, explicit) ---------------------------
+  // `--finding <ref>=<summary>` and `--finding-basis <ref>=<evi_…|rec_…>` say *what*
+  // supports each criterion. Without them a finding keeps the generic summary and an empty
+  // basis_refs — never a citation nobody supplied.
+  const assessedIds = new Set(assessments.map((a) => a.criterion_id));
+  const resolveFindingRef = (flag: string, raw: string): [string, string] => {
+    const eq = raw.indexOf('=');
+    if (eq <= 0 || eq === raw.length - 1) {
+      throw new CliError(
+        `--${flag} must be "<code|cri_…>=<value>"; got "${raw}"`,
+        'cli.invalid_value',
+      );
+    }
+    const ref = raw.slice(0, eq);
+    const ids = declaredCriterionIds.has(ref) ? [ref] : (codeToCriterionIds.get(ref) ?? []);
+    if (ids.length !== 1 || !assessedIds.has(ids[0]!)) {
+      throw new CliError(
+        `--${flag} "${ref}" must name a criterion assessed by a --criterion in this command`,
+        'cli.invalid_value',
+      );
+    }
+    return [ids[0]!, raw.slice(eq + 1)];
+  };
+  const findingSummaries = new Map<string, string>();
+  for (const raw of strArray(args, 'finding')) {
+    const [id, summary] = resolveFindingRef('finding', raw);
+    if (findingSummaries.has(id)) {
+      throw new CliError(`--finding given twice for ${id}`, 'cli.invalid_value');
+    }
+    findingSummaries.set(id, summary);
+  }
+  const findingBasis = new Map<string, string[]>();
+  for (const raw of strArray(args, 'finding-basis')) {
+    const [id, ref] = resolveFindingRef('finding-basis', raw);
+    if (!knownEvidence.has(ref) && !knownReconciliation.has(ref)) {
+      throw new CliError(
+        `--finding-basis ${ref} is not an Evidence or Reconciliation in this ledger`,
+        'cli.invalid_value',
+      );
+    }
+    findingBasis.set(id, [...(findingBasis.get(id) ?? []), ref]);
+  }
+  // A per-criterion citation is also part of what the Verdict as a whole rests on.
+  for (const refs of findingBasis.values()) {
+    for (const ref of refs) {
+      if (knownEvidence.has(ref) && !evidenceIds.includes(ref)) evidenceIds.push(ref);
+      if (knownReconciliation.has(ref) && !reconciliationIds.includes(ref)) {
+        reconciliationIds.push(ref);
+      }
+    }
+  }
+
   // -- Construct Verdict + Findings -----------------------------------------
   const findings: Finding[] = assessments.map((a) => {
     const crit = declaredCriteriaById.get(a.criterion_id)!;
     return {
       criterion_id: a.criterion_id,
       assessment: a.assessment,
-      summary: `${crit.code}: assessed as ${a.assessment}`,
-      // Finding.basis_refs is a criterion-specific citation, distinct from
-      // Verdict.basis.evidence_ids. This slice has no per-criterion evidence syntax,
-      // so it defaults empty rather than silently inheriting every Claim/Verdict
-      // evidence id — that would fabricate a per-criterion citation nobody supplied.
-      basis_refs: [],
+      summary: findingSummaries.get(a.criterion_id) ?? `${crit.code}: assessed as ${a.assessment}`,
+      basis_refs: [...new Set(findingBasis.get(a.criterion_id) ?? [])].sort(),
     };
   });
 
