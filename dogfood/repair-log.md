@@ -48,3 +48,23 @@ future benchmark round measures their effect.
   unchanged; the correct `--criterion` form still records.
 - **Uncertainty**: `evidence --claim-id` is now rejected, but nothing yet tells the caller
   that Evidence is linked from `claim --evidence` (addressed with evidence ergonomics).
+
+## R3 — Rejections name CLI flags, not record fields (F8, 6/9 runs)
+
+- **Reproduced**: `settle --decision land` without a basis →
+  `land requires exactly one of basis.verdict_id or verification_exception`; the flags are
+  `--verdict-id` / `--verification-exception`. Haiku guessed `--basis-*` in 3/3 runs and
+  never settled. `dispatch --workspace-id <path>` → a raw UUIDv7 regex.
+- **Root cause**: the CLI printed the validator's wire-format message verbatim.
+- **Change**: a CLI-side `hint` (stdout field + `hint:` stderr line) for the settlement
+  basis matrix (per decision) and for schema paths `/records/N/<field>` that map to a flag
+  the command declares (id-shaped fields: "must be a `wsp_<UUIDv7>` id … find ids with
+  `tallyback list`"). `code` and `message` are unchanged; the validator is untouched; the
+  basis requirement is not relaxed. Missing / invalid flags get `cli.missing_flag` /
+  `cli.invalid_value` and point to `<command> --help`.
+- **Regression**: `test/cli-diagnostics.test.ts`.
+- **Dogfood**: `settle land` without basis → still rejected (0 settlements), hint names both
+  flags and says "Passing tests are not a Verdict"; a path as `--workspace-id` → hint names
+  the id kind; `settle` without `--attempt-id` → `cli.missing_flag … See tallyback settle --help`.
+- **Uncertainty**: the hint table covers the codes seen in the benchmark; other validator
+  messages still surface in wire terms unless they carry a `/records/N/<field>` path.

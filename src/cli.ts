@@ -144,7 +144,7 @@ function str(args: Args, key: string, fallback?: string): string {
   const value = args[key];
   if (typeof value === 'string') return value;
   if (fallback !== undefined) return fallback;
-  throw new CliError(`missing required --${key}`);
+  throw new CliError(`missing required --${key}`, 'cli.missing_flag');
 }
 
 function strArray(args: Args, key: string): string[] {
@@ -163,7 +163,7 @@ function optionalStr(args: Args, key: string): string | undefined {
 function enumArg<T extends string>(args: Args, key: string, allowed: readonly T[]): T {
   const value = str(args, key);
   if (!(allowed as readonly string[]).includes(value)) {
-    throw new CliError(`--${key} must be one of ${allowed.join('|')}`);
+    throw new CliError(`--${key} must be one of ${allowed.join('|')}`, 'cli.invalid_value');
   }
   return value as T;
 }
@@ -237,6 +237,9 @@ function taskRef(store: Store, args: Args, key = 'task-id'): string {
 function taskRefs(store: Store, args: Args, key = 'task-id'): string[] {
   return strArray(args, key).map((raw) => resolveTaskRefValue(store, raw, key));
 }
+
+/** The command being run, for usage diagnostics raised deep inside argument parsing. */
+let currentCommand = '';
 
 /** A usage error: the command was not run and nothing was written. */
 class CliError extends Error {
@@ -368,6 +371,7 @@ Flags, accepted values, and examples for one command: tallyback <command> --help
 
 async function run(): Promise<void> {
   const { command, args, positionals } = parseArgs(process.argv.slice(2));
+  currentCommand = command;
 
   // Top-level help must work before any project-root / Store resolution: a new user
   // reaching for `--help` should never be met with a raw ENOENT for a ledger that
@@ -504,16 +508,63 @@ async function run(): Promise<void> {
   // Mutating commands: preflight the capability handshake against the ledger.
   preflight(store.currentSnapshot().schema_version);
 
-  const outcome = await dispatch(store, command, args, submitter);
+  const dispatched = await dispatch(store, command, args, submitter);
+  const hint = isRejected(dispatched) ? cliHint(command, dispatched as RejectedOutcome) : null;
+  const outcome = hint ? { ...(dispatched as object), hint } : dispatched;
   print(outcome);
   // A rejected mutation is an ordinary outcome for the library, but for a shell it is a
   // failure: `tallyback claim … && tallyback settle …` and any CI step must not carry on
   // as though the append landed. The machine-readable body still goes to stdout.
   if (isRejected(outcome)) {
     const { code, message } = outcome as { code?: string; message?: string };
-    process.stderr.write(`${code ?? 'error'}: ${message ?? 'the mutation was rejected'}\n`);
+    process.stderr.write(
+      `${code ?? 'error'}: ${message ?? 'the mutation was rejected'}\n` +
+        (hint ? `hint: ${hint}\n` : ''),
+    );
     process.exitCode = 1;
   }
+}
+
+interface RejectedOutcome {
+  ok: false;
+  code?: string;
+  message?: string;
+}
+
+/**
+ * Translate a rejection phrased in contract-record terms into the flags that fix it.
+ *
+ * The validator speaks the wire format (`basis.verdict_id`, `/records/0/workspace_id`);
+ * a CLI caller needs `--verdict-id`, `--workspace-id`. The machine-readable `code` and the
+ * validator's `message` are passed through unchanged; this only adds a `hint`.
+ */
+function cliHint(command: string, outcome: RejectedOutcome): string | null {
+  const message = outcome.message ?? '';
+  if (command === 'settle' && outcome.code === 'invariant.settlement_basis_matrix') {
+    if (/requires exactly one of/.test(message)) {
+      return (
+        'accept and land need exactly one basis: --verdict-id <ver_…> (a Verdict recorded with ' +
+        '`tallyback verdict`), or --verification-exception "<why this is accepted without a ' +
+        'Verdict>" — an explicit, attributed override. Passing tests are not a Verdict.'
+      );
+    }
+    if (/must not cite a verdict/.test(message)) {
+      return 'retry and abandon must not pass --verdict-id; cite --attempt-end-id and/or --blocker instead.';
+    }
+    if (/verification_exception/.test(message)) {
+      return '--verification-exception is only for accept/land; retry and abandon take --attempt-end-id and/or --blocker.';
+    }
+  }
+  const field = /\/records\/\d+\/([a-z_]+)/.exec(message)?.[1];
+  const flag = field?.replace(/_/g, '-');
+  if (flag && COMMAND_SPECS.get(command)?.flags.some((f) => f.name === flag)) {
+    const idPrefix = /must match pattern "\^([a-z]+_)\[0-9a-f\]\{8\}/.exec(message)?.[1];
+    if (idPrefix) {
+      return `--${flag} must be a ${idPrefix}<UUIDv7> id, not a name or path; find ids with \`tallyback list\` or \`tallyback view\`.`;
+    }
+    return `check --${flag}: ${message.replace(/^\/records\/\d+\/[a-z_]+\s*/, '')}. See \`tallyback ${command} --help\`.`;
+  }
+  return null;
 }
 
 /** Whether a command result is a `{ ok: false }` mutation outcome. */
@@ -1312,8 +1363,13 @@ run().catch((err) => {
   if (err instanceof CliError) {
     // Same shape as every other rejected outcome: machine-readable on stdout, a one-line
     // `code: message` on stderr. The command did not run.
-    print({ ok: false, code: err.code, message: err.message });
-    process.stderr.write(`${err.code}: ${err.message}\n`);
+    const helpful =
+      (err.code === 'cli.missing_flag' || err.code === 'cli.invalid_value') &&
+      COMMAND_SPECS.has(currentCommand)
+        ? `${err.message}. See \`tallyback ${currentCommand} --help\`.`
+        : err.message;
+    print({ ok: false, code: err.code, message: helpful });
+    process.stderr.write(`${err.code}: ${helpful}\n`);
     process.exitCode = 1;
     return;
   }
