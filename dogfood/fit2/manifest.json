@@ -2,7 +2,9 @@
   "experiment": "execution-fit-2",
   "tallyback": {
     "pre_fix": "2f76847d64b4ffc15f8cce53f736d9e8b8b0fdf5",
-    "note": "each run.json records the tallyback_sha it ran against; the boundary benchmark uses one frozen SHA recorded here as boundary_benchmark"
+    "note": "each run.json records the tallyback_sha it ran against; the boundary benchmark uses one frozen SHA recorded here as boundary_benchmark",
+    "post_fix": "174c45fc61244fc874a128410d58e209e50a0f86",
+    "boundary_benchmark": "10e8acd58ea2a4602407b7b2c3668addafc3fccd"
   },
   "models": {
     "haiku": "claude-haiku-4-5-20251001",

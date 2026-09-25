@@ -1,0 +1,13 @@
+{
+  "$comment": "FROZEN: event contract v1. Do not edit. Any change needs a recorded API council approval (docs/CHANGE_POLICY.md).",
+  "version": "1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "name", "occurred_at"],
+  "properties": {
+    "event_id": { "type": "string", "pattern": "^evt_[0-9a-z]{8}$" },
+    "name": { "type": "string", "enum": ["app_open", "purchase", "share"] },
+    "occurred_at": { "type": "integer", "minimum": 0 },
+    "user_id": { "type": "string" }
+  }
+}
