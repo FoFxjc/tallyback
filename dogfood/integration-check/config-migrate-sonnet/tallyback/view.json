@@ -1,0 +1,130 @@
+{
+  "generated_from_revision": 11,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d7a8-2711-74f7-8f65-5c5af87f704a",
+      "title": "Fix v1->v2 config migration dropping unrelated keys",
+      "topic_id": "top_01a0d7a8-0816-73f3-a916-ddf9223be693",
+      "declaration": {
+        "declaration_id": "dcl_01a0d7a8-41e1-71ba-8c87-c176ccbbfa46",
+        "objective": "Fix cfgmigrate v1->v2 migration so it preserves unrelated user-defined keys instead of dropping them",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d7a8-41e1-71ba-8c87-c648a2d279a7",
+            "code": "rename",
+            "statement": "timeout is renamed to request_timeout",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d7a8-41e1-71ba-8c87-cbe490325b89",
+            "code": "version",
+            "statement": "version is set to 2",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d7a8-41e1-71ba-8c87-cc23d8de8154",
+            "code": "preserve",
+            "statement": "all unrelated user-defined keys are preserved recursively",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d7a8-41e1-71ba-8c87-d0b8ebbbb14b",
+            "code": "immutable",
+            "statement": "the input config object is not mutated",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d7a8-41e1-71ba-8c87-d4940c03cb4d",
+            "code": "regression",
+            "statement": "regression test coverage exists for preservation of unknown keys",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d7a8-822e-717a-87fe-459d61eae511",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d7a8-67be-763a-a384-470d7c923e23",
+          "repository_id": "repo_01a0d7a7-7b28-70f9-8606-815ec8954bd8",
+          "dispatched_at": "2026-09-25T08:22:19.950Z",
+          "ended": false
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d7a8-e115-7288-a55b-ab569fdbd376",
+          "statement": "Rewrote _v1_to_v2 in cfgmigrate/migrate.py to build the new dict from a copy of all of old's keys (excluding 'timeout'), then set version=2 and request_timeout, defaulting plugins only if absent. This preserves unrelated/nested keys like 'custom' and does not mutate the input. Added 3 regression tests; full suite (13 tests) passes.",
+          "evidence_ids": [
+            "evi_01a0d7a8-aa1c-754d-a86a-278119f6f78a",
+            "evi_01a0d7a8-b9bf-7489-aaf0-d946db14646b"
+          ],
+          "claimed_by": {
+            "kind": "unknown",
+            "id": "unattributed"
+          },
+          "claimed_at": "2026-09-25T08:22:44.245Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d7a8-aa1c-754d-a86a-278119f6f78a",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T08:22:30.172Z",
+          "note": "13 passed, 0 failed: tests/test_migrate.py, including 3 new regression tests (test_preserves_unrelated_top_level_keys, test_preserves_nested_and_unknown_keys_recursively, test_does_not_mutate_input)"
+        },
+        {
+          "evidence_id": "evi_01a0d7a8-b9bf-7489-aaf0-d946db14646b",
+          "kind": "observation",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T08:22:34.175Z"
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d7a9-19fc-709a-8696-0e3ef94079db",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "Full pytest suite (13 tests) passes including 3 new regression tests targeting exactly the acceptance criteria; manual reproduction of the ISSUE.md example confirms correct output and no input mutation. Code inspection of the fixed _v1_to_v2 confirms it copies all keys except 'timeout' rather than allowlisting a fixed set."
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d7a9-472d-765e-a581-f245801989a5",
+        "decision": "accept",
+        "verification_exception": null,
+        "rationale": "All 5 acceptance criteria verified as supported with high confidence. Fix is in the working tree (cfgmigrate/migrate.py, tests/test_migrate.py) but not yet committed; the user has not requested a commit, so settling as accept rather than land."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "settled: accept",
+      "next_command": null
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 1
+  }
+}

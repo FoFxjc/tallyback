@@ -1,0 +1,55 @@
+diff --git a/cfgmigrate/migrate.py b/cfgmigrate/migrate.py
+index c9b01d4..f7d7101 100644
+--- a/cfgmigrate/migrate.py
++++ b/cfgmigrate/migrate.py
+@@ -26,11 +26,11 @@ class UnsupportedVersionError(ValueError):
+ 
+ 
+ def _v1_to_v2(old: Config) -> Config:
+-    return {
+-        "version": 2,
+-        "request_timeout": old["timeout"],
+-        "plugins": old.get("plugins", []),
+-    }
++    new = {k: v for k, v in old.items() if k != "timeout"}
++    new["version"] = 2
++    new["request_timeout"] = old["timeout"]
++    new.setdefault("plugins", [])
++    return new
+ 
+ 
+ _MIGRATIONS: dict[int, Callable[[Config], Config]] = {
+diff --git a/tests/test_migrate.py b/tests/test_migrate.py
+index b483b98..836e325 100644
+--- a/tests/test_migrate.py
++++ b/tests/test_migrate.py
+@@ -34,6 +34,29 @@ def test_current_version_is_returned_as_is():
+     assert migrate(doc) == doc
+ 
+ 
++def test_preserves_unrelated_top_level_keys():
++    doc = v1(custom={"owner": "peter"})
++    out = migrate(doc)
++    assert out["custom"] == {"owner": "peter"}
++
++
++def test_preserves_nested_and_unknown_keys_recursively():
++    doc = v1(
++        custom={"owner": "peter", "nested": {"deep": [1, 2, {"a": "b"}]}},
++        another_unknown_key="keep-me",
++    )
++    out = migrate(doc)
++    assert out["custom"] == {"owner": "peter", "nested": {"deep": [1, 2, {"a": "b"}]}}
++    assert out["another_unknown_key"] == "keep-me"
++
++
++def test_does_not_mutate_input():
++    doc = v1(custom={"owner": "peter"})
++    original = {k: v for k, v in doc.items()}
++    migrate(doc)
++    assert doc == original
++
++
+ @pytest.mark.parametrize("version", [None, "1", True, 0, 3])
+ def test_rejects_unsupported_versions(version):
+     with pytest.raises(UnsupportedVersionError):

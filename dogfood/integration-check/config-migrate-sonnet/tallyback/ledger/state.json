@@ -1,0 +1,308 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 11,
+  "included_through": 11,
+  "project": {
+    "project_id": "prj_01a0d7a7-7b28-70f9-8606-7ccaa0b3f9bd",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d7a7-7b28-70f9-8606-815ec8954bd8",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d7a7-7b28-70f9-8606-815ec8954bd8",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d7a8-67be-763a-a384-470d7c923e23",
+      "repository_id": "repo_01a0d7a7-7b28-70f9-8606-815ec8954bd8",
+      "branch": "main"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d7a8-0816-73f3-a916-ddf9223be693",
+      "project_id": "prj_01a0d7a7-7b28-70f9-8606-7ccaa0b3f9bd",
+      "name": "cfgmigrate-v1-v2",
+      "goal": "",
+      "created_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "created_at": "2026-09-25T08:21:48.694Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d7a8-2711-74f7-8f65-5c5af87f704a",
+      "topic_id": "top_01a0d7a8-0816-73f3-a916-ddf9223be693",
+      "title": "Fix v1->v2 config migration dropping unrelated keys"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d7a8-41e1-71ba-8c87-c176ccbbfa46",
+      "task_id": "tsk_01a0d7a8-2711-74f7-8f65-5c5af87f704a",
+      "declared_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "declared_at": "2026-09-25T08:22:03.489Z",
+      "objective": "Fix cfgmigrate v1->v2 migration so it preserves unrelated user-defined keys instead of dropping them",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d7a8-41e1-71ba-8c87-c648a2d279a7",
+          "code": "rename",
+          "statement": "timeout is renamed to request_timeout",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d7a8-41e1-71ba-8c87-cbe490325b89",
+          "code": "version",
+          "statement": "version is set to 2",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d7a8-41e1-71ba-8c87-cc23d8de8154",
+          "code": "preserve",
+          "statement": "all unrelated user-defined keys are preserved recursively",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d7a8-41e1-71ba-8c87-d0b8ebbbb14b",
+          "code": "immutable",
+          "statement": "the input config object is not mutated",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d7a8-41e1-71ba-8c87-d4940c03cb4d",
+          "code": "regression",
+          "statement": "regression test coverage exists for preservation of unknown keys",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d7a8-822e-717a-87fe-459d61eae511",
+      "task_id": "tsk_01a0d7a8-2711-74f7-8f65-5c5af87f704a",
+      "declaration_id": "dcl_01a0d7a8-41e1-71ba-8c87-c176ccbbfa46",
+      "repository_id": "repo_01a0d7a7-7b28-70f9-8606-815ec8954bd8",
+      "workspace_id": "wsp_01a0d7a8-67be-763a-a384-470d7c923e23",
+      "executor": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "dispatched_at": "2026-09-25T08:22:19.950Z"
+    }
+  ],
+  "attempt_ends": [],
+  "claims": [
+    {
+      "claim_id": "clm_01a0d7a8-e115-7288-a55b-ab569fdbd376",
+      "task_id": "tsk_01a0d7a8-2711-74f7-8f65-5c5af87f704a",
+      "attempt_id": "att_01a0d7a8-822e-717a-87fe-459d61eae511",
+      "declaration_id": "dcl_01a0d7a8-41e1-71ba-8c87-c176ccbbfa46",
+      "statement": "Rewrote _v1_to_v2 in cfgmigrate/migrate.py to build the new dict from a copy of all of old's keys (excluding 'timeout'), then set version=2 and request_timeout, defaulting plugins only if absent. This preserves unrelated/nested keys like 'custom' and does not mutate the input. Added 3 regression tests; full suite (13 tests) passes.",
+      "evidence_ids": [
+        "evi_01a0d7a8-aa1c-754d-a86a-278119f6f78a",
+        "evi_01a0d7a8-b9bf-7489-aaf0-d946db14646b"
+      ],
+      "claimed_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "claimed_at": "2026-09-25T08:22:44.245Z"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "test_run",
+      "payload": {
+        "command": "python3 -m pytest -v",
+        "exit_code": 0
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "note": "13 passed, 0 failed: tests/test_migrate.py, including 3 new regression tests (test_preserves_unrelated_top_level_keys, test_preserves_nested_and_unknown_keys_recursively, test_does_not_mutate_input)",
+      "evidence_id": "evi_01a0d7a8-aa1c-754d-a86a-278119f6f78a",
+      "submitted_at": "2026-09-25T08:22:30.172Z"
+    },
+    {
+      "kind": "observation",
+      "payload": {
+        "text": "Manually ran migrate() on the exact ISSUE.md example {version:1, timeout:30, plugins:[foo], custom:{owner:peter}}. Output: {version:2, request_timeout:30, plugins:[foo], custom:{owner:peter}}. Confirmed original input dict unchanged after the call (deepcopy comparison)."
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "evidence_id": "evi_01a0d7a8-b9bf-7489-aaf0-d946db14646b",
+      "submitted_at": "2026-09-25T08:22:34.175Z"
+    }
+  ],
+  "reconciliations": [],
+  "check_invocations": [
+    {
+      "check_invocation_id": "chk_01a0d7a9-19fe-7798-999f-7ea18ba07907",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d7a8-e115-7288-a55b-ab569fdbd376"
+      },
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d7a7-7b28-70f9-8606-7ccaa0b3f9bd",
+        "revision": 8,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "8594ce1d0901995ce24a1a8ca1b3ce776501b9f2901ad5f78e744b5198e81372"
+        }
+      },
+      "invoked_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "invoked_at": "2026-09-25T08:22:58.814Z"
+    }
+  ],
+  "check_results": [
+    {
+      "check_result_id": "ckr_01a0d7a9-1a0e-775a-8229-797d48200e70",
+      "check_invocation_id": "chk_01a0d7a9-19fe-7798-999f-7ea18ba07907",
+      "outcome": "verdict_emitted",
+      "produced_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "completed_at": "2026-09-25T08:22:58.830Z",
+      "diagnostics": [],
+      "reconciliation_ids": [],
+      "verdict_id": "ver_01a0d7a9-19fc-709a-8696-0e3ef94079db"
+    }
+  ],
+  "verdicts": [
+    {
+      "verdict_id": "ver_01a0d7a9-19fc-709a-8696-0e3ef94079db",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d7a8-e115-7288-a55b-ab569fdbd376"
+      },
+      "declaration_id": "dcl_01a0d7a8-41e1-71ba-8c87-c176ccbbfa46",
+      "scope": {
+        "evaluated_criteria": [
+          "cri_01a0d7a8-41e1-71ba-8c87-c648a2d279a7",
+          "cri_01a0d7a8-41e1-71ba-8c87-cbe490325b89",
+          "cri_01a0d7a8-41e1-71ba-8c87-cc23d8de8154",
+          "cri_01a0d7a8-41e1-71ba-8c87-d0b8ebbbb14b",
+          "cri_01a0d7a8-41e1-71ba-8c87-d4940c03cb4d"
+        ],
+        "unevaluated_criteria": []
+      },
+      "conclusion": "supported",
+      "finality": "final",
+      "basis": {
+        "evidence_ids": [
+          "evi_01a0d7a8-aa1c-754d-a86a-278119f6f78a",
+          "evi_01a0d7a8-b9bf-7489-aaf0-d946db14646b"
+        ],
+        "reconciliation_ids": []
+      },
+      "findings": [
+        {
+          "criterion_id": "cri_01a0d7a8-41e1-71ba-8c87-c648a2d279a7",
+          "assessment": "supported",
+          "summary": "test_renames_timeout_to_request_timeout passes; code sets request_timeout from old['timeout'] and excludes 'timeout' key",
+          "basis_refs": [
+            "evi_01a0d7a8-aa1c-754d-a86a-278119f6f78a"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d7a8-41e1-71ba-8c87-cbe490325b89",
+          "assessment": "supported",
+          "summary": "test_sets_current_version passes; code hardcodes new['version']=2",
+          "basis_refs": [
+            "evi_01a0d7a8-aa1c-754d-a86a-278119f6f78a"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d7a8-41e1-71ba-8c87-cc23d8de8154",
+          "assessment": "supported",
+          "summary": "test_preserves_nested_and_unknown_keys_recursively passes; manual run of ISSUE.md example keeps 'custom':{'owner':'peter'} intact",
+          "basis_refs": [
+            "evi_01a0d7a8-b9bf-7489-aaf0-d946db14646b"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d7a8-41e1-71ba-8c87-d0b8ebbbb14b",
+          "assessment": "supported",
+          "summary": "test_does_not_mutate_input passes; manual deepcopy comparison confirms original dict unchanged after migrate()",
+          "basis_refs": [
+            "evi_01a0d7a8-b9bf-7489-aaf0-d946db14646b"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d7a8-41e1-71ba-8c87-d4940c03cb4d",
+          "assessment": "supported",
+          "summary": "3 new tests added: test_preserves_unrelated_top_level_keys, test_preserves_nested_and_unknown_keys_recursively, test_does_not_mutate_input",
+          "basis_refs": [
+            "evi_01a0d7a8-aa1c-754d-a86a-278119f6f78a"
+          ]
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Full pytest suite (13 tests) passes including 3 new regression tests targeting exactly the acceptance criteria; manual reproduction of the ISSUE.md example confirms correct output and no input mutation. Code inspection of the fixed _v1_to_v2 confirms it copies all keys except 'timeout' rather than allowlisting a fixed set."
+      },
+      "rationale": "Full pytest suite (13 tests) passes including 3 new regression tests targeting exactly the acceptance criteria; manual reproduction of the ISSUE.md example confirms correct output and no input mutation. Code inspection of the fixed _v1_to_v2 confirms it copies all keys except 'timeout' rather than allowlisting a fixed set.",
+      "uncertainty": [],
+      "limitations": [],
+      "issued_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "issued_at": "2026-09-25T08:22:58.813Z",
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      }
+    }
+  ],
+  "settlements": [
+    {
+      "settlement_id": "set_01a0d7a9-472d-765e-a581-f245801989a5",
+      "task_id": "tsk_01a0d7a8-2711-74f7-8f65-5c5af87f704a",
+      "attempt_id": "att_01a0d7a8-822e-717a-87fe-459d61eae511",
+      "decision": "accept",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "decided_at": "2026-09-25T08:23:10.381Z",
+      "basis": {
+        "verdict_id": "ver_01a0d7a9-19fc-709a-8696-0e3ef94079db",
+        "attempt_end_id": null,
+        "blocker_ids": []
+      },
+      "rationale": "All 5 acceptance criteria verified as supported with high confidence. Fix is in the working tree (cfgmigrate/migrate.py, tests/test_migrate.py) but not yet committed; the user has not requested a commit, so settling as accept rather than land.",
+      "verification_exception": null
+    }
+  ],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": []
+}

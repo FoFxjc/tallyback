@@ -1,0 +1,11 @@
+{
+  "model": "claude-haiku-4-5-20251001",
+  "seed": "533937679bcb1cbc5854dadec7acfed4a2c5b745",
+  "tallyback_sha": "71519e85195d796cabca895c3d18f5b9e6def7d9",
+  "workspace": "/tmp/claude-0/-home-user-tallyback/01b763c0-69a7-5ad2-94c6-b173155321d2/scratchpad/ic/w/38peCW8L/repo",
+  "exit": 0,
+  "seconds": 149,
+  "fixture": "config-migrate",
+  "seed_sha": "533937679bcb1cbc5854dadec7acfed4a2c5b745",
+  "note": "integration check at 71519e8 with the updated skill; not part of the frozen 3x3 batch"
+}

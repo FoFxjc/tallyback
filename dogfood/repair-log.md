@@ -238,3 +238,24 @@ code"` records the result text.
   `.tallyback/.gitignore` is preserved.
 - **Uncertainty**: ledgers created before this change get no `.gitignore` (only creation
   paths write it). Whether to commit `state.json` at all remains the user's choice.
+
+## Integration check — Claude Code, `config-migrate` × 3 models at `71519e8`
+
+See `integration-check/README.md`. Against batch 1 on the same fixture: Tallyback call
+failures 30 → 10 (Haiku), 15 → 2 (Sonnet), 7 → 1 (Opus); every first declaration had
+criteria; Haiku reached a Verdict and a Settlement for the first time; no false or forged
+records; no run read Tallyback's source; Opus attributed its records via `--actor`. Remaining:
+Haiku still chose `land` unprompted and did not run `tallyback land`; findings stay optional.
+n = 1 per model — the next benchmark round, not this check, should carry the comparison.
+
+## Left unchanged, with reasons
+
+- **F4 Attempt ↔ Declaration binding**: contract-level referential rule; its benchmark cost
+  came from criteria-less declarations (fixed by R7) — not relaxed.
+- **F12 self-verification**: no run delegated; no evidence about delegated verification.
+- **F13 Attempts opened after the work**: not detectable without Git timing; `next_command`
+  now puts `dispatch` before `claim`.
+- **F14 multiple effective `land` settlements**: allowed by the contract; single anecdote.
+- **Settlement basis matrix**: unchanged by design; it held in every run.
+- **`artifact {}`**: an empty artifact payload is valid under the frozen contract.
+- **`land` without a merge request**: a judgement recorded by the CLI, not one it should make.

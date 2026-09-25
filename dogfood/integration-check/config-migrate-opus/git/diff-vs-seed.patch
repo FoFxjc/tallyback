@@ -1,0 +1,96 @@
+diff --git a/cfgmigrate/migrate.py b/cfgmigrate/migrate.py
+index c9b01d4..33088bf 100644
+--- a/cfgmigrate/migrate.py
++++ b/cfgmigrate/migrate.py
+@@ -10,10 +10,15 @@ single-step migration in order, and returns the upgraded document.
+ Schema history:
+ 
+ * v1 -> v2: ``timeout`` (seconds) was renamed to ``request_timeout``.
++
++Migrations only touch the keys their schema step changes; every other key the user
++wrote is carried over unchanged. ``migrate`` never mutates its argument: the result
++is a deep copy that shares no mutable state with the input.
+ """
+ 
+ from __future__ import annotations
+ 
++import copy
+ from typing import Any, Callable
+ 
+ Config = dict[str, Any]
+@@ -26,11 +31,11 @@ class UnsupportedVersionError(ValueError):
+ 
+ 
+ def _v1_to_v2(old: Config) -> Config:
+-    return {
+-        "version": 2,
+-        "request_timeout": old["timeout"],
+-        "plugins": old.get("plugins", []),
+-    }
++    new = copy.deepcopy(old)
++    new["version"] = 2
++    new["request_timeout"] = new.pop("timeout")
++    new.setdefault("plugins", [])
++    return new
+ 
+ 
+ _MIGRATIONS: dict[int, Callable[[Config], Config]] = {
+@@ -46,7 +51,7 @@ def migrate(config: Config) -> Config:
+     if version > CURRENT_VERSION or (version < CURRENT_VERSION and version not in _MIGRATIONS):
+         raise UnsupportedVersionError(f"cannot migrate config version {version}")
+ 
+-    result = config
++    result = copy.deepcopy(config)
+     while result["version"] < CURRENT_VERSION:
+         result = _MIGRATIONS[result["version"]](result)
+     return result
+diff --git a/tests/test_migrate.py b/tests/test_migrate.py
+index b483b98..46062cd 100644
+--- a/tests/test_migrate.py
++++ b/tests/test_migrate.py
+@@ -38,3 +38,45 @@ def test_current_version_is_returned_as_is():
+ def test_rejects_unsupported_versions(version):
+     with pytest.raises(UnsupportedVersionError):
+         migrate({"version": version, "timeout": 1})
++
++
++ISSUE_V1 = {"version": 1, "timeout": 30, "plugins": ["foo"], "custom": {"owner": "peter"}}
++
++
++def test_issue_example_preserves_custom_section():
++    assert migrate(ISSUE_V1) == {
++        "version": 2,
++        "request_timeout": 30,
++        "plugins": ["foo"],
++        "custom": {"owner": "peter"},
++    }
++
++
++def test_preserves_unknown_keys_recursively():
++    nested = {"a": {"b": [1, {"c": None}], "timeout": 5}, "flag": True}
++    out = migrate(v1(custom=nested, extra="x", retries=3))
++    assert out["custom"] == nested
++    assert out["extra"] == "x"
++    assert out["retries"] == 3
++    # Only the top-level ``timeout`` is renamed; nested user keys are left alone.
++    assert out["custom"]["a"]["timeout"] == 5
++
++
++def test_does_not_mutate_input():
++    import copy
++
++    doc = v1(custom={"owner": "peter", "tags": ["a"]})
++    snapshot = copy.deepcopy(doc)
++    out = migrate(doc)
++    assert doc == snapshot
++    # The result shares no mutable state with the input.
++    out["custom"]["tags"].append("b")
++    out["plugins"].append("bar")
++    assert doc == snapshot
++
++
++def test_current_version_result_does_not_alias_input():
++    doc = {"version": 2, "request_timeout": 5, "plugins": [], "custom": {"k": [1]}}
++    out = migrate(doc)
++    out["custom"]["k"].append(2)
++    assert doc["custom"]["k"] == [1]
