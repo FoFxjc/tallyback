@@ -199,15 +199,7 @@ function enumArg<T extends string>(args: Args, key: string, allowed: readonly T[
 function actor(args: Args, key: string, fallback: Actor): Actor {
   const raw = optionalStr(args, key);
   if (!raw) return fallback;
-  const idx = raw.indexOf(':');
-  if (idx <= 0) {
-    throw new CliError(`--${key} must be of the form "kind:id" (got "${raw}")`);
-  }
-  const kind = raw.slice(0, idx) as ActorKind;
-  if (!ACTOR_KINDS.includes(kind)) {
-    throw new CliError(`--${key} kind "${kind}" is not a valid ActorKind`);
-  }
-  return { kind, id: raw.slice(idx + 1) };
+  return parseActor(raw, `--${key}`);
 }
 
 function jsonValue(args: Args, key: string): unknown {
@@ -280,7 +272,30 @@ class CliError extends Error {
   }
 }
 
-const DEFAULT_ACTOR: Actor = { kind: 'tool', id: 'tallyback' };
+/**
+ * Who authored a record when the command does not say (`--actor`).
+ *
+ * The CLI cannot know which agent or person is typing, so it does not guess. A host that
+ * does know — a bridge or an agent runtime — sets `TALLYBACK_ACTOR=kind:id` explicitly;
+ * otherwise the record says `unknown:unattributed`. It used to say `tool:tallyback`, which
+ * attributed an agent's Claims, Verdicts, and Settlements to Tallyback itself (dogfood F7,
+ * 8/9 runs). The operation's provenance (`--as`, default `tool:tallyback`) is separate: the
+ * tool really does submit the append.
+ */
+const UNATTRIBUTED: Actor = { kind: 'unknown', id: 'unattributed' };
+let DEFAULT_ACTOR: Actor = UNATTRIBUTED;
+
+function parseActor(raw: string, source: string): Actor {
+  const idx = raw.indexOf(':');
+  const kind = raw.slice(0, idx) as ActorKind;
+  if (idx <= 0 || idx === raw.length - 1 || !ACTOR_KINDS.includes(kind)) {
+    throw new CliError(
+      `${source} must be "kind:id" with kind one of ${ACTOR_KINDS.join('|')} (got "${raw}")`,
+      'cli.invalid_value',
+    );
+  }
+  return { kind, id: raw.slice(idx + 1) };
+}
 
 // ---------------------------------------------------------------------------
 // Output helpers
@@ -440,6 +455,13 @@ async function run(): Promise<void> {
 
   const projectRoot = optionalStr(args, 'project-root') ?? process.cwd();
   const submitter = actor(args, 'as', { kind: 'tool', id: 'tallyback' });
+  const envActor = process.env['TALLYBACK_ACTOR'];
+  DEFAULT_ACTOR =
+    optionalStr(args, 'as') !== undefined
+      ? submitter
+      : envActor
+        ? parseActor(envActor, 'TALLYBACK_ACTOR')
+        : UNATTRIBUTED;
 
   if (command === 'init') {
     const repositories = strArray(args, 'repository').map((alias) => ({ alias }));
@@ -449,7 +471,7 @@ async function run(): Promise<void> {
       project_id: optionalStr(args, 'project-id'),
       repositories: repositories.length > 0 ? repositories : undefined,
       topic: topicName ? { name: topicName, goal: goal ?? '' } : undefined,
-      created_by: actor(args, 'actor', submitter),
+      created_by: actor(args, 'actor', DEFAULT_ACTOR),
     });
     const snapshot = store.currentSnapshot();
     print({
@@ -674,7 +696,7 @@ async function dispatch(
       return store.beginCheckFor({
         claim_id: str(args, 'claim-id'),
         checker: { id: str(args, 'checker-id'), version: str(args, 'checker-version') },
-        invoked_by: actor(args, 'actor', { kind: 'tool', id: 'tallyback-check' }),
+        invoked_by: actor(args, 'actor', DEFAULT_ACTOR),
       });
     }
 
@@ -704,7 +726,7 @@ async function dispatch(
         reconciliations: jsonArray<Reconciliation>(args, 'reconciliation'),
         produced_evidence: jsonArray<Evidence>(args, 'evidence-record'),
         verdict: verdicts[0] ?? null,
-        produced_by: actor(args, 'actor', { kind: 'tool', id: 'tallyback-check' }),
+        produced_by: actor(args, 'actor', DEFAULT_ACTOR),
       });
     }
 
@@ -1189,7 +1211,7 @@ async function runVerdict(store: Store, args: Args, submitter: Actor): Promise<u
   if (!checkerId || !checkerVersion) {
     throw new CliError('--checker-id and --checker-version must be non-empty when provided');
   }
-  const issuedBy = actor(args, 'actor', submitter);
+  const issuedBy = actor(args, 'actor', DEFAULT_ACTOR);
 
   // -- Per-criterion findings (optional, explicit) ---------------------------
   // `--finding <ref>=<summary>` and `--finding-basis <ref>=<evi_…|rec_…>` say *what*

@@ -22,3 +22,16 @@ rather than trusting this file's age.
 The plugin version (`0.1.0` in `plugin.json`) tracks this directory independently of the
 main package's version and of the contract's version — SPEC §16: "Contract,
 implementation, and plugin versions are independent, joined only by compatibility ranges."
+
+## Attribution
+
+Tallyback does not guess who authored a record. Records written without `--actor` are
+attributed to `$TALLYBACK_ACTOR` when the host sets it, otherwise to `unknown:unattributed`.
+In Claude Code the project's `.claude/settings.json` can set it for every Bash call:
+
+```json
+{ "env": { "TALLYBACK_ACTOR": "executor:claude-code" } }
+```
+
+Use an id that is true for your setup; a per-command `--actor` still overrides it (for
+example a separate verifier recording a Verdict as `subagent:<name>`).

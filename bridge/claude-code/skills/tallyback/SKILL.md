@@ -14,6 +14,10 @@ description: Use when driving a Tallyback-tracked task through its lifecycle (de
    invent any other part of the command.
 3. Repeat after each step.
 
+Say who you are: Tallyback cannot know which agent is typing, so records you author are
+`unknown:unattributed` unless you pass `--actor <kind>:<id>` (e.g. `--actor executor:claude-code`)
+or the host sets `TALLYBACK_ACTOR` (see the plugin README).
+
 For any command's required flags, accepted values, and examples, run
 `tallyback <command> --help` — it never runs the command.
 

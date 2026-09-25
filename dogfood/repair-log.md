@@ -199,3 +199,26 @@ code"` records the result text.
   truncated a title.
 - **Uncertainty**: `next_command` covers the single latest Attempt/Claim; multi-attempt
   tasks still need judgment about which Attempt to settle. `next_action` naming is left as is.
+
+## R9 — Honest default attribution (F7, 8/9 runs)
+
+- **Reproduced**: `evidence …` / `claim …` / `settle …` without `--actor` →
+  `submitted_by` / `claimed_by` / `decided_by` = `tool:tallyback`; `tallyback verdict`
+  → `issued_by` = the submitter (`tool:tallyback`). In the benchmark this attributed agents'
+  Claims, Verdicts, and Settlements to Tallyback itself (Sonnet also copied
+  `tool:tallyback-check` into a hand-made Verdict).
+- **Root cause**: the CLI filled the author with its own identity when none was given — a
+  false provenance statement, not a neutral default.
+- **Change**: author default = `--actor` › `--as` (if given) › `$TALLYBACK_ACTOR` (explicit
+  host setting, validated) › `unknown:unattributed` (a contract ActorKind). The CLI still
+  never infers an identity. Operation provenance (`--as`, default `tool:tallyback`) is
+  unchanged — the tool does submit the append. The Claude Code bridge README shows the
+  `.claude/settings.json` `env` setting; the skill says to pass `--actor`.
+- **Regression**: `test/cli-attribution.test.ts`.
+- **Dogfood**: default → `unknown:unattributed`; `TALLYBACK_ACTOR=executor:claude-code` →
+  used; `--actor human:alice` overrides it; `TALLYBACK_ACTOR=robot` → `cli.invalid_value`,
+  `state.json` unchanged.
+- **Uncertainty**: `unknown:unattributed` is honest but not useful; the value comes only from
+  hosts or agents actually passing an identity. Self-verification (F12) remains
+  indistinguishable when one agent uses one id for everything — deliberately not addressed
+  (no delegation evidence in the benchmark).
