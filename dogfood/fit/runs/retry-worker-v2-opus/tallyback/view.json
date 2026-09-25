@@ -1,0 +1,148 @@
+{
+  "generated_from_revision": 13,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d843-3f3a-740d-8ece-c5b30c359c36",
+      "title": "Fix batcher.chunk losing payloads",
+      "topic_id": "top_01a0d843-3371-7029-a686-6a2410f2ba51",
+      "declaration": {
+        "declaration_id": "dcl_01a0d843-53d4-7221-afed-23e642c22421",
+        "objective": "batcher.chunk never loses payloads and satisfies all batching invariants",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d843-53d4-7221-afed-271e2c0c3680",
+            "code": "max_items",
+            "statement": "A batch contains at most max_items items",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-53d4-7221-afed-288cd773fa1a",
+            "code": "max_bytes",
+            "statement": "A batch of normal items contains at most max_bytes bytes in total",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-53d4-7221-afed-2c90ec7adfe8",
+            "code": "oversized",
+            "statement": "An item larger than max_bytes is never dropped; it is emitted alone in its own batch",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-53d4-7221-afed-322f1fc34e9b",
+            "code": "no_empty",
+            "statement": "No empty batches are produced",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-53d4-7221-afed-3575c0fb4285",
+            "code": "order",
+            "statement": "Concatenating the batches yields the input items in order",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-53d4-7221-afed-387738c4ace9",
+            "code": "tests",
+            "statement": "Regression tests added for fixed defects; full test suite passes",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d843-6f97-70f9-81fd-b4b6201be288",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d843-61c9-7429-9b1b-9b7699ad8965",
+          "repository_id": "repo_01a0d843-284b-72b1-88af-6190eb4be51c",
+          "dispatched_at": "2026-09-25T11:11:33.271Z",
+          "ended": false
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d844-196e-7474-ac78-880b5825b907",
+          "statement": "Fixed two defects in batcher.chunk: oversized items were dropped (continue), and an empty batch was emitted when flushing an empty current batch. Oversized items now go out alone; flush happens only when current is non-empty. Added 5 regression tests incl. randomized invariant check; 13/13 pass. Changes are uncommitted on branch fix/chunk-drops.",
+          "evidence_ids": [
+            "evi_01a0d843-e515-74fc-a83e-897c38cdeb81",
+            "evi_01a0d843-e6d3-71ff-b150-f8e93259d57f",
+            "evi_01a0d843-fb20-76ec-95be-6b6eee4f56af"
+          ],
+          "claimed_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "claimed_at": "2026-09-25T11:12:16.751Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d843-e515-74fc-a83e-897c38cdeb81",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T11:12:03.349Z",
+          "note": "Pre-fix baseline: HEAD chunk.py + new tests: 6 failed, 7 passed (existing test_oversized_item_is_emitted_alone + all 5 new regression tests fail)"
+        },
+        {
+          "evidence_id": "evi_01a0d843-e6d3-71ff-b150-f8e93259d57f",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T11:12:03.795Z",
+          "note": "Post-fix: 13 passed, 0 failed. Includes randomized invariant test (2000 cases, seed 1234) asserting order, 1<=len<=max_items, byte bound for normal batches, oversized alone"
+        },
+        {
+          "evidence_id": "evi_01a0d843-fb20-76ec-95be-6b6eee4f56af",
+          "kind": "git_diff",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T11:12:08.992Z",
+          "note": "Uncommitted working-tree diff on fix/chunk-drops: batcher/chunk.py (flush only non-empty current; emit oversized item alone instead of dropping), tests/test_chunk.py (+5 regression tests)"
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d844-3d4a-729a-aee1-2548d4032c1d",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "Ran full suite against HEAD chunk.py (6 fail) and fixed chunk.py (13 pass); randomized 2000-case property test checks every invariant jointly"
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d844-543b-73ed-a84b-b871af7ab6e2",
+        "decision": "accept",
+        "verification_exception": null,
+        "rationale": "All six criteria supported by pre/post test runs. Accept, not land: changes are uncommitted and integration was not authorized by the user."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "settled: accept",
+      "next_command": null
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 1
+  }
+}

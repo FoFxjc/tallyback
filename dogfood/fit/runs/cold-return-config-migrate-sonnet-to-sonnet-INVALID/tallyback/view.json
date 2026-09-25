@@ -1,0 +1,131 @@
+{
+  "generated_from_revision": 13,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d843-ab3b-730c-b914-7c3104390adb",
+      "title": "Preserve unknown keys during v1->v2 config migration",
+      "topic_id": "top_01a0d843-8d13-733b-8533-fbef161ef592",
+      "declaration": {
+        "declaration_id": "dcl_01a0d843-cb18-71dc-b8ed-03a36386194f",
+        "objective": "v1->v2 config migration preserves all unrelated user-defined keys and does not mutate input",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d843-cb19-73fe-a42f-e9793d353ac1",
+            "code": "rename",
+            "statement": "timeout is renamed to request_timeout",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-cb19-73fe-a42f-ed052bd5b9bd",
+            "code": "version",
+            "statement": "version is set to 2",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-cb19-73fe-a42f-f04081bdca50",
+            "code": "preserve",
+            "statement": "all unrelated user-defined keys are preserved recursively (e.g. custom.owner)",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-cb19-73fe-a42f-f67953baed48",
+            "code": "immutable",
+            "statement": "the input config object is not mutated",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-cb19-73fe-a42f-f89d290f91c5",
+            "code": "tests",
+            "statement": "regression test added covering preservation of unknown keys",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d844-1f41-7349-9284-77585a61ed4b",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d844-0ade-744b-a899-188a5f443a7b",
+          "repository_id": "repo_01a0d843-3f60-7020-b98b-022ea66d0b92",
+          "dispatched_at": "2026-09-25T11:12:18.241Z",
+          "ended": true
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d845-2eb7-744e-bf0c-99f86a89465e",
+          "statement": "Rewrote _v1_to_v2 in cfgmigrate/migrate.py to deep-copy the input, rename timeout to request_timeout in place, and default plugins, instead of building a fresh dict that dropped unrelated keys. This preserves all unrelated/unknown keys (e.g. custom) recursively and never mutates the caller's config. Added 3 regression tests covering unknown top-level key preservation, independence of nested structures from the input, and non-mutation of the input.",
+          "evidence_ids": [
+            "evi_01a0d844-da60-7235-ad3c-b95acd979541",
+            "evi_01a0d844-f0a5-7245-9706-91105ac0d90a"
+          ],
+          "claimed_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "claimed_at": "2026-09-25T11:13:27.736Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d844-da60-7235-ad3c-b95acd979541",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T11:13:06.145Z",
+          "note": "13 passed, 0 failed: all pre-existing tests plus 3 new regression tests (unknown top-level key preservation, independent nested-key copy, input-not-mutated) all pass"
+        },
+        {
+          "evidence_id": "evi_01a0d844-f0a5-7245-9706-91105ac0d90a",
+          "kind": "observation",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T11:13:11.846Z",
+          "note": "Confirms the reported bug scenario is fixed exactly as described in ISSUE.md"
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d845-7299-74eb-b96f-9109c723c9ec",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "Re-ran the full pytest suite myself (13 passed, 0 failed) and independently replayed the exact ISSUE.md scenario by hand, confirming output matches the expected v2 doc with custom.owner preserved and the input dict left untouched. Reviewed the diff: _v1_to_v2 now deep-copies input before mutating the copy, so no built-in dict-literal reconstruction drops unknown keys."
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d845-c8d7-72ef-aaba-ce8c9d2f561e",
+        "decision": "accept",
+        "verification_exception": null,
+        "rationale": "All 5 declared acceptance criteria are supported by a high-confidence Verdict backed by a full passing test run (13/13) and a manual replay of the exact ISSUE.md example. Accepting the implementation; not settling as 'land' since changes remain uncommitted pending the user's own review/commit decision (outside executor authority)."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "settled: accept",
+      "next_command": null
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 1
+  }
+}

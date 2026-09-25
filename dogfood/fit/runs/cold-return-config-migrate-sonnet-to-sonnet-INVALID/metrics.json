@@ -1,0 +1,43 @@
+{
+  "model_reported_by_cli": "claude-sonnet-5",
+  "model_usage": {
+    "claude-sonnet-5": {
+      "inputTokens": 38,
+      "outputTokens": 13957,
+      "cacheReadInputTokens": 1028433,
+      "cacheCreationInputTokens": 31347,
+      "webSearchRequests": 0,
+      "costUSD": 0.47072060000000004,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 7737,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "num_turns": 24,
+  "duration_ms": 189128,
+  "total_cost_usd": 0.47072060000000004,
+  "result_is_error": false,
+  "tool_calls": 22,
+  "tool_calls_by_name": {
+    "Bash": 17,
+    "Grep": 1,
+    "Read": 3,
+    "Skill": 1
+  },
+  "tallyback_invocations": 7,
+  "tallyback_failed_or_rejected": 2,
+  "tallyback_by_subcommand": {
+    "decision": 1,
+    "handshake": 1,
+    "settle": 1,
+    "show": 3,
+    "view": 1
+  },
+  "used_skill_tool": true,
+  "touched_tallyback_source": false,
+  "inspected_tallyback_wrapper": true,
+  "spawned_subagents": 0
+}

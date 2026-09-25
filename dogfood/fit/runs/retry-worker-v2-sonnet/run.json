@@ -1,0 +1,13 @@
+{
+  "run_id": "retry-worker-v2-sonnet",
+  "fixture": "retry-worker-v2",
+  "model_requested": "claude-sonnet-5",
+  "seed_sha": "e1e8ba0f6a5771873ec66d7586ba89b6c71d098a",
+  "workspace": "/tmp/claude-0/-home-user-tallyback/01b763c0-69a7-5ad2-94c6-b173155321d2/scratchpad/fit/w/7k4x7myH/repo",
+  "session_id": "01b763c0-69a7-5ad2-94c6-b173155321d2",
+  "phase2": false,
+  "session_seconds_per_phase": [
+    171
+  ],
+  "note": "run.json reconstructed from the transcript (session init cwd/session_id, result durations): the harness failed to write it (bash true/false passed to Python); evidence files are unaltered"
+}

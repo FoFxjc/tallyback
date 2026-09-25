@@ -1,0 +1,29 @@
+diff --git a/cfgmigrate/migrate.py b/cfgmigrate/migrate.py
+index c9b01d4..bd3ccc1 100644
+--- a/cfgmigrate/migrate.py
++++ b/cfgmigrate/migrate.py
+@@ -14,6 +14,7 @@ Schema history:
+ 
+ from __future__ import annotations
+ 
++import copy
+ from typing import Any, Callable
+ 
+ Config = dict[str, Any]
+@@ -26,11 +27,11 @@ class UnsupportedVersionError(ValueError):
+ 
+ 
+ def _v1_to_v2(old: Config) -> Config:
+-    return {
+-        "version": 2,
+-        "request_timeout": old["timeout"],
+-        "plugins": old.get("plugins", []),
+-    }
++    new = copy.deepcopy(old)
++    new["version"] = 2
++    new["request_timeout"] = new.pop("timeout")
++    new.setdefault("plugins", [])
++    return new
+ 
+ 
+ _MIGRATIONS: dict[int, Callable[[Config], Config]] = {

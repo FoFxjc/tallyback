@@ -1,0 +1,8 @@
+Independent verification report — an automated property-based check was run by the maintainers against your working tree after your last message. It is not part of the repository.
+
+FAILED: 3966 of 5468 generated cases violated the acceptance criteria.
+Smallest counterexample: chunk([b'aaaaaa'], max_items=1, max_bytes=4)
+returned [[], [b'aaaaaa']]
+Violated: criterion 4 (no empty batches): an empty batch was produced
+
+Continue the task under Tallyback.

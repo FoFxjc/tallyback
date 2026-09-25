@@ -1,0 +1,44 @@
+diff --git a/batcher/chunk.py b/batcher/chunk.py
+index 47c0ab0..f4c76ee 100644
+--- a/batcher/chunk.py
++++ b/batcher/chunk.py
+@@ -26,9 +26,11 @@ def chunk(items: Iterable[bytes], max_items: int, max_bytes: int) -> list[list[b
+         next_size = current_size + size
+ 
+         if next_size > max_bytes:
+-            batches.append(current)
++            if current:
++                batches.append(current)
+             current, current_size = [], 0
+             if size > max_bytes:
++                batches.append([item])
+                 continue
+ 
+         if len(current) >= max_items:
+diff --git a/tests/test_chunk.py b/tests/test_chunk.py
+index 88630d2..53fc138 100644
+--- a/tests/test_chunk.py
++++ b/tests/test_chunk.py
+@@ -37,6 +37,22 @@ def test_oversized_item_is_emitted_alone():
+     assert chunk([small, big, tail], max_items=10, max_bytes=10) == [[small], [big], [tail]]
+ 
+ 
++def test_leading_oversized_item_does_not_produce_empty_batch():
++    big, tail = b(50, "B"), b(2, "t")
++    assert chunk([big, tail], max_items=10, max_bytes=10) == [[big], [tail]]
++
++
++def test_consecutive_oversized_items_each_get_own_batch():
++    big1, big2 = b(50, "A"), b(60, "B")
++    assert chunk([big1, big2], max_items=10, max_bytes=10) == [[big1], [big2]]
++
++
++def test_no_batch_is_ever_empty():
++    items = [b(2, "s"), b(50, "B"), b(2, "t"), b(60, "C")]
++    for batch in chunk(items, max_items=10, max_bytes=10):
++        assert batch
++
++
+ @pytest.mark.parametrize("max_items,max_bytes", [(0, 10), (1, 0)])
+ def test_rejects_invalid_limits(max_items, max_bytes):
+     with pytest.raises(ValueError):

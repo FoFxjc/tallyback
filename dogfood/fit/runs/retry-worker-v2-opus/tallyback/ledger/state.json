@@ -1,0 +1,373 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 13,
+  "included_through": 13,
+  "project": {
+    "project_id": "prj_01a0d843-284a-7378-b361-0eddc9049b7e",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d843-284b-72b1-88af-6190eb4be51c",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d843-284b-72b1-88af-6190eb4be51c",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d843-61c9-7429-9b1b-9b7699ad8965",
+      "repository_id": "repo_01a0d843-284b-72b1-88af-6190eb4be51c",
+      "branch": "fix/chunk-drops"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d843-3371-7029-a686-6a2410f2ba51",
+      "project_id": "prj_01a0d843-284a-7378-b361-0eddc9049b7e",
+      "name": "upload-worker",
+      "goal": "",
+      "created_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "created_at": "2026-09-25T11:11:17.873Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d843-3f3a-740d-8ece-c5b30c359c36",
+      "topic_id": "top_01a0d843-3371-7029-a686-6a2410f2ba51",
+      "title": "Fix batcher.chunk losing payloads"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d843-53d4-7221-afed-23e642c22421",
+      "task_id": "tsk_01a0d843-3f3a-740d-8ece-c5b30c359c36",
+      "declared_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "declared_at": "2026-09-25T11:11:26.164Z",
+      "objective": "batcher.chunk never loses payloads and satisfies all batching invariants",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d843-53d4-7221-afed-271e2c0c3680",
+          "code": "max_items",
+          "statement": "A batch contains at most max_items items",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d843-53d4-7221-afed-288cd773fa1a",
+          "code": "max_bytes",
+          "statement": "A batch of normal items contains at most max_bytes bytes in total",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d843-53d4-7221-afed-2c90ec7adfe8",
+          "code": "oversized",
+          "statement": "An item larger than max_bytes is never dropped; it is emitted alone in its own batch",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d843-53d4-7221-afed-322f1fc34e9b",
+          "code": "no_empty",
+          "statement": "No empty batches are produced",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d843-53d4-7221-afed-3575c0fb4285",
+          "code": "order",
+          "statement": "Concatenating the batches yields the input items in order",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d843-53d4-7221-afed-387738c4ace9",
+          "code": "tests",
+          "statement": "Regression tests added for fixed defects; full test suite passes",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d843-6f97-70f9-81fd-b4b6201be288",
+      "task_id": "tsk_01a0d843-3f3a-740d-8ece-c5b30c359c36",
+      "declaration_id": "dcl_01a0d843-53d4-7221-afed-23e642c22421",
+      "repository_id": "repo_01a0d843-284b-72b1-88af-6190eb4be51c",
+      "workspace_id": "wsp_01a0d843-61c9-7429-9b1b-9b7699ad8965",
+      "executor": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_at": "2026-09-25T11:11:33.271Z"
+    }
+  ],
+  "attempt_ends": [],
+  "claims": [
+    {
+      "claim_id": "clm_01a0d844-196e-7474-ac78-880b5825b907",
+      "task_id": "tsk_01a0d843-3f3a-740d-8ece-c5b30c359c36",
+      "attempt_id": "att_01a0d843-6f97-70f9-81fd-b4b6201be288",
+      "declaration_id": "dcl_01a0d843-53d4-7221-afed-23e642c22421",
+      "statement": "Fixed two defects in batcher.chunk: oversized items were dropped (continue), and an empty batch was emitted when flushing an empty current batch. Oversized items now go out alone; flush happens only when current is non-empty. Added 5 regression tests incl. randomized invariant check; 13/13 pass. Changes are uncommitted on branch fix/chunk-drops.",
+      "evidence_ids": [
+        "evi_01a0d843-e515-74fc-a83e-897c38cdeb81",
+        "evi_01a0d843-e6d3-71ff-b150-f8e93259d57f",
+        "evi_01a0d843-fb20-76ec-95be-6b6eee4f56af"
+      ],
+      "claimed_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "claimed_at": "2026-09-25T11:12:16.751Z"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "test_run",
+      "payload": {
+        "command": "python3 -m pytest -q",
+        "exit_code": 1,
+        "repository_id": "repo_01a0d843-284b-72b1-88af-6190eb4be51c",
+        "workspace_id": "wsp_01a0d843-61c9-7429-9b1b-9b7699ad8965",
+        "working_tree": "dirty"
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "note": "Pre-fix baseline: HEAD chunk.py + new tests: 6 failed, 7 passed (existing test_oversized_item_is_emitted_alone + all 5 new regression tests fail)",
+      "evidence_id": "evi_01a0d843-e515-74fc-a83e-897c38cdeb81",
+      "submitted_at": "2026-09-25T11:12:03.349Z"
+    },
+    {
+      "kind": "test_run",
+      "payload": {
+        "command": "python3 -m pytest -q",
+        "exit_code": 0,
+        "repository_id": "repo_01a0d843-284b-72b1-88af-6190eb4be51c",
+        "workspace_id": "wsp_01a0d843-61c9-7429-9b1b-9b7699ad8965",
+        "working_tree": "dirty"
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "note": "Post-fix: 13 passed, 0 failed. Includes randomized invariant test (2000 cases, seed 1234) asserting order, 1<=len<=max_items, byte bound for normal batches, oversized alone",
+      "evidence_id": "evi_01a0d843-e6d3-71ff-b150-f8e93259d57f",
+      "submitted_at": "2026-09-25T11:12:03.795Z"
+    },
+    {
+      "kind": "git_diff",
+      "payload": {
+        "repository_id": "repo_01a0d843-284b-72b1-88af-6190eb4be51c",
+        "base_object_id": "e1e8ba0f6a5771873ec66d7586ba89b6c71d098a"
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "note": "Uncommitted working-tree diff on fix/chunk-drops: batcher/chunk.py (flush only non-empty current; emit oversized item alone instead of dropping), tests/test_chunk.py (+5 regression tests)",
+      "evidence_id": "evi_01a0d843-fb20-76ec-95be-6b6eee4f56af",
+      "submitted_at": "2026-09-25T11:12:08.992Z"
+    }
+  ],
+  "reconciliations": [],
+  "check_invocations": [
+    {
+      "check_invocation_id": "chk_01a0d844-3d4c-758d-9841-d1b64be2ef87",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d844-196e-7474-ac78-880b5825b907"
+      },
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d843-284a-7378-b361-0eddc9049b7e",
+        "revision": 10,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "ad7ba7481c3004bf61c51e395c85dcdc6835663c8e26a4c394511e0dad24a6b1"
+        }
+      },
+      "invoked_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "invoked_at": "2026-09-25T11:12:25.932Z"
+    }
+  ],
+  "check_results": [
+    {
+      "check_result_id": "ckr_01a0d844-3d5e-721d-b165-9c168549bc40",
+      "check_invocation_id": "chk_01a0d844-3d4c-758d-9841-d1b64be2ef87",
+      "outcome": "verdict_emitted",
+      "produced_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "completed_at": "2026-09-25T11:12:25.950Z",
+      "diagnostics": [],
+      "reconciliation_ids": [],
+      "verdict_id": "ver_01a0d844-3d4a-729a-aee1-2548d4032c1d"
+    }
+  ],
+  "verdicts": [
+    {
+      "verdict_id": "ver_01a0d844-3d4a-729a-aee1-2548d4032c1d",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d844-196e-7474-ac78-880b5825b907"
+      },
+      "declaration_id": "dcl_01a0d843-53d4-7221-afed-23e642c22421",
+      "scope": {
+        "evaluated_criteria": [
+          "cri_01a0d843-53d4-7221-afed-271e2c0c3680",
+          "cri_01a0d843-53d4-7221-afed-288cd773fa1a",
+          "cri_01a0d843-53d4-7221-afed-2c90ec7adfe8",
+          "cri_01a0d843-53d4-7221-afed-322f1fc34e9b",
+          "cri_01a0d843-53d4-7221-afed-3575c0fb4285",
+          "cri_01a0d843-53d4-7221-afed-387738c4ace9"
+        ],
+        "unevaluated_criteria": []
+      },
+      "conclusion": "supported",
+      "finality": "final",
+      "basis": {
+        "evidence_ids": [
+          "evi_01a0d843-e515-74fc-a83e-897c38cdeb81",
+          "evi_01a0d843-e6d3-71ff-b150-f8e93259d57f",
+          "evi_01a0d843-fb20-76ec-95be-6b6eee4f56af"
+        ],
+        "reconciliation_ids": []
+      },
+      "findings": [
+        {
+          "criterion_id": "cri_01a0d843-53d4-7221-afed-271e2c0c3680",
+          "assessment": "supported",
+          "summary": "test_respects_max_items, test_item_limit_hit_before_oversized_item and randomized check assert len<=max_items",
+          "basis_refs": [
+            "evi_01a0d843-e6d3-71ff-b150-f8e93259d57f"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d843-53d4-7221-afed-288cd773fa1a",
+          "assessment": "supported",
+          "summary": "test_respects_max_bytes, exact-boundary test and randomized check assert sum<=max_bytes for batches without oversized items",
+          "basis_refs": [
+            "evi_01a0d843-e6d3-71ff-b150-f8e93259d57f"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d843-53d4-7221-afed-2c90ec7adfe8",
+          "assessment": "supported",
+          "summary": "4 tests cover oversized first/middle/last/consecutive; all failed pre-fix, pass post-fix",
+          "basis_refs": [
+            "evi_01a0d843-e515-74fc-a83e-897c38cdeb81",
+            "evi_01a0d843-e6d3-71ff-b150-f8e93259d57f"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d843-53d4-7221-afed-322f1fc34e9b",
+          "assessment": "supported",
+          "summary": "test_leading_oversized_item_does_not_produce_empty_batch failed pre-fix ([[],[big],...]); randomized check asserts len>=1",
+          "basis_refs": [
+            "evi_01a0d843-e515-74fc-a83e-897c38cdeb81",
+            "evi_01a0d843-e6d3-71ff-b150-f8e93259d57f"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d843-53d4-7221-afed-3575c0fb4285",
+          "assessment": "supported",
+          "summary": "test_preserves_order and randomized check assert flattening equals input",
+          "basis_refs": [
+            "evi_01a0d843-e6d3-71ff-b150-f8e93259d57f"
+          ]
+        },
+        {
+          "criterion_id": "cri_01a0d843-53d4-7221-afed-387738c4ace9",
+          "assessment": "supported",
+          "summary": "5 regression tests added; 6 failed on unfixed code; full suite 13 passed",
+          "basis_refs": [
+            "evi_01a0d843-e515-74fc-a83e-897c38cdeb81",
+            "evi_01a0d843-e6d3-71ff-b150-f8e93259d57f"
+          ]
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Ran full suite against HEAD chunk.py (6 fail) and fixed chunk.py (13 pass); randomized 2000-case property test checks every invariant jointly"
+      },
+      "rationale": "Ran full suite against HEAD chunk.py (6 fail) and fixed chunk.py (13 pass); randomized 2000-case property test checks every invariant jointly",
+      "uncertainty": [
+        "Zero-length items and non-bytes inputs are not specified by the issue; behavior for them is unchanged by design"
+      ],
+      "limitations": [
+        "Verified by the same executor that made the change; no independent reviewer",
+        "Changes are uncommitted in the working tree; not integrated into main"
+      ],
+      "issued_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "issued_at": "2026-09-25T11:12:25.930Z",
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      }
+    }
+  ],
+  "settlements": [
+    {
+      "settlement_id": "set_01a0d844-543b-73ed-a84b-b871af7ab6e2",
+      "task_id": "tsk_01a0d843-3f3a-740d-8ece-c5b30c359c36",
+      "attempt_id": "att_01a0d843-6f97-70f9-81fd-b4b6201be288",
+      "decision": "accept",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "decided_at": "2026-09-25T11:12:31.803Z",
+      "basis": {
+        "verdict_id": "ver_01a0d844-3d4a-729a-aee1-2548d4032c1d",
+        "attempt_end_id": null,
+        "blocker_ids": []
+      },
+      "rationale": "All six criteria supported by pre/post test runs. Accept, not land: changes are uncommitted and integration was not authorized by the user.",
+      "verification_exception": null
+    }
+  ],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": [
+    {
+      "decision_id": "dec_01a0d843-8295-77b1-877d-03d310db784e",
+      "subject": {
+        "kind": "attempt",
+        "id": "att_01a0d843-6f97-70f9-81fd-b4b6201be288"
+      },
+      "role": "execution_choice",
+      "question": "Execution fit",
+      "choice": "FIT: small pure function; bugs visible by reading; all criteria testable with pytest",
+      "rationale": "criteria: all six are concrete and understood; capability: fix is local to batcher/chunk.py; verification: unit tests plus a randomized property check against all invariants; tools/authority: can edit and run tests; will not commit, merge, or settle land without user approval",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "decided_at": "2026-09-25T11:11:38.133Z",
+      "basis": []
+    }
+  ]
+}

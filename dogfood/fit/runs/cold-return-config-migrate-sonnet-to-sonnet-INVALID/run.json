@@ -1,0 +1,11 @@
+{
+  "run_id": "cold-return-config-migrate-sonnet-to-sonnet",
+  "fixture": "config-migrate",
+  "model_a": "claude-sonnet-5",
+  "model_b": "claude-sonnet-5",
+  "seed_sha": "4ab1633e217ddeda88eabce487d938f93abd8bda",
+  "workspace": "/tmp/claude-0/-home-user-tallyback/01b763c0-69a7-5ad2-94c6-b173155321d2/scratchpad/fit/w/bMyVMHKx/repo",
+  "termination": "killed: attempt + Fit Decision + implementation edited",
+  "session_a_seconds": 89,
+  "session_b_seconds": 190
+}

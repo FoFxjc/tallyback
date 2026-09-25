@@ -1,0 +1,3 @@
+3d4a39b4b19b01b9ddca1e106bca271fde3a17c4 Claude Haiku 4.5 Fix chunk() to prevent empty batches when oversized item is first
+3f2253b670de248d85b74bb44dbbb3220e8b1a30 Claude Haiku 4.5 Fix chunk() to emit oversized items instead of losing them
+e1e8ba0f6a5771873ec66d7586ba89b6c71d098a Tallyback Dogfood seed: retry-worker-v2

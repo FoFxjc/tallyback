@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 6,
+  "included_through": 6,
+  "project": {
+    "project_id": "prj_01a0d843-3f60-7020-b98a-fec16d34fe79",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d843-3f60-7020-b98b-022ea66d0b92",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d843-3f60-7020-b98b-022ea66d0b92",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d844-0ade-744b-a899-188a5f443a7b",
+      "repository_id": "repo_01a0d843-3f60-7020-b98b-022ea66d0b92",
+      "branch": "main"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d843-8d13-733b-8533-fbef161ef592",
+      "project_id": "prj_01a0d843-3f60-7020-b98a-fec16d34fe79",
+      "name": "config-migrate-fix",
+      "goal": "Fix v1->v2 config migration losing unrelated user-defined keys",
+      "created_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "created_at": "2026-09-25T11:11:40.820Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d843-ab3b-730c-b914-7c3104390adb",
+      "topic_id": "top_01a0d843-8d13-733b-8533-fbef161ef592",
+      "title": "Preserve unknown keys during v1->v2 config migration",
+      "alias": "T1"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d843-cb18-71dc-b8ed-03a36386194f",
+      "task_id": "tsk_01a0d843-ab3b-730c-b914-7c3104390adb",
+      "declared_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "declared_at": "2026-09-25T11:11:56.696Z",
+      "objective": "v1->v2 config migration preserves all unrelated user-defined keys and does not mutate input",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d843-cb19-73fe-a42f-e9793d353ac1",
+          "code": "rename",
+          "statement": "timeout is renamed to request_timeout",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d843-cb19-73fe-a42f-ed052bd5b9bd",
+          "code": "version",
+          "statement": "version is set to 2",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d843-cb19-73fe-a42f-f04081bdca50",
+          "code": "preserve",
+          "statement": "all unrelated user-defined keys are preserved recursively (e.g. custom.owner)",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d843-cb19-73fe-a42f-f67953baed48",
+          "code": "immutable",
+          "statement": "the input config object is not mutated",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d843-cb19-73fe-a42f-f89d290f91c5",
+          "code": "tests",
+          "statement": "regression test added covering preservation of unknown keys",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d844-1f41-7349-9284-77585a61ed4b",
+      "task_id": "tsk_01a0d843-ab3b-730c-b914-7c3104390adb",
+      "declaration_id": "dcl_01a0d843-cb18-71dc-b8ed-03a36386194f",
+      "repository_id": "repo_01a0d843-3f60-7020-b98b-022ea66d0b92",
+      "workspace_id": "wsp_01a0d844-0ade-744b-a899-188a5f443a7b",
+      "executor": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_at": "2026-09-25T11:12:18.241Z"
+    }
+  ],
+  "attempt_ends": [],
+  "claims": [],
+  "evidence": [],
+  "reconciliations": [],
+  "check_invocations": [],
+  "check_results": [],
+  "verdicts": [],
+  "settlements": [],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": [
+    {
+      "decision_id": "dec_01a0d844-398f-730f-9021-461e4a1ed459",
+      "subject": {
+        "kind": "attempt",
+        "id": "att_01a0d844-1f41-7349-9284-77585a61ed4b"
+      },
+      "role": "execution_choice",
+      "question": "Execution fit",
+      "choice": "FIT: can implement and verify via unit tests",
+      "rationale": "criteria: all 5 criteria are clear and testable; capability: small, well-scoped Python fix to a pure function; verification: pytest suite plus new regression test gives direct evidence; tools/authority: have edit/test access, will not commit or settle land without being asked",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "decided_at": "2026-09-25T11:12:24.975Z",
+      "basis": []
+    }
+  ]
+}

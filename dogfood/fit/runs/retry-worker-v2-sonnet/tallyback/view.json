@@ -1,0 +1,137 @@
+{
+  "generated_from_revision": 12,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d843-7fa4-76a8-ba97-38f819bd711c",
+      "title": "Fix batcher.chunk dropping oversized items",
+      "topic_id": "top_01a0d843-6cc1-701c-bbc7-a7f9e5969d07",
+      "declaration": {
+        "declaration_id": "dcl_01a0d843-9969-7236-92b6-8065ecfb1640",
+        "objective": "Fix batcher.chunk so it never silently drops payloads while batching for the upload worker",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d843-996a-70a9-9b6c-1056b74c2fb1",
+            "code": "max_items",
+            "statement": "A batch contains at most max_items items",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-996a-70a9-9b6c-169ef2788fac",
+            "code": "max_bytes",
+            "statement": "A batch of normal items contains at most max_bytes bytes in total",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-996a-70a9-9b6c-190745242eac",
+            "code": "oversized_alone",
+            "statement": "An item larger than max_bytes is never dropped; it is emitted alone, in its own batch",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-996a-70a9-9b6c-1d1e016da556",
+            "code": "no_empty",
+            "statement": "No empty batches are produced",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-996a-70a9-9b6c-21a83dd7a0be",
+            "code": "order",
+            "statement": "Order is preserved; concatenating the batches yields the input items in order",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-996a-70a9-9b6c-27dd36602851",
+            "code": "regression_tests",
+            "statement": "Regression tests are added for the defects fixed and the full test suite passes",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d843-eb94-706e-b912-bf83fae24a99",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d843-d698-752d-8f61-9cb02850a89f",
+          "repository_id": "repo_01a0d843-2db6-7278-8f25-f2edf7992c47",
+          "dispatched_at": "2026-09-25T11:12:05.012Z",
+          "ended": false
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d845-0324-7093-918b-8a7c94be4d71",
+          "statement": "Fixed batcher.chunk so an oversized item is emitted alone in its own batch instead of being silently dropped, and guarded against emitting an empty batch when the oversized item is first. Added 3 regression tests (leading oversized item, consecutive oversized items, no batch ever empty) alongside the existing test_oversized_item_is_emitted_alone. Full suite (11 tests) passes.",
+          "evidence_ids": [
+            "evi_01a0d844-9f8e-74ea-b20a-75ec0757b97a",
+            "evi_01a0d844-e350-70e5-ab91-795fc539c646"
+          ],
+          "claimed_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "claimed_at": "2026-09-25T11:13:16.580Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d844-9f8e-74ea-b20a-75ec0757b97a",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T11:12:51.086Z",
+          "note": "Full suite (tests/test_chunk.py): 11 passed, 0 failed. Includes the previously-failing test_oversized_item_is_emitted_alone plus 3 new regression tests: test_leading_oversized_item_does_not_produce_empty_batch, test_consecutive_oversized_items_each_get_own_batch, test_no_batch_is_ever_empty."
+        },
+        {
+          "evidence_id": "evi_01a0d844-e350-70e5-ab91-795fc539c646",
+          "kind": "observation",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T11:13:08.432Z",
+          "note": "Static analysis of the defect in batcher/chunk.py (pre-fix) explaining why payloads were lost."
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d845-4cd3-7208-a18a-ff418941c473",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "Every criterion is backed by a passing, deterministic pytest test in the full local suite; the root-cause evidence explains why the fix addresses the drop rather than coincidentally passing."
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d845-7558-75f8-a58e-2c4eba8c36c1",
+        "decision": "accept",
+        "verification_exception": null,
+        "rationale": "All 6 declared acceptance criteria are supported by a high-confidence Verdict backed by a full local test-suite run (11 passed, 0 failed) plus root-cause evidence. Work has not been committed, pushed, or merged, and the user did not ask for that; settling as accept rather than land, since landing/merging is beyond this executor's authority without an explicit request."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "settled: accept",
+      "next_command": null
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 1
+  }
+}

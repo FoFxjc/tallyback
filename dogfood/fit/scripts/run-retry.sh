@@ -36,7 +36,7 @@ printf '%s\n' "$FINAL" > "$OUT/independent-check-final.txt"
 python3 - "$OUT/run.json" <<PY
 import json,sys
 json.dump({"run_id":"retry-worker-v2-$ALIAS","fixture":"retry-worker-v2","model_requested":"$MODEL","seed_sha":"$SEED",
- "workspace":"$WS","session_id":"$SID","phase1_seconds":$P1-$S,"phase2":$PHASE2,"total_seconds":$E-$S},open(sys.argv[1],"w"),indent=2)
+ "workspace":"$WS","session_id":"$SID","phase1_seconds":$P1-$S,"phase2":$([ "$PHASE2" = true ] && echo True || echo False),"total_seconds":$E-$S},open(sys.argv[1],"w"),indent=2)
 PY
 "$FIT/scripts/collect.sh" "$OUT" "$WS" >/dev/null 2>&1
 echo "retry-worker-v2-$ALIAS done (phase2=$PHASE2, $((E-S))s)"

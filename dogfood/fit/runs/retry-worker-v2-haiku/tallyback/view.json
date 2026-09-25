@@ -1,0 +1,194 @@
+{
+  "generated_from_revision": 23,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d843-580c-71df-9b65-abace2e44069",
+      "title": "Fix chunk() to avoid losing payloads",
+      "topic_id": "top_01a0d843-4803-75ab-9643-0d781e1aa7d6",
+      "declaration": {
+        "declaration_id": "dcl_01a0d843-7426-731f-8f95-1bb0958fb173",
+        "objective": "Fix the chunk() function to prevent payload loss by satisfying all batching constraints",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d843-7427-71d8-9327-098907b4690e",
+            "code": "max_items",
+            "statement": "A batch contains at most max_items items",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-7427-71d8-9327-0db85e14b548",
+            "code": "max_bytes",
+            "statement": "A batch of normal items contains at most max_bytes bytes in total",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-7427-71d8-9327-13d82141a341",
+            "code": "oversized_item",
+            "statement": "An item larger than max_bytes is never dropped; it is emitted alone in its own batch",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-7427-71d8-9327-1486fc058342",
+            "code": "no_empty_batches",
+            "statement": "No empty batches are produced",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-7427-71d8-9327-186baf18a48b",
+            "code": "order_preserved",
+            "statement": "Order is preserved; concatenating the batches yields the input items in order",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d843-7427-71d8-9327-1ded98183624",
+            "code": "regression_tests",
+            "statement": "Add regression tests for the defects; the full test suite must pass",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d843-d7e1-7344-93d8-30adb3016306",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d843-c0bb-721d-b103-7993fc54770f",
+          "repository_id": "repo_01a0d843-36c0-71da-9b84-a036f4bc836c",
+          "dispatched_at": "2026-09-25T11:11:59.969Z",
+          "ended": true
+        },
+        {
+          "attempt_id": "att_01a0d846-142e-725e-9528-c702cc2a1e47",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d843-c0bb-721d-b103-7993fc54770f",
+          "repository_id": "repo_01a0d843-36c0-71da-9b84-a036f4bc836c",
+          "dispatched_at": "2026-09-25T11:14:26.478Z",
+          "ended": false
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d844-e17b-702c-8b13-46b62a62d30c",
+          "statement": "Fix applied: oversized items are now correctly emitted in their own batch, not dropped",
+          "evidence_ids": [
+            "evi_01a0d844-9844-72e8-aebe-4119139aa52d",
+            "evi_01a0d844-c0ab-744f-990d-c9e261b00481"
+          ],
+          "claimed_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "claimed_at": "2026-09-25T11:13:07.964Z"
+        },
+        {
+          "claim_id": "clm_01a0d846-4076-7023-bd94-33b55692c31c",
+          "statement": "Fix refined: added guard to prevent empty batches. Now correctly handles oversized items without creating empty batches.",
+          "evidence_ids": [
+            "evi_01a0d846-21d5-7658-a822-722a620686b0",
+            "evi_01a0d846-2fc0-7529-9b64-efd2ddc211a5"
+          ],
+          "claimed_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "claimed_at": "2026-09-25T11:14:37.815Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d844-9844-72e8-aebe-4119139aa52d",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T11:12:49.221Z",
+          "note": "All 8 tests pass after fix: empty_input, respects_max_items, respects_max_bytes, exact_byte_boundary_fits_in_one_batch, preserves_order, oversized_item_is_emitted_alone, rejects_invalid_limits."
+        },
+        {
+          "evidence_id": "evi_01a0d844-c0ab-744f-990d-c9e261b00481",
+          "kind": "git_commit",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T11:12:59.563Z",
+          "note": "Commit fixing chunk() to emit oversized items: changed 'continue' to 'batches.append([item]); continue'"
+        },
+        {
+          "evidence_id": "evi_01a0d846-21d5-7658-a822-722a620686b0",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T11:14:29.973Z",
+          "note": "All 8 tests pass with improved fix. Verified counterexample: chunk([b'\"aaaaaa\"'], max_items=1, max_bytes=4) now returns [[b'\"aaaaaa\"']] without empty batches."
+        },
+        {
+          "evidence_id": "evi_01a0d846-2fc0-7529-9b64-efd2ddc211a5",
+          "kind": "git_commit",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T11:14:33.536Z",
+          "note": "Fix to prevent empty batches: added guard 'if current:' before appending current batch when oversized item encountered"
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d845-2ac3-748f-ba20-0f4bf9cc12b7",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "All acceptance criteria met: fix changes 'continue' to 'batches.append([item]); continue', emitting oversized items in their own batch. All 8 tests pass including previously failing test_oversized_item_is_emitted_alone. No regressions observed."
+          }
+        },
+        {
+          "verdict_id": "ver_01a0d846-5cc6-719a-a372-c13a3e10cea3",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "Improved fix: added 'if current:' guard before appending batch when oversized item detected. All 8 tests pass including the problematic no_empty_batches case. Verified counterexample from property-based check now passes correctly."
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d846-7219-7358-a2ac-19204ccffca0",
+        "decision": "land",
+        "verification_exception": null,
+        "rationale": "Improved fix addresses regression found by property-based check. Added guard 'if current:' to prevent empty batches when oversized item is first item. All acceptance criteria verified as supported with high confidence. All 8 tests pass; counterexample now handled correctly."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": true,
+        "stale": false
+      },
+      "next_action": "settled: land",
+      "next_command": {
+        "command": "tallyback land",
+        "reason": "ready_to_land here is the ledger half only (a land Settlement on positive verification); `tallyback land` checks the Git half: branch, commits ahead, conflicts.",
+        "requires": []
+      }
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 1,
+    "stale": 0,
+    "settled": 1
+  }
+}

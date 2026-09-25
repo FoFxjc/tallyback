@@ -1,0 +1,77 @@
+diff --git a/batcher/chunk.py b/batcher/chunk.py
+index 47c0ab0..84ef08b 100644
+--- a/batcher/chunk.py
++++ b/batcher/chunk.py
+@@ -23,17 +23,15 @@ def chunk(items: Iterable[bytes], max_items: int, max_bytes: int) -> list[list[b
+ 
+     for item in items:
+         size = len(item)
+-        next_size = current_size + size
+ 
+-        if next_size > max_bytes:
++        if current and (current_size + size > max_bytes or len(current) >= max_items):
+             batches.append(current)
+             current, current_size = [], 0
+-            if size > max_bytes:
+-                continue
+ 
+-        if len(current) >= max_items:
+-            batches.append(current)
+-            current, current_size = [], 0
++        if size > max_bytes:
++            # Oversized payloads cannot share a request; emit them alone, never drop them.
++            batches.append([item])
++            continue
+ 
+         current.append(item)
+         current_size += size
+diff --git a/tests/test_chunk.py b/tests/test_chunk.py
+index 88630d2..f41a8dc 100644
+--- a/tests/test_chunk.py
++++ b/tests/test_chunk.py
+@@ -37,6 +37,45 @@ def test_oversized_item_is_emitted_alone():
+     assert chunk([small, big, tail], max_items=10, max_bytes=10) == [[small], [big], [tail]]
+ 
+ 
++def test_leading_oversized_item_does_not_produce_empty_batch():
++    big, tail = b(50, "B"), b(2, "t")
++    assert chunk([big, tail], max_items=10, max_bytes=10) == [[big], [tail]]
++
++
++def test_consecutive_oversized_items_each_emitted_alone():
++    big1, big2 = b(20, "X"), b(30, "Y")
++    assert chunk([big1, big2], max_items=10, max_bytes=10) == [[big1], [big2]]
++
++
++def test_oversized_item_as_last_item_is_not_dropped():
++    small, big = b(2, "s"), b(50, "B")
++    assert chunk([small, big], max_items=10, max_bytes=10) == [[small], [big]]
++
++
++def test_item_limit_hit_before_oversized_item():
++    items = [b(1, "a"), b(1, "b"), b(50, "B"), b(1, "c")]
++    assert chunk(items, max_items=2, max_bytes=10) == [items[0:2], [items[2]], [items[3]]]
++
++
++def test_randomized_invariants():
++    import random
++
++    rng = random.Random(1234)
++    for _ in range(2000):
++        max_items = rng.randint(1, 5)
++        max_bytes = rng.randint(1, 20)
++        items = [bytes([i % 256]) * rng.randint(0, 30) for i in range(rng.randint(0, 15))]
++        batches = chunk(items, max_items=max_items, max_bytes=max_bytes)
++
++        assert [x for batch in batches for x in batch] == items
++        for batch in batches:
++            assert 1 <= len(batch) <= max_items
++            if any(len(x) > max_bytes for x in batch):
++                assert len(batch) == 1
++            else:
++                assert sum(map(len, batch)) <= max_bytes
++
++
+ @pytest.mark.parametrize("max_items,max_bytes", [(0, 10), (1, 0)])
+ def test_rejects_invalid_limits(max_items, max_bytes):
+     with pytest.raises(ValueError):

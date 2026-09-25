@@ -36,8 +36,12 @@ while kill -0 $APID 2>/dev/null; do
     if [ $(( $(date +%s) - FIRST_EDIT )) -ge 60 ]; then REASON="killed: attempt + implementation edited, NO Fit Decision within 60s"; break; fi
   fi
 done
-if kill -0 $APID 2>/dev/null; then kill -TERM -- -$APID 2>/dev/null; sleep 2; kill -KILL -- -$APID 2>/dev/null; fi
+# `timeout` (in claude-run.sh) moves itself into its own process group, so kill the whole
+# session (setsid made $APID its leader) and confirm nothing from it survives.
+if kill -0 $APID 2>/dev/null; then pkill -TERM -s $APID 2>/dev/null; sleep 2; pkill -KILL -s $APID 2>/dev/null; fi
 wait $APID 2>/dev/null
+sleep 1
+if pgrep -s $APID >/dev/null 2>&1; then echo "session A survived the kill" >&2; pgrep -a -s $APID >&2; exit 3; fi
 K=$(date +%s)
 # Snapshot of what session A left behind.
 git -C "$WS" status --short --untracked-files=all > "$OUT/session-a/git-status-at-kill.txt"
