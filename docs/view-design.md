@@ -148,6 +148,23 @@ names as the loop's explicit commands.
 `summary` is a small rollup over `tasks[].status`, not a second source of truth — it is
 computed from the same array the caller already has.
 
+### `next_command`
+
+Each task also carries `next_command` — the runnable form of `next_action` in the same
+`{ command, reason, requires }` shape as the ledger-level guidance below. Ids the ledger
+holds are filled in; what only the caller can decide (an objective, an assessment, a
+settlement decision, a statement) is a `<placeholder>` listed in `requires`. It never
+pre-selects a decision or an assessment, and `next_action` itself is unchanged.
+
+Two boundaries it states explicitly:
+
+- **settle without a positive Verdict**: the reason says accept/land need `--verdict-id` or
+  an explicit `--verification-exception`, and retry/abandon cite `--attempt-end-id` /
+  `--blocker`. (A withheld verdict still yields `next_action: "settle"`, per §4 step 8.)
+- **`status.ready_to_land`** is the ledger half of readiness (SPEC §7.2; `docs/land-design.md`):
+  a land Settlement on positive verification. For a ledger-ready task `next_command` is
+  `tallyback land`, which checks the Git half.
+
 ### Before the first Task
 
 An initialized ledger with no Task has no per-task `next_action` to follow, so an

@@ -8,9 +8,10 @@ description: Use when driving a Tallyback-tracked task through its lifecycle (de
 ## Start here
 
 1. Run `tallyback view`.
-2. Follow its `next_action`: the top-level one when the ledger has no Task yet, otherwise
-   each task's own. Fill only the `<placeholder>` values it lists under `requires`;
-   never invent any other part of the command.
+2. Run the command it suggests: the top-level `next_action.command` while the ledger has
+   no Task, then each task's `next_command.command`. Fill only the `<placeholder>` values
+   listed in `requires` — assessments, decisions, and statements are yours to judge; never
+   invent any other part of the command.
 3. Repeat after each step.
 
 For any command's required flags, accepted values, and examples, run
@@ -23,7 +24,8 @@ do not re-initialize over it.
 
 Do not infer Tallyback state from filesystem errors, Git status, passing tests, or a
 worker saying "done". Work is only settled when `view` shows a Settlement
-(`next_action: "settled: <decision>"`).
+(`next_action: "settled: <decision>"`). `status.ready_to_land` is the ledger half only;
+`tallyback land` checks the Git half.
 
 Tallyback externalizes the state of delegated work: what was promised, who attempted it,
 what came back, what was verified, and what was settled. This skill is the semantic layer

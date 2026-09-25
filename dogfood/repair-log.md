@@ -170,3 +170,32 @@ code"` records the result text.
   superseding with `--criterion` still works.
 - **Uncertainty**: `--no-criteria` remains available, so a determined caller can still
   declare an unjudgeable task; it now says so in the command line.
+
+## R8 — Per-task `next_command`; `ready_to_land` / `settle` affordances (F10 9/9, F9 3/9)
+
+- **Reproduced**: per-task `next_action` is a phase name (`"declare"`, `"dispatch"`,
+  `"verify (record-check)"`, `"settle"`); the benchmark's first failures in every run came
+  at exactly that step. `view` of an uncommitted `land` settlement: `ready_to_land: true`
+  while `tallyback land` says `git_unresolved`; `next_action: "settle"` after
+  `verdict_withheld`.
+- **Investigation (F9)**: not a semantic defect. SPEC §7.2 and `docs/land-design.md` define
+  the ledger projection as the ledger half of readiness; the Git half is `tallyback land`
+  by design (no I/O in projections). `next_action: "settle"` after a withheld verdict
+  follows view-design §4 step 8 — retry/abandon remain valid. Both are affordance problems:
+  nothing said what the value meant or what to run. Behaviour of `status` and `next_action`
+  is therefore **unchanged**.
+- **Change**: `TaskView.next_command` (`{command, reason, requires}`), with ledger ids filled
+  and `<placeholders>` for caller judgments: resolve / declare / workspace-or-dispatch /
+  claim (with `--evidence`) / `verdict` per declared criterion / settle (with the positive
+  `--verdict-id` when one exists, otherwise a reason stating the basis rule) /
+  `tallyback land` for a ledger-ready task. Skill and view-design updated.
+- **Regression**: `test/view-next-command.test.ts` — a follower that fills only
+  placeholders goes from an empty Git repo to `settled: accept` with zero failed commands;
+  the withheld-verdict settle reason; the land pointer.
+- **Dogfood**: scripted follower (scratch `follow.py`): init → topic → task → declare →
+  workspace → dispatch → evidence + claim → verdict → settle, 9 steps, 0 failures,
+  `validate` ok. Its own harness bugs (double `--project-root`, unquoted multi-word value)
+  were caught by R2's fail-closed parsing — before R2 the second would have silently
+  truncated a title.
+- **Uncertainty**: `next_command` covers the single latest Attempt/Claim; multi-attempt
+  tasks still need judgment about which Attempt to settle. `next_action` naming is left as is.

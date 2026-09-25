@@ -27,6 +27,7 @@ import type {
 } from '../contract/index.js';
 import {
   computeProjectionValues,
+  isPositiveVerification,
   type ProjectionValues,
   type StalePolicy,
 } from '../ledger/projections.js';
@@ -110,6 +111,12 @@ export interface TaskView {
   settlement: TaskViewSettlement | null;
   status: TaskViewStatus;
   next_action: string;
+  /**
+   * The runnable form of `next_action`: one command with this task's ids filled in and
+   * `<placeholders>` (listed in `requires`) for what only the caller can supply. Advice,
+   * never a transition. Null when no single command follows.
+   */
+  next_command: LedgerNextAction | null;
 }
 
 export interface ViewSummary {
@@ -218,6 +225,137 @@ function deriveNextAction(snapshot: Snapshot, task: Task, projections: Projectio
   return 'settle';
 }
 
+/**
+ * The runnable form of a task's `next_action` (see `TaskView.next_command`). Every id is
+ * one the ledger already holds; anything else is a `<placeholder>` named in `requires`.
+ * Mirrors `deriveNextAction`'s branches and never decides anything on the caller's behalf
+ * — in particular it never pre-selects a settlement decision or an assessment.
+ */
+function deriveNextCommand(
+  snapshot: Snapshot,
+  task: Task,
+  projections: ProjectionValues,
+  nextAction: string,
+  status: TaskViewStatus,
+): LedgerNextAction | null {
+  const t = task.task_id;
+  if (nextAction === 'resolve blocker') {
+    const blocker = (projections.blocked[t] ?? [])[0]!;
+    return {
+      command: `tallyback resolve --blocker-id ${blocker} --disposition <resolved|withdrawn> --explanation <text>`,
+      reason: 'An unresolved Blocker is recorded on this task.',
+      requires: ['--disposition', '--explanation'],
+    };
+  }
+  if (nextAction.startsWith('settled: ')) {
+    if (!status.ready_to_land) return null;
+    return {
+      command: 'tallyback land',
+      reason:
+        'ready_to_land here is the ledger half only (a land Settlement on positive ' +
+        'verification); `tallyback land` checks the Git half: branch, commits ahead, conflicts.',
+      requires: [],
+    };
+  }
+  const declaration = effectiveRecords(snapshot.declarations).find((d) => d.task_id === t);
+  if (nextAction === 'declare' || !declaration) {
+    return {
+      command: `tallyback declare --task-id ${t} --objective <objective> --criterion <code:statement>`,
+      reason: 'Declare what done means; repeat --criterion once per acceptance criterion.',
+      requires: ['--objective', '--criterion'],
+    };
+  }
+  const attempts = snapshot.attempts.filter((a) => a.task_id === t);
+  if (nextAction === 'dispatch') {
+    const repositories = snapshot.repositories;
+    const repo = repositories.length === 1 ? repositories[0]!.repository_id : '<repo_…>';
+    const workspaces = snapshot.workspaces.filter(
+      (w) => repositories.length !== 1 || w.repository_id === repo,
+    );
+    if (workspaces.length === 0) {
+      return {
+        command: `tallyback workspace --repository-id ${repo} --branch <branch>`,
+        reason: 'Dispatch needs a Workspace; register the checkout/branch the work happens on.',
+        requires: repositories.length === 1 ? ['--branch'] : ['--repository-id', '--branch'],
+      };
+    }
+    const ws = workspaces.length === 1 ? workspaces[0]!.workspace_id : '<wsp_…>';
+    return {
+      command:
+        `tallyback dispatch --task-id ${t} --declaration-id ${declaration.declaration_id} ` +
+        `--repository-id ${repo} --workspace-id ${ws} --executor <kind:id>`,
+      reason: 'Start an Attempt; --executor names who does the work.',
+      requires: [
+        ...(repositories.length === 1 ? [] : ['--repository-id']),
+        ...(workspaces.length === 1 ? [] : ['--workspace-id']),
+        '--executor',
+      ],
+    };
+  }
+  const latestAttempt = pickLatest(
+    attempts,
+    (a) => a.dispatched_at,
+    (a) => a.attempt_id,
+  )!;
+  if (nextAction === 'observe (claim)') {
+    return {
+      command:
+        `tallyback claim --task-id ${t} --attempt-id ${latestAttempt.attempt_id} ` +
+        `--declaration-id ${latestAttempt.declaration_id} --statement <statement> --evidence <evi_…>`,
+      reason:
+        'Record what the Attempt claims. Record Evidence first (`tallyback evidence --help`) ' +
+        'and cite it with --evidence (repeatable).',
+      requires: ['--statement', '--evidence'],
+    };
+  }
+  const claims = snapshot.claims.filter((c) => c.attempt_id === latestAttempt.attempt_id);
+  const latestClaim = pickLatest(
+    claims,
+    (c) => c.claimed_at,
+    (c) => c.claim_id,
+  );
+  if (nextAction.startsWith('verify') && latestClaim) {
+    const claimDeclaration = snapshot.declarations.find(
+      (d) => d.declaration_id === latestClaim.declaration_id,
+    );
+    const codes = (claimDeclaration?.criteria ?? []).map((c) => c.code);
+    return {
+      command:
+        `tallyback verdict --claim ${latestClaim.claim_id} ` +
+        codes.map((c) => `--criterion ${c}=<assessment> `).join('') +
+        '--confidence <low|medium|high> --rationale <text>',
+      reason:
+        'Judge the claim criterion by criterion (assessment: supported|partially_supported|' +
+        'unsupported|contradicted); --finding/--finding-basis say what supports each one.',
+      requires: [...codes.map((c) => `--criterion ${c}`), '--confidence', '--rationale'],
+    };
+  }
+  if (nextAction === 'settle') {
+    const positive = snapshot.verdicts
+      .filter((v) => latestClaim && v.subject.id === latestClaim.claim_id)
+      .filter((v) =>
+        isPositiveVerification(
+          v,
+          snapshot.declarations.find((d) => d.declaration_id === v.declaration_id),
+        ),
+      )
+      .map((v) => v.verdict_id)
+      .sort();
+    const verdict = positive.at(-1);
+    return {
+      command:
+        `tallyback settle --task-id ${t} --attempt-id ${latestAttempt.attempt_id} ` +
+        `--decision <accept|retry|abandon|land> ${verdict ? `--verdict-id ${verdict} ` : ''}--rationale <text>`,
+      reason: verdict
+        ? 'Record the decision explicitly. land authorises integration; accept does not.'
+        : 'No positive Verdict exists for the latest claim: accept/land need --verdict-id or an ' +
+          'explicit --verification-exception; retry/abandon cite --attempt-end-id and/or --blocker.',
+      requires: ['--decision', '--rationale'],
+    };
+  }
+  return null;
+}
+
 function buildTaskView(snapshot: Snapshot, task: Task, projections: ProjectionValues): TaskView {
   const declaration = effectiveRecords(snapshot.declarations).find(
     (d) => d.task_id === task.task_id,
@@ -250,6 +388,7 @@ function buildTaskView(snapshot: Snapshot, task: Task, projections: ProjectionVa
     (s) => s.settlement_id,
   );
 
+  const nextAction = deriveNextAction(snapshot, task, projections);
   const status: TaskViewStatus = {
     blocked: (projections.blocked[task.task_id]?.length ?? 0) > 0,
     // `verified` means positive verification (isPositiveVerification), never merely
@@ -318,7 +457,8 @@ function buildTaskView(snapshot: Snapshot, task: Task, projections: ProjectionVa
         }
       : null,
     status,
-    next_action: deriveNextAction(snapshot, task, projections),
+    next_action: nextAction,
+    next_command: deriveNextCommand(snapshot, task, projections, nextAction, status),
   };
 }
 
