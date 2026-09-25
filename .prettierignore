@@ -9,3 +9,5 @@ node_modules/
 dist/
 coverage/
 .tallyback/
+# Raw benchmark evidence is kept byte-for-byte as collected.
+dogfood/runs/

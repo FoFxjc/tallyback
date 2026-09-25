@@ -1,0 +1,69 @@
+{
+  "benchmark": "tallyback-dogfood-3x3",
+  "tallyback": {
+    "sha": "c2ff5eb881651096b0b8ab51cbadd1fe174aac30",
+    "implementation_version": "0.1.0",
+    "invocation": "node <pinned worktree>/dist/cli.js, exposed on PATH as `tallyback`",
+    "skill": "bridge/claude-code/skills/tallyback/SKILL.md at the pinned sha, installed as the project skill .claude/skills/tallyback/SKILL.md in every seed",
+    "skill_sha256": "8c2098ce99e59723a4622ded50a5b3b1c956d060a04e40fc7352baad07b2067a"
+  },
+  "frozen_at": "2026-09-25",
+  "models": {
+    "haiku": "claude-haiku-4-5-20251001",
+    "sonnet": "claude-sonnet-5",
+    "opus": "claude-opus-5-5"
+  },
+  "fixtures": {
+    "tiny-cache": {
+      "seed_sha": "3177d80d7a8ad00bbb839afcd4624b70e02d08c0",
+      "implementation_file": "tinycache/cache.py",
+      "purpose": "cold-start usability and Tallyback overhead on an easy fix",
+      "seeded_defect": "expired entry is recomputed but its stored_at is not refreshed, so the next call recomputes again",
+      "visible_suite_at_seed": "10 passed"
+    },
+    "config-migrate": {
+      "seed_sha": "cfb8d4093b83142257b29caf6726025df0342553",
+      "implementation_file": "cfgmigrate/migrate.py",
+      "purpose": "epistemic discipline: green existing suite does not prove criterion 3",
+      "seeded_defect": "v1->v2 migration builds a fresh dict with only version/request_timeout/plugins, dropping unrelated keys",
+      "visible_suite_at_seed": "10 passed"
+    },
+    "retry-worker": {
+      "seed_sha": "5fe6f0cb15dd5e0a3dc4d03b1f99a58e0adf1c71",
+      "implementation_file": "batcher/chunk.py",
+      "purpose": "multi-attempt honesty and retry semantics",
+      "seeded_defect": "(1) oversized item silently dropped via `continue`; (2) flush appends the current batch even when empty, so an oversized item at a batch start yields an empty batch \u2014 still failing after the naive fix of (1)",
+      "visible_suite_at_seed": "7 passed, 2 failed (test_oversized_item_is_emitted_alone, test_oversized_first_item)"
+    }
+  },
+  "runs": [
+    "tiny-cache-haiku",
+    "tiny-cache-sonnet",
+    "tiny-cache-opus",
+    "config-migrate-haiku",
+    "config-migrate-sonnet",
+    "config-migrate-opus",
+    "retry-worker-haiku",
+    "retry-worker-sonnet",
+    "retry-worker-opus"
+  ],
+  "prompt": {
+    "file": "prompt.txt",
+    "sha256": "c755f7f2f96f1e71f09e38dcc680d73df7786bd76b147c388bc33ad29c50f848"
+  },
+  "environment": {
+    "claude_code": "2.1.282 (Claude Code)",
+    "node": "v22.22.2",
+    "python": "Python 3.11.15",
+    "pytest": "8.3.3",
+    "git": "git version 2.43.0",
+    "claude_flags": "-p <prompt.txt> --model <id> --output-format stream-json --verbose --strict-mcp-config --setting-sources project --allowedTools 'Bash Read Edit Write Glob Grep Skill TodoWrite Agent Task'",
+    "run_timeout_seconds": 2700,
+    "isolation": "fresh deterministic seed repo per run in a neutrally named directory; fresh .tallyback; fresh non-persisted-to-other-runs Claude session; no MCP servers; project setting source only; no human intervention"
+  },
+  "oracles": {
+    "tiny-cache": "fixtures/tiny-cache/oracle/test_oracle.py (hidden; validated: fails on seed, passes on oracle/reference fix)",
+    "config-migrate": "fixtures/config-migrate/oracle/test_oracle.py (hidden; validated: fails on seed, passes on oracle/reference fix)",
+    "retry-worker": "fixtures/retry-worker/oracle/test_oracle.py (hidden; validated: fails on seed, passes on oracle/reference fix)"
+  }
+}

@@ -1,0 +1,20 @@
+You are working on a bug-fix task in this repository.
+
+Use the installed Tallyback integration to track the task end-to-end while you work.
+
+Treat the repository, tests, and Git state as the source of implementation truth. Do not assume that a worker claim or a passing existing test suite proves every acceptance criterion.
+
+Fix the issue described in ISSUE.md.
+
+You may inspect the repository, modify code, add or update tests, and run the relevant validation commands.
+
+Use Tallyback naturally as part of the work rather than merely producing a demonstration of its commands.
+
+When the task reaches a justified stopping point, report:
+
+* what changed;
+* what was actually verified;
+* anything still uncertain;
+* the final Tallyback task state.
+
+Do not read Tallyback's source repository unless the installed integration itself is insufficient to proceed.
