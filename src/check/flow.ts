@@ -108,6 +108,8 @@ export interface RecordCheckOutputResult {
   ok: boolean;
   revision: number;
   code?: string;
+  /** Why the append was rejected, when it was. */
+  message?: string;
 }
 
 /**

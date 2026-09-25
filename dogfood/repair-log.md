@@ -68,3 +68,27 @@ future benchmark round measures their effect.
   the id kind; `settle` without `--attempt-id` → `cli.missing_flag … See tallyback settle --help`.
 - **Uncertainty**: the hint table covers the codes seen in the benchmark; other validator
   messages still surface in wire terms unless they carry a `/records/N/<field>` path.
+
+## R4 — `record-check` reports the real rejection (F5, 6/9 runs)
+
+- **Reproduced**: `record-check --outcome verdict_emitted` (no verdict) →
+  `invariant.check_result_outcome_mismatch: recording the check result failed after 5
+retries` — no retry happened; `--verdict '{"pass":true}'` → `schema.undefined_value …
+failed after 5 retries`. Benchmark consequences: two false `check_failed` results,
+  `verdict_withheld` chosen for syntax, one hand-fabricated Verdict.
+- **Root cause**: `recordCheckOutput` dropped the validator's message; `recordCheckResult`
+  substituted a fixed retry-exhaustion message for every failure, although it breaks out
+  immediately on anything but a revision conflict.
+- **Change**: the rejection message is carried through (`RecordCheckOutputResult.message`,
+  optional, both interfaces); non-conflict failures say "the check result was rejected:
+  <validator message>"; only real revision-conflict exhaustion mentions retries, with the
+  actual count. The CLI rejects a `--verdict` JSON without `verdict_id` up front
+  (`cli.invalid_value`), and every `record-check` rejection carries a hint pointing to
+  `tallyback verdict` and to the honest use of `verdict_withheld` / `check_failed`.
+- **Regression**: `test/cli-diagnostics.test.ts` (record-check block); existing
+  `acceptance.test.ts` still proves the genuine conflict-retry path.
+- **Dogfood**: both benchmark failure shapes now name the real cause, carry the hint, and
+  leave `state.json` byte-identical; an honest `verdict_withheld` still records.
+- **Uncertainty**: `record-check` still requires complete raw records by design (it is the
+  Check boundary's low-level interface); the fix is diagnostics and redirection, not a new
+  authoring path.

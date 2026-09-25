@@ -103,3 +103,48 @@ describe('settlement basis diagnostics name the CLI flags', () => {
     expect(invalid.json['message']).toContain('returned|failed|cancelled');
   }, 60_000);
 });
+
+describe('record-check reports the real rejection', () => {
+  it('names the rejection instead of "failed after 5 retries", and points at `tallyback verdict`', async () => {
+    const fx = await buildLedger('tallyback-diag-');
+    const begin = await tb(fx.root, [
+      'begin-check',
+      '--claim-id',
+      fx.claim_id,
+      '--checker-id',
+      'pytest',
+      '--checker-version',
+      '8',
+    ]);
+    const invocation = (begin.json['invocation'] as { check_invocation_id: string })
+      .check_invocation_id;
+    const statePath = join(fx.root, '.tallyback', 'state.json');
+    const before = await readFile(statePath, 'utf8');
+
+    const noVerdict = await tb(fx.root, [
+      'record-check',
+      '--invocation-id',
+      invocation,
+      '--outcome',
+      'verdict_emitted',
+    ]);
+    expect(noVerdict.json['code']).toBe('invariant.check_result_outcome_mismatch');
+    expect(String(noVerdict.json['message'])).not.toContain('retries');
+    expect(String(noVerdict.json['message'])).toContain('requires a non-null verdict_id');
+    expect(noVerdict.json['hint']).toContain('tallyback verdict');
+
+    const guessed = await tb(fx.root, [
+      'record-check',
+      '--invocation-id',
+      invocation,
+      '--outcome',
+      'verdict_emitted',
+      '--verdict',
+      '{"pass":true}',
+    ]);
+    expect(guessed.json['code']).toBe('cli.invalid_value');
+    expect(String(guessed.json['message'])).toContain('complete Verdict record');
+
+    expect(await readFile(statePath, 'utf8')).toBe(before);
+  }, 60_000);
+});

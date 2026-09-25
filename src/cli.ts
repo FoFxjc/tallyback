@@ -555,6 +555,15 @@ function cliHint(command: string, outcome: RejectedOutcome): string | null {
       return '--verification-exception is only for accept/land; retry and abandon take --attempt-end-id and/or --blocker.';
     }
   }
+  if (command === 'record-check') {
+    return (
+      'record-check takes complete contract records. To judge a Claim, use ' +
+      '`tallyback verdict --claim <clm_…> --criterion <code>=<assessment> --confidence <level> ' +
+      '--rationale "…"`, which records the CheckInvocation, CheckResult, and Verdict together. ' +
+      'If no Verdict was reached, record that honestly with --outcome verdict_withheld; ' +
+      'use check_failed only when the check itself failed.'
+    );
+  }
   const field = /\/records\/\d+\/([a-z_]+)/.exec(message)?.[1];
   const flag = field?.replace(/_/g, '-');
   if (flag && COMMAND_SPECS.get(command)?.flags.some((f) => f.name === flag)) {
@@ -635,6 +644,19 @@ async function dispatch(
       const verdicts = jsonArray<Verdict>(args, 'verdict');
       if (verdicts.length > 1) {
         throw new CliError('--verdict may be given at most once (a result carries one Verdict)');
+      }
+      const verdict = verdicts[0] as unknown;
+      if (
+        verdict !== undefined &&
+        (typeof verdict !== 'object' ||
+          verdict === null ||
+          typeof (verdict as { verdict_id?: unknown }).verdict_id !== 'string')
+      ) {
+        throw new CliError(
+          '--verdict must be a complete Verdict record (it has no verdict_id); nothing was ' +
+            'recorded. To judge a Claim without writing raw records, use `tallyback verdict`',
+          'cli.invalid_value',
+        );
       }
       return store.recordCheckResult({
         check_invocation_id: str(args, 'invocation-id'),

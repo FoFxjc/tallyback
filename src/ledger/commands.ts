@@ -75,6 +75,8 @@ export interface RecordCheckOutputResult {
   ok: boolean;
   revision: number;
   code?: string;
+  /** Why the append was rejected, when it was. */
+  message?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -647,7 +649,12 @@ export class Store extends LedgerStore {
     };
     const result = await this.append(operation);
     if (!result.ok) {
-      return { ok: false, revision: this.currentRevision(), code: result.code };
+      return {
+        ok: false,
+        revision: this.currentRevision(),
+        code: result.code,
+        ...(result.message ? { message: result.message } : {}),
+      };
     }
     return { ok: true, revision: result.revision };
   }
@@ -754,18 +761,30 @@ export class Store extends LedgerStore {
 
     const maxRetries = input.maxRetries ?? 5;
     let last: RecordCheckOutputResult = { ok: false, revision: this.currentRevision() };
+    let retries = 0;
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       last = await this.recordCheckOutput(bundle, this.currentRevision());
       if (last.ok) {
         return { ok: true, revision: last.revision, check_result, bundle };
       }
-      if (last.code !== 'mutation.revision_conflict') break;
-      await this.reload();
+      // Only a revision conflict is worth retrying; anything else is a real rejection of
+      // the submitted records and must be reported as such, not as retry exhaustion.
+      if (last.code !== 'mutation.revision_conflict') {
+        return {
+          ok: false,
+          code: last.code ?? 'mutation.persist_failed',
+          message: `the check result was rejected: ${last.message ?? last.code ?? 'unknown reason'}`,
+        };
+      }
+      if (attempt < maxRetries) {
+        retries++;
+        await this.reload();
+      }
     }
     return {
       ok: false,
-      code: last.code ?? 'mutation.revision_conflict',
-      message: `recording the check result failed after ${maxRetries} retries`,
+      code: 'mutation.revision_conflict',
+      message: `recording the check result lost the revision race ${retries + 1} times (${retries} retries)`,
     };
   }
 
