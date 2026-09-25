@@ -151,3 +151,22 @@ code"` records the result text.
 - **Uncertainty**: findings remain optional. Requiring them would force authors to write
   something per criterion but risks boilerplate; the next benchmark should show whether
   agents use them once visible.
+
+## R7 — Criteria-less `declare` must be deliberate (F1, 9/9 runs)
+
+- **Reproduced**: `declare --task-id <tsk> --objective "fix it"` → `ok: true`,
+  `criteria: []`; `tallyback verdict` later refuses ("declaration … has no criteria;
+  nothing to assess"). Every benchmark run's first declaration looked like this.
+- **Root cause**: `--criterion` is optional at the CLI; the omission (or, before R2, a
+  misspelled flag) was indistinguishable from a choice.
+- **Change**: the CLI requires ≥ 1 `--criterion` or an explicit `--no-criteria`
+  (`cli.missing_flag` otherwise; `cli.invalid_value` for both). The Store and the frozen
+  contract still accept criteria-less declarations — this is an authoring guard, not a
+  contract change. Found while testing: the "did you mean" ranking preferred containment
+  (`--criteria` → `--no-criteria`); it now ranks by edit distance first.
+- **Regression**: `test/cli-declare.test.ts`; suggestion case in `cli-fail-closed.test.ts`.
+- **Dogfood**: bare `declare` rejected with guidance and `state.json` unchanged;
+  `--criterion` + `--no-criteria` rejected; `--no-criteria` records an empty declaration;
+  superseding with `--criterion` still works.
+- **Uncertainty**: `--no-criteria` remains available, so a determined caller can still
+  declare an unjudgeable task; it now says so in the command line.

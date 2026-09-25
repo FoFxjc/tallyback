@@ -98,6 +98,7 @@ const BOOLEAN_FLAGS = new Set([
   'allow-partial',
   'all',
   'repair-header',
+  'no-criteria',
 ]);
 
 function parseArgs(argv: string[]): { command: string; args: Args; positionals: string[] } {
@@ -713,6 +714,21 @@ async function dispatch(
         if (idx <= 0) throw new CliError('--criterion must be "code:statement"');
         return { code: c.slice(0, idx), statement: c.slice(idx + 1) };
       });
+      // A declaration without criteria cannot be judged later (`tallyback verdict` has
+      // nothing to assess). The contract allows it, so the CLI does not forbid it — but it
+      // must be deliberate, not the silent result of a forgotten or misspelled flag.
+      const noCriteria = args['no-criteria'] === 'true';
+      if (criteria.length === 0 && !noCriteria) {
+        throw new CliError(
+          'declare needs at least one --criterion "code:statement" (repeat per acceptance ' +
+            'criterion) — criteria are what a Verdict later assesses. To record a declaration ' +
+            'without any, deliberately, pass --no-criteria',
+          'cli.missing_flag',
+        );
+      }
+      if (criteria.length > 0 && noCriteria) {
+        throw new CliError('--no-criteria contradicts --criterion', 'cli.invalid_value');
+      }
       return store.declare({
         task_id: taskRef(store, args),
         objective: str(args, 'objective'),

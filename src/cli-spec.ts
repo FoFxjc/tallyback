@@ -343,7 +343,14 @@ const commands: CommandSpec[] = [
         name: 'criterion',
         repeatable: true,
         placeholder: 'code:statement',
-        description: 'one acceptance criterion; repeat per criterion',
+        description:
+          'one acceptance criterion; repeat per criterion (at least one, unless --no-criteria)',
+      },
+      {
+        name: 'no-criteria',
+        boolean: true,
+        description:
+          'deliberately declare without criteria (a Verdict will have nothing to assess)',
       },
       {
         name: 'supersedes',
@@ -748,13 +755,18 @@ function distance(a: string, b: string): number {
 
 /** The declared flag an unknown one most plausibly meant, if any is close. */
 function closestFlag(name: string, flags: FlagSpec[]): string | null {
+  // Nearest by edit distance first; a flag contained in the unknown one (or vice versa)
+  // only as a fallback, so `--criteria` suggests `--criterion`, not `--no-criteria`, while
+  // `--basis-verification-exception` still finds `--verification-exception`.
   let best: { flag: string; score: number } | null = null;
   for (const f of flags) {
-    const contains = name.includes(f.name) || f.name.includes(name);
-    const score = contains ? 0 : distance(name, f.name);
+    const score = distance(name, f.name);
     if (score <= 3 && (!best || score < best.score)) best = { flag: f.name, score };
   }
-  return best?.flag ?? null;
+  if (best) return best.flag;
+  const containing = flags.filter((f) => name.includes(f.name) || f.name.includes(name));
+  containing.sort((a, b) => b.name.length - a.name.length);
+  return containing[0]?.name ?? null;
 }
 
 /** A usage problem found before any command logic runs. */
