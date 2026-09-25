@@ -13,6 +13,7 @@ description: Use when driving a Tallyback-tracked task through its lifecycle (de
    listed in `requires` — assessments, decisions, and statements are yours to judge; never
    invent any other part of the command.
 3. Repeat after each step.
+4. After `dispatch`, before changing anything: do the **Execution Fit Check** (below).
 
 Say who you are: Tallyback cannot know which agent is typing, so records you author are
 `unknown:unattributed` unless you pass `--actor <kind>:<id>` (e.g. `--actor executor:claude-code`)
@@ -69,6 +70,48 @@ the real gate.
 - **Precondition**: a Declaration exists for the Task, and a Repository/Workspace are registered for the Attempt to run in.
 - **Commands**: `tallyback dispatch`, `tallyback end`
 - **Guardrail**: ending an Attempt does not declare the Task complete. `end` records how an Attempt stopped — it never authorizes settlement.
+
+### Execution Fit Check (after dispatch, before work)
+
+Ask: can I responsibly attempt **and verify** this Attempt without guessing, bypassing a
+safeguard, exceeding my authority, or calling unverified work verified?
+
+Check only:
+
+1. **Criteria** — do I understand each declared acceptance criterion?
+2. **Capability** — can I do the work?
+3. **Verification** — is there a credible way to get evidence for the important criteria?
+4. **Tools and authority** — do I have what I need, and am I allowed? (Committing, merging,
+   or settling `land` without being asked is usually beyond an executor's authority.)
+
+Answer exactly one:
+
+- `FIT` — a credible path to do and verify it.
+- `CONDITIONAL` — proceed, but a named limit (capability, evidence, tooling, or authority)
+  stays visible.
+- `NOT_FIT` — it would need guessing, bypassing a guardrail, exceeding authority, or
+  claiming verification I cannot get.
+
+Record it on the Attempt (a Decision has no lifecycle effect):
+
+```
+tallyback decision --subject-kind attempt --subject-id <att_…> --role execution_choice \
+  --question "Execution fit" --choice "<FIT|CONDITIONAL|NOT_FIT>: <one line>" \
+  --rationale "criteria: …; capability: …; verification: …; tools/authority: …" --actor <you>
+```
+
+- Fit is an assessment — not permission, Evidence, a Verdict, or a Settlement. `FIT` does
+  not mean it will work.
+- `CONDITIONAL`: carry the limit into your Claim, your Verdict (`--limitation`,
+  `--uncertainty`), and your final report.
+- `NOT_FIT`: do not fabricate progress. `tallyback end --attempt-id <att_…> --outcome returned
+--reason "NOT_FIT: …"`, raise `tallyback block` for what is missing, and report back.
+- **Re-assess when reality disagrees** (e.g. a check fails after you believed you were
+  done): record a new Decision with `--supersedes <dec_…>` instead of settling over it. If
+  more work is needed, `end` the Attempt, `settle --decision retry --attempt-end-id <ate_…>`,
+  and dispatch a new Attempt.
+- Every executor — including a new session resuming this task — does its own Fit Check.
+  An earlier one does not carry over (earlier Decisions are in `tallyback show`).
 
 ### Observe
 

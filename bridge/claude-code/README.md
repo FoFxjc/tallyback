@@ -35,3 +35,12 @@ In Claude Code the project's `.claude/settings.json` can set it for every Bash c
 
 Use an id that is true for your setup; a per-command `--actor` still overrides it (for
 example a separate verifier recording a Verdict as `subagent:<name>`).
+
+## Execution Fit Check
+
+The skill asks the executor, after `dispatch` and before any work, whether it can
+responsibly attempt **and verify** the Attempt (criteria, capability, verification path,
+tools/authority), answering `FIT`, `CONDITIONAL`, or `NOT_FIT`. It is recorded as an
+existing contract record — a `Decision` on the Attempt with role `execution_choice` — and
+revised with `--supersedes`. It is guidance for the executor only: Tallyback core does not
+read, require, or act on it, and works unchanged when a host skips it.
