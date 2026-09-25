@@ -1,0 +1,30 @@
+{
+  "model_reported_by_cli": "claude-opus-5-5",
+  "model_usage": null,
+  "num_turns": null,
+  "duration_ms": null,
+  "total_cost_usd": null,
+  "result_is_error": null,
+  "tool_calls": 12,
+  "tool_calls_by_name": {
+    "Bash": 9,
+    "Edit": 2,
+    "Skill": 1
+  },
+  "tallyback_invocations": 8,
+  "tallyback_failed_or_rejected": 1,
+  "tallyback_by_subcommand": {
+    "decision": 1,
+    "declare": 1,
+    "dispatch": 1,
+    "handshake": 1,
+    "init": 1,
+    "task": 1,
+    "topic": 1,
+    "workspace": 1
+  },
+  "used_skill_tool": true,
+  "touched_tallyback_source": false,
+  "inspected_tallyback_wrapper": true,
+  "spawned_subagents": 0
+}

@@ -1,0 +1,55 @@
+..........FF.F                                                           [100%]
+=================================== FAILURES ===================================
+_________________ test_issue_example_preserves_custom_section __________________
+
+    def test_issue_example_preserves_custom_section():
+        doc = {"version": 1, "timeout": 30, "plugins": ["foo"], "custom": {"owner": "peter"}}
+>       assert migrate(doc) == {
+            "version": 2,
+            "request_timeout": 30,
+            "plugins": ["foo"],
+            "custom": {"owner": "peter"},
+        }
+E       AssertionError: assert {'plugins': [... 'version': 2} == {'custom': {'... 'version': 2}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Right contains 1 more item:
+E         {'custom': {'owner': 'peter'}}
+E         Use -v to get more diff
+
+tests/test_migrate.py:47: AssertionError
+___________________ test_preserves_unknown_keys_recursively ____________________
+
+    def test_preserves_unknown_keys_recursively():
+        nested = {"a": {"b": [1, {"c": None}], "timeout": 5}, "flag": True}
+        out = migrate(v1(custom=nested, extra="x"))
+>       assert out["custom"] == {"a": {"b": [1, {"c": None}], "timeout": 5}, "flag": True}
+E       KeyError: 'custom'
+
+tests/test_migrate.py:58: KeyError
+_______________________ test_output_does_not_alias_input _______________________
+
+    def test_output_does_not_alias_input():
+        doc = v1(custom={"owner": "peter", "tags": ["a"]})
+        out = migrate(doc)
+>       out["custom"]["tags"].append("b")
+E       KeyError: 'custom'
+
+tests/test_migrate.py:72: KeyError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_migrate.py::test_sets_current_version
+PASSED tests/test_migrate.py::test_renames_timeout_to_request_timeout
+PASSED tests/test_migrate.py::test_keeps_plugins
+PASSED tests/test_migrate.py::test_missing_plugins_defaults_to_empty_list
+PASSED tests/test_migrate.py::test_current_version_is_returned_as_is
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[None]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[1]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[True]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[0]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[3]
+PASSED tests/test_migrate.py::test_does_not_mutate_input
+FAILED tests/test_migrate.py::test_issue_example_preserves_custom_section - A...
+FAILED tests/test_migrate.py::test_preserves_unknown_keys_recursively - KeyEr...
+FAILED tests/test_migrate.py::test_output_does_not_alias_input - KeyError: 'c...
+3 failed, 11 passed in 0.03s

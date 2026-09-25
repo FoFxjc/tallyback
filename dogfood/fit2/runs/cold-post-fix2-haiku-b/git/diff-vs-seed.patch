@@ -1,0 +1,50 @@
+diff --git a/cfgmigrate/migrate.py b/cfgmigrate/migrate.py
+index c9b01d4..e7f0bb1 100644
+--- a/cfgmigrate/migrate.py
++++ b/cfgmigrate/migrate.py
+@@ -26,11 +26,12 @@ class UnsupportedVersionError(ValueError):
+ 
+ 
+ def _v1_to_v2(old: Config) -> Config:
+-    return {
+-        "version": 2,
+-        "request_timeout": old["timeout"],
+-        "plugins": old.get("plugins", []),
+-    }
++    result = dict(old)
++    result["version"] = 2
++    result["request_timeout"] = result.pop("timeout")
++    if "plugins" not in result:
++        result["plugins"] = []
++    return result
+ 
+ 
+ _MIGRATIONS: dict[int, Callable[[Config], Config]] = {
+diff --git a/tests/test_migrate.py b/tests/test_migrate.py
+index b483b98..e31480c 100644
+--- a/tests/test_migrate.py
++++ b/tests/test_migrate.py
+@@ -38,3 +38,23 @@ def test_current_version_is_returned_as_is():
+ def test_rejects_unsupported_versions(version):
+     with pytest.raises(UnsupportedVersionError):
+         migrate({"version": version, "timeout": 1})
++
++
++def test_preserves_unknown_keys():
++    doc = v1(custom={"owner": "peter"}, other_field="value")
++    result = migrate(doc)
++    assert result["custom"] == {"owner": "peter"}
++    assert result["other_field"] == "value"
++
++
++def test_does_not_mutate_input():
++    doc = v1()
++    original_id = id(doc)
++    original_timeout_id = id(doc["timeout"]) if "timeout" in doc else None
++
++    result = migrate(doc)
++
++    assert id(result) != original_id
++    assert "timeout" in doc
++    assert doc["timeout"] == 30
++    assert doc["version"] == 1

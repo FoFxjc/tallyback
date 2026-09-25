@@ -1,0 +1,22 @@
+{
+  "generated_from_revision": 12,
+  "policy": {
+    "stale_after_ms": 172800000
+  },
+  "findings": [
+    {
+      "task_id": "tsk_01a0d87c-8a73-742c-9477-61f9bef0920c",
+      "attempt_id": "att_01a0d87c-b338-765c-9382-0b9daea0758b",
+      "kind": "lost",
+      "code": "repository_unbound",
+      "reason": "no binding for repository repo_01a0d87c-7658-7478-9cf1-e8a6e0e6a2e2"
+    }
+  ],
+  "summary": {
+    "open_attempts": 1,
+    "stale": 0,
+    "lost": 1,
+    "claim_without_branch_advance": 0,
+    "unresolved": 0
+  }
+}

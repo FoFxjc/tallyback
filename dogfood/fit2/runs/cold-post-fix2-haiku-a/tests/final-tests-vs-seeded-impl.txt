@@ -1,0 +1,60 @@
+..........FFFF.                                                          [100%]
+=================================== FAILURES ===================================
+__________________________ test_preserves_custom_keys __________________________
+
+    def test_preserves_custom_keys():
+        """Regression test: custom fields should be preserved during migration."""
+        doc = v1(custom={"owner": "peter"})
+        result = migrate(doc)
+>       assert result["custom"] == {"owner": "peter"}
+E       KeyError: 'custom'
+
+tests/test_migrate.py:47: KeyError
+_______________________ test_preserves_nested_structure ________________________
+
+    def test_preserves_nested_structure():
+        """Regression test: nested dicts should be preserved and deep-copied."""
+        doc = v1(custom={"owner": "peter", "nested": {"key": "value"}})
+        result = migrate(doc)
+>       assert result["custom"] == {"owner": "peter", "nested": {"key": "value"}}
+E       KeyError: 'custom'
+
+tests/test_migrate.py:54: KeyError
+____________________ test_does_not_share_nested_references _____________________
+
+    def test_does_not_share_nested_references():
+        """Regression test: migrated config should not share references with input."""
+        doc = v1(custom={"owner": "peter"})
+        result = migrate(doc)
+>       assert result["custom"] is not doc["custom"]
+E       KeyError: 'custom'
+
+tests/test_migrate.py:61: KeyError
+________________________ test_preserves_arbitrary_keys _________________________
+
+    def test_preserves_arbitrary_keys():
+        """Regression test: any user-defined keys should be preserved."""
+        doc = v1(database={"host": "localhost", "port": 5432}, debug=True)
+        result = migrate(doc)
+>       assert result["database"] == {"host": "localhost", "port": 5432}
+E       KeyError: 'database'
+
+tests/test_migrate.py:71: KeyError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_migrate.py::test_sets_current_version
+PASSED tests/test_migrate.py::test_renames_timeout_to_request_timeout
+PASSED tests/test_migrate.py::test_keeps_plugins
+PASSED tests/test_migrate.py::test_missing_plugins_defaults_to_empty_list
+PASSED tests/test_migrate.py::test_current_version_is_returned_as_is
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[None]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[1]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[True]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[0]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[3]
+PASSED tests/test_migrate.py::test_does_not_mutate_input_on_v1
+FAILED tests/test_migrate.py::test_preserves_custom_keys - KeyError: 'custom'
+FAILED tests/test_migrate.py::test_preserves_nested_structure - KeyError: 'cu...
+FAILED tests/test_migrate.py::test_does_not_share_nested_references - KeyErro...
+FAILED tests/test_migrate.py::test_preserves_arbitrary_keys - KeyError: 'data...
+4 failed, 11 passed in 0.04s

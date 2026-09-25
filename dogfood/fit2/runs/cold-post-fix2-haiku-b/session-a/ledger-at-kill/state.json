@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 6,
+  "included_through": 6,
+  "project": {
+    "project_id": "prj_01a0d881-97d7-7759-9cdd-972f2617a279",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d881-97d8-72ad-ab6e-95385df75d30",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d881-97d8-72ad-ab6e-95385df75d30",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d881-e667-768e-ac21-0aa943b8e6cc",
+      "repository_id": "repo_01a0d881-97d8-72ad-ab6e-95385df75d30",
+      "branch": "main"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d881-a908-77fa-a318-2a87234e23bf",
+      "project_id": "prj_01a0d881-97d7-7759-9cdd-972f2617a279",
+      "name": "config-migration-bug",
+      "goal": "Fix config migration bug: preserve unknown keys during v1→v2 migration",
+      "created_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "created_at": "2026-09-25T12:19:31.208Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d881-b95e-7176-9148-368ddf93c29c",
+      "topic_id": "top_01a0d881-a908-77fa-a318-2a87234e23bf",
+      "title": "Fix config migration bug: preserve unknown keys during v1→v2 migration"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d881-cff8-73de-b7cb-609ab4b9a92c",
+      "task_id": "tsk_01a0d881-b95e-7176-9148-368ddf93c29c",
+      "declared_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "declared_at": "2026-09-25T12:19:41.177Z",
+      "objective": "Fix the config migration function to preserve unknown keys during v1→v2 migration",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d881-cff9-710a-a598-60be7f2b2ee6",
+          "code": "rename_timeout",
+          "statement": "Rename timeout to request_timeout",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d881-cff9-710a-a598-66aab2b8f2fa",
+          "code": "set_version",
+          "statement": "Set version to 2",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d881-cff9-710a-a598-6b06698ebfff",
+          "code": "preserve_keys",
+          "statement": "Preserve all unrelated user-defined keys recursively",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d881-cff9-710a-a598-6e639bd36c68",
+          "code": "no_mutation",
+          "statement": "Do not mutate the input object",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d881-cff9-710a-a598-7384d5a00fd5",
+          "code": "test_coverage",
+          "statement": "Add regression coverage for preservation of unknown keys",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d882-0dad-728f-ab06-25ad6c2351ce",
+      "task_id": "tsk_01a0d881-b95e-7176-9148-368ddf93c29c",
+      "declaration_id": "dcl_01a0d881-cff8-73de-b7cb-609ab4b9a92c",
+      "repository_id": "repo_01a0d881-97d8-72ad-ab6e-95385df75d30",
+      "workspace_id": "wsp_01a0d881-e667-768e-ac21-0aa943b8e6cc",
+      "executor": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "dispatched_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "dispatched_at": "2026-09-25T12:19:56.973Z"
+    }
+  ],
+  "attempt_ends": [],
+  "claims": [],
+  "evidence": [],
+  "reconciliations": [],
+  "check_invocations": [],
+  "check_results": [],
+  "verdicts": [],
+  "settlements": [],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": [
+    {
+      "decision_id": "dec_01a0d882-3947-77dc-a790-c3da2be172bf",
+      "subject": {
+        "kind": "attempt",
+        "id": "att_01a0d882-0dad-728f-ab06-25ad6c2351ce"
+      },
+      "role": "execution_choice",
+      "question": "Execution fit",
+      "choice": "FIT: Can implement and verify all criteria",
+      "rationale": "Criteria: All 5 acceptance criteria are clearly understood from ISSUE.md. Capability: I can modify migration code, run tests, verify preservation and immutability, and add test coverage. Hardest: Ensuring recursive preservation and immutability; this requires careful implementation. Evidence: Unit tests demonstrating custom key preservation, nested key preservation, and input immutability. Not authorised: I will not commit or merge. Stop if: Tests fail or criteria cannot be met with current approach.",
+      "decided_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "decided_at": "2026-09-25T12:20:08.135Z",
+      "basis": []
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "model_reported_by_cli": "claude-sonnet-5",
+  "model_usage": null,
+  "num_turns": null,
+  "duration_ms": null,
+  "total_cost_usd": null,
+  "result_is_error": null,
+  "tool_calls": 27,
+  "tool_calls_by_name": {
+    "Bash": 20,
+    "Edit": 3,
+    "Read": 3,
+    "Skill": 1
+  },
+  "tallyback_invocations": 15,
+  "tallyback_failed_or_rejected": 2,
+  "tallyback_by_subcommand": {
+    "decision": 1,
+    "declare": 2,
+    "dispatch": 2,
+    "init": 1,
+    "task": 3,
+    "topic": 2,
+    "view": 2,
+    "workspace": 2
+  },
+  "used_skill_tool": true,
+  "touched_tallyback_source": false,
+  "inspected_tallyback_wrapper": true,
+  "spawned_subagents": 0
+}

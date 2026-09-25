@@ -1,0 +1,143 @@
+{
+  "generated_from_revision": 13,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d87d-5608-75b8-b738-175efd24f60b",
+      "title": "Preserve unknown keys during v1->v2 migration",
+      "topic_id": "top_01a0d87d-3313-74e2-87bd-4b5df09c2724",
+      "declaration": {
+        "declaration_id": "dcl_01a0d87d-7daf-715c-969f-38d11607134d",
+        "objective": "v1->v2 config migration preserves all unrelated user-defined keys and does not mutate input",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d87d-7db0-737e-b8a6-279e77f3c723",
+            "code": "rename",
+            "statement": "timeout is renamed to request_timeout",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87d-7db0-737e-b8a6-2abf86282534",
+            "code": "version",
+            "statement": "version is set to 2",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87d-7db0-737e-b8a6-2e4ebf216615",
+            "code": "preserve",
+            "statement": "all unrelated user-defined keys are preserved recursively",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87d-7db0-737e-b8a6-339b5d95e31f",
+            "code": "no_mutate",
+            "statement": "the input config object is not mutated",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87d-7db0-737e-b8a6-36bb8163e0b7",
+            "code": "regression_test",
+            "statement": "a regression test covers preservation of unknown keys",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d87d-c6ec-737f-ab5d-d4d0c2c2b2b4",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d87d-ba72-74f8-b90b-8aee5c2a56fa",
+          "repository_id": "repo_01a0d87c-8668-7027-9603-cd0030d7169b",
+          "dispatched_at": "2026-09-25T12:15:16.717Z",
+          "ended": false,
+          "execution_fit": {
+            "decision_id": "dec_01a0d87e-c1aa-712c-b665-f78104a201af",
+            "decided_by": {
+              "kind": "executor",
+              "id": "claude-code"
+            },
+            "decided_at": "2026-09-25T12:16:20.907Z",
+            "assessment": "FIT",
+            "choice": "FIT: verified existing uncommitted fix meets all 5 criteria; can complete claim/verdict/settle",
+            "rationale": "criteria: all 5 understood and match ISSUE.md; capability: code already present in working tree (cfgmigrate/migrate.py uses copy.deepcopy + pop/setdefault) and appears correct; hardest: confirming no-mutation and recursive independence for nested structures, and that this isn't just a worker claim; evidence: ran full pytest suite (13 passed incl. 3 new regression tests for preserve/nested-independence/no-mutate), and manually reproduced the exact ISSUE.md YAML example confirming output matches expected and input dict is unchanged via deepcopy equality check; not authorised/equipped: will not commit, push, or run tallyback land/settle land without being explicitly asked; stop if: any test fails or manual repro output diverges from ISSUE.md's expected YAML",
+            "supersedes": "dec_01a0d87d-eb77-7471-9882-55ade984088e",
+            "concurrent": []
+          }
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d87f-266f-739f-98b5-4df1e5dcb1eb",
+          "statement": "_v1_to_v2 now deep-copies the input, renames timeout to request_timeout via pop, sets version=2, and defaults plugins; all 5 acceptance criteria (rename, version, recursive preserve, no mutation, regression test) are met and verified",
+          "evidence_ids": [
+            "evi_01a0d87e-f55a-700a-b827-7bf09b2dcb0c",
+            "evi_01a0d87f-0918-709f-b754-5ca681fc4b73"
+          ],
+          "claimed_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "claimed_at": "2026-09-25T12:16:46.703Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d87e-f55a-700a-b827-7bf09b2dcb0c",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T12:16:34.138Z",
+          "note": "13 passed, 0 failed: all pre-existing tests plus 3 new regression tests (test_preserves_unknown_keys, test_preserves_nested_unknown_keys_independently, test_does_not_mutate_input)"
+        },
+        {
+          "evidence_id": "evi_01a0d87f-0918-709f-b754-5ca681fc4b73",
+          "kind": "observation",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T12:16:39.192Z"
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d87f-6864-735a-9851-a67f9d9de5ff",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "test_renames_timeout_to_request_timeout and manual ISSUE.md repro confirm rename+version; test_preserves_unknown_keys and test_preserves_nested_unknown_keys_independently confirm recursive preservation with independent copies (deepcopy); test_does_not_mutate_input plus manual pre/post equality check confirm the input object is never mutated; the three new tests in tests/test_migrate.py directly cover the regression scenario from ISSUE.md"
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d87f-bdb8-70ce-a396-3f086263b02e",
+        "decision": "accept",
+        "verification_exception": null,
+        "rationale": "All 5 declared criteria assessed supported with high confidence: rename, version bump, recursive preservation of unknown keys (incl. nested, independently copied), no mutation of input, and 3 new regression tests added. Not settling as 'land' since committing/merging was not requested; the fix remains uncommitted in the working tree pending user direction."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "settled: accept",
+      "next_command": null
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 1
+  }
+}

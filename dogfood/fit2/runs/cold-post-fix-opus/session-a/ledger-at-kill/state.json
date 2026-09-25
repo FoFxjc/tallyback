@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 6,
+  "included_through": 6,
+  "project": {
+    "project_id": "prj_01a0d87c-7657-7458-82c4-97f23ba61e9e",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d87c-7658-7478-9cf1-e8a6e0e6a2e2",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d87c-7658-7478-9cf1-e8a6e0e6a2e2",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d87c-a622-717c-a3fd-cfa1b756f618",
+      "repository_id": "repo_01a0d87c-7658-7478-9cf1-e8a6e0e6a2e2",
+      "branch": "fix/migrate-preserve-keys"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d87c-8048-7406-b6df-e5f3a05ba920",
+      "project_id": "prj_01a0d87c-7657-7458-82c4-97f23ba61e9e",
+      "name": "config-migration",
+      "goal": "",
+      "created_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "created_at": "2026-09-25T12:13:53.096Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d87c-8a73-742c-9477-61f9bef0920c",
+      "topic_id": "top_01a0d87c-8048-7406-b6df-e5f3a05ba920",
+      "title": "Fix v1->v2 migration dropping user keys"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d87c-9a56-74b7-95ec-b23f3fc45f3d",
+      "task_id": "tsk_01a0d87c-8a73-742c-9477-61f9bef0920c",
+      "declared_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "declared_at": "2026-09-25T12:13:59.766Z",
+      "objective": "Migrating a v1 config to v2 preserves user settings",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d87c-9a57-7548-8d66-d7a8833c23f0",
+          "code": "rename",
+          "statement": "timeout is renamed to request_timeout",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d87c-9a57-7548-8d66-db6b49747669",
+          "code": "version",
+          "statement": "version is set to 2",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d87c-9a57-7548-8d66-dcde1f7cd8c1",
+          "code": "preserve",
+          "statement": "All unrelated user-defined keys are preserved recursively",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d87c-9a57-7548-8d66-e16926a37c99",
+          "code": "no-mutate",
+          "statement": "The input object is not mutated",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d87c-9a57-7548-8d66-e5ec07f478f7",
+          "code": "tests",
+          "statement": "Regression coverage exists for preservation of unknown keys",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d87c-b338-765c-9382-0b9daea0758b",
+      "task_id": "tsk_01a0d87c-8a73-742c-9477-61f9bef0920c",
+      "declaration_id": "dcl_01a0d87c-9a56-74b7-95ec-b23f3fc45f3d",
+      "repository_id": "repo_01a0d87c-7658-7478-9cf1-e8a6e0e6a2e2",
+      "workspace_id": "wsp_01a0d87c-a622-717c-a3fd-cfa1b756f618",
+      "executor": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_at": "2026-09-25T12:14:06.136Z"
+    }
+  ],
+  "attempt_ends": [],
+  "claims": [],
+  "evidence": [],
+  "reconciliations": [],
+  "check_invocations": [],
+  "check_results": [],
+  "verdicts": [],
+  "settlements": [],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": [
+    {
+      "decision_id": "dec_01a0d87c-ccfe-7684-b083-40ea931e0799",
+      "subject": {
+        "kind": "attempt",
+        "id": "att_01a0d87c-b338-765c-9382-0b9daea0758b"
+      },
+      "role": "execution_choice",
+      "question": "Execution fit",
+      "choice": "FIT: small pure-function fix in _v1_to_v2 with local pytest verification",
+      "rationale": "criteria: all five clear; capability: yes; hardest: 'recursively' + no-mutate means nested values must be deep-copied, not aliased; evidence: new pytest regression tests for unknown keys (top-level and nested), deep-copy isolation, and input immutability, plus full suite; not authorised/equipped: will not commit, merge, or settle land without being asked; stop if: existing tests break in a way that conflicts with criteria",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "decided_at": "2026-09-25T12:14:12.734Z",
+      "basis": []
+    }
+  ]
+}

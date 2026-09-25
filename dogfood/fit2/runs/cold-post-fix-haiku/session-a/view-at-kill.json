@@ -1,0 +1,101 @@
+{
+  "generated_from_revision": 6,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d87c-d854-77a6-90df-f86a576426c8",
+      "title": "Fix v1 config migration to preserve custom fields",
+      "topic_id": "top_01a0d87c-c6a7-76d3-bfa8-99dbba8b0afa",
+      "declaration": {
+        "declaration_id": "dcl_01a0d87c-efdd-76b9-8be9-ec5527700fa8",
+        "objective": "Migrate v1 config schema to v2 while preserving user-defined custom fields",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d87c-efdd-76b9-8be9-f0b8b31aa53b",
+            "code": "rename_timeout",
+            "statement": "Rename timeout to request_timeout",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87c-efdd-76b9-8be9-f6135bb128c6",
+            "code": "set_version",
+            "statement": "Set version to 2",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87c-efdd-76b9-8be9-f8522f81b1d0",
+            "code": "preserve_custom",
+            "statement": "Preserve all unrelated user-defined keys recursively",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87c-efdd-76b9-8be9-fc4b93c22ebf",
+            "code": "no_mutate",
+            "statement": "Do not mutate the input object",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87c-efdd-76b9-8bea-028f7ea2a8f8",
+            "code": "test_coverage",
+            "statement": "Add regression coverage for preservation of unknown keys",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d87d-308a-72df-b3ab-1dc0c832dd92",
+          "executor": {
+            "kind": "unknown",
+            "id": "unattributed"
+          },
+          "workspace_id": "wsp_01a0d87d-0eb7-750d-8d99-564fd2fd718d",
+          "repository_id": "repo_01a0d87c-b71e-72dd-9df9-76a353d6d4bb",
+          "dispatched_at": "2026-09-25T12:14:38.218Z",
+          "ended": false,
+          "execution_fit": {
+            "decision_id": "dec_01a0d87d-5584-727a-a959-e6464617c49f",
+            "decided_by": {
+              "kind": "unknown",
+              "id": "unattributed"
+            },
+            "decided_at": "2026-09-25T12:14:47.684Z",
+            "assessment": "FIT",
+            "choice": "FIT: Can implement and verify the criteria with tests",
+            "rationale": "criteria: clearly defined from issue; capability: can write Python code and run tests; hardest: ensuring recursive preservation without mutation; evidence: test execution; authority: feature branch only; stop if: tests fail or mutation detected",
+            "supersedes": null,
+            "concurrent": []
+          }
+        }
+      ],
+      "claims": [],
+      "evidence": [],
+      "blockers": [],
+      "verification": [],
+      "settlement": null,
+      "status": {
+        "blocked": false,
+        "verified": false,
+        "settled": false,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "observe (claim)",
+      "next_command": {
+        "command": "tallyback claim --task-id tsk_01a0d87c-d854-77a6-90df-f86a576426c8 --attempt-id att_01a0d87d-308a-72df-b3ab-1dc0c832dd92 --declaration-id dcl_01a0d87c-efdd-76b9-8be9-ec5527700fa8 --statement <statement> --evidence <evi_…>",
+        "reason": "Record what the Attempt claims. Record Evidence first (`tallyback evidence --help`) and cite it with --evidence (repeatable).",
+        "requires": [
+          "--statement",
+          "--evidence"
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 0
+  }
+}

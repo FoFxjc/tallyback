@@ -1,0 +1,12 @@
+{
+  "run_id": "cold-post-fix-opus",
+  "tallyback_sha": "174c45fc61244fc874a128410d58e209e50a0f86",
+  "fixture": "config-migrate",
+  "model_a": "claude-opus-5-5",
+  "model_b": "claude-opus-5-5",
+  "seed_sha": "2abb5c78b141eb0c75fc2cdc31bf5f55a60fb2c9",
+  "workspace": "/tmp/claude-0/-home-user-tallyback/01b763c0-69a7-5ad2-94c6-b173155321d2/scratchpad/fit2/w/a0apWRoE/repo",
+  "termination": "killed: attempt + Fit Decision + implementation edited",
+  "session_a_seconds": 36,
+  "session_b_seconds": 66
+}

@@ -1,0 +1,25 @@
+diff --git a/cfgmigrate/migrate.py b/cfgmigrate/migrate.py
+index c9b01d4..3315ee1 100644
+--- a/cfgmigrate/migrate.py
++++ b/cfgmigrate/migrate.py
+@@ -26,11 +26,15 @@ class UnsupportedVersionError(ValueError):
+ 
+ 
+ def _v1_to_v2(old: Config) -> Config:
+-    return {
+-        "version": 2,
+-        "request_timeout": old["timeout"],
+-        "plugins": old.get("plugins", []),
+-    }
++    result = {"version": 2}
++    for key, value in old.items():
++        if key == "timeout":
++            result["request_timeout"] = value
++        elif key != "version":
++            result[key] = value
++    if "request_timeout" not in result and "plugins" not in result:
++        result["plugins"] = []
++    return result
+ 
+ 
+ _MIGRATIONS: dict[int, Callable[[Config], Config]] = {

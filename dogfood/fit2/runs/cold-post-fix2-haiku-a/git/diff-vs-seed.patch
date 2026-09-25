@@ -1,0 +1,105 @@
+diff --git a/cfgmigrate/migrate.py b/cfgmigrate/migrate.py
+index c9b01d4..fa92828 100644
+--- a/cfgmigrate/migrate.py
++++ b/cfgmigrate/migrate.py
+@@ -14,6 +14,7 @@ Schema history:
+ 
+ from __future__ import annotations
+ 
++import copy
+ from typing import Any, Callable
+ 
+ Config = dict[str, Any]
+@@ -25,12 +26,26 @@ class UnsupportedVersionError(ValueError):
+     """The document's ``version`` is missing, unknown, or newer than this library."""
+ 
+ 
++def _deep_copy_value(value: Any) -> Any:
++    """Deep copy a YAML value, preserving structure without sharing references."""
++    if isinstance(value, dict):
++        return {k: _deep_copy_value(v) for k, v in value.items()}
++    elif isinstance(value, list):
++        return [_deep_copy_value(v) for v in value]
++    else:
++        return value
++
++
+ def _v1_to_v2(old: Config) -> Config:
+-    return {
+-        "version": 2,
+-        "request_timeout": old["timeout"],
+-        "plugins": old.get("plugins", []),
+-    }
++    result = {"version": 2}
++    for key, value in old.items():
++        if key == "timeout":
++            result["request_timeout"] = _deep_copy_value(value)
++        elif key != "version":
++            result[key] = _deep_copy_value(value)
++    if "plugins" not in result:
++        result["plugins"] = []
++    return result
+ 
+ 
+ _MIGRATIONS: dict[int, Callable[[Config], Config]] = {
+@@ -49,4 +64,7 @@ def migrate(config: Config) -> Config:
+     result = config
+     while result["version"] < CURRENT_VERSION:
+         result = _MIGRATIONS[result["version"]](result)
++
++    if result is config:
++        result = copy.deepcopy(config)
+     return result
+diff --git a/tests/test_migrate.py b/tests/test_migrate.py
+index b483b98..f44cc0f 100644
+--- a/tests/test_migrate.py
++++ b/tests/test_migrate.py
+@@ -38,3 +38,48 @@ def test_current_version_is_returned_as_is():
+ def test_rejects_unsupported_versions(version):
+     with pytest.raises(UnsupportedVersionError):
+         migrate({"version": version, "timeout": 1})
++
++
++def test_preserves_custom_keys():
++    """Regression test: custom fields should be preserved during migration."""
++    doc = v1(custom={"owner": "peter"})
++    result = migrate(doc)
++    assert result["custom"] == {"owner": "peter"}
++
++
++def test_preserves_nested_structure():
++    """Regression test: nested dicts should be preserved and deep-copied."""
++    doc = v1(custom={"owner": "peter", "nested": {"key": "value"}})
++    result = migrate(doc)
++    assert result["custom"] == {"owner": "peter", "nested": {"key": "value"}}
++
++
++def test_does_not_share_nested_references():
++    """Regression test: migrated config should not share references with input."""
++    doc = v1(custom={"owner": "peter"})
++    result = migrate(doc)
++    assert result["custom"] is not doc["custom"]
++    # Modifying nested dict in result should not affect input
++    result["custom"]["owner"] = "alice"
++    assert doc["custom"]["owner"] == "peter"
++
++
++def test_preserves_arbitrary_keys():
++    """Regression test: any user-defined keys should be preserved."""
++    doc = v1(database={"host": "localhost", "port": 5432}, debug=True)
++    result = migrate(doc)
++    assert result["database"] == {"host": "localhost", "port": 5432}
++    assert result["debug"] is True
++
++
++def test_does_not_mutate_input_on_v1():
++    """Regression test: input object should not be mutated during migration."""
++    doc = v1(custom={"owner": "peter"})
++    original_doc = {
++        "version": 1,
++        "timeout": 30,
++        "plugins": ["foo"],
++        "custom": {"owner": "peter"},
++    }
++    migrate(doc)
++    assert doc == original_doc

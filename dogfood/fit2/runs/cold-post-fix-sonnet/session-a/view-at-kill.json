@@ -1,0 +1,101 @@
+{
+  "generated_from_revision": 6,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d87d-5608-75b8-b738-175efd24f60b",
+      "title": "Preserve unknown keys during v1->v2 migration",
+      "topic_id": "top_01a0d87d-3313-74e2-87bd-4b5df09c2724",
+      "declaration": {
+        "declaration_id": "dcl_01a0d87d-7daf-715c-969f-38d11607134d",
+        "objective": "v1->v2 config migration preserves all unrelated user-defined keys and does not mutate input",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d87d-7db0-737e-b8a6-279e77f3c723",
+            "code": "rename",
+            "statement": "timeout is renamed to request_timeout",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87d-7db0-737e-b8a6-2abf86282534",
+            "code": "version",
+            "statement": "version is set to 2",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87d-7db0-737e-b8a6-2e4ebf216615",
+            "code": "preserve",
+            "statement": "all unrelated user-defined keys are preserved recursively",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87d-7db0-737e-b8a6-339b5d95e31f",
+            "code": "no_mutate",
+            "statement": "the input config object is not mutated",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87d-7db0-737e-b8a6-36bb8163e0b7",
+            "code": "regression_test",
+            "statement": "a regression test covers preservation of unknown keys",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d87d-c6ec-737f-ab5d-d4d0c2c2b2b4",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d87d-ba72-74f8-b90b-8aee5c2a56fa",
+          "repository_id": "repo_01a0d87c-8668-7027-9603-cd0030d7169b",
+          "dispatched_at": "2026-09-25T12:15:16.717Z",
+          "ended": false,
+          "execution_fit": {
+            "decision_id": "dec_01a0d87d-eb77-7471-9882-55ade984088e",
+            "decided_by": {
+              "kind": "executor",
+              "id": "claude-code"
+            },
+            "decided_at": "2026-09-25T12:15:26.072Z",
+            "assessment": "FIT",
+            "choice": "FIT: can implement and verify the migration fix with the existing pytest suite plus new regression tests",
+            "rationale": "criteria: all 5 understood (rename key, set version=2, recursively preserve unrelated keys, no input mutation, add regression test); capability: straightforward Python dict-handling fix in cfgmigrate/migrate.py; hardest: ensuring deep/nested preservation without mutating the original nested structures (shared list/dict references); evidence: run full pytest suite plus a manual repro of the exact ISSUE.md example and an identity/deepcopy check against the input; not authorised/equipped: will not commit, push, or run tallyback land/settle land without being explicitly asked; stop if: any pytest failure or the manual repro output does not match ISSUE.md's expected YAML",
+            "supersedes": null,
+            "concurrent": []
+          }
+        }
+      ],
+      "claims": [],
+      "evidence": [],
+      "blockers": [],
+      "verification": [],
+      "settlement": null,
+      "status": {
+        "blocked": false,
+        "verified": false,
+        "settled": false,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "observe (claim)",
+      "next_command": {
+        "command": "tallyback claim --task-id tsk_01a0d87d-5608-75b8-b738-175efd24f60b --attempt-id att_01a0d87d-c6ec-737f-ab5d-d4d0c2c2b2b4 --declaration-id dcl_01a0d87d-7daf-715c-969f-38d11607134d --statement <statement> --evidence <evi_…>",
+        "reason": "Record what the Attempt claims. Record Evidence first (`tallyback evidence --help`) and cite it with --evidence (repeatable).",
+        "requires": [
+          "--statement",
+          "--evidence"
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 0
+  }
+}

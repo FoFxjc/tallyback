@@ -1,0 +1,146 @@
+{
+  "generated_from_revision": 12,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d87c-8a73-742c-9477-61f9bef0920c",
+      "title": "Fix v1->v2 migration dropping user keys",
+      "topic_id": "top_01a0d87c-8048-7406-b6df-e5f3a05ba920",
+      "declaration": {
+        "declaration_id": "dcl_01a0d87c-9a56-74b7-95ec-b23f3fc45f3d",
+        "objective": "Migrating a v1 config to v2 preserves user settings",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d87c-9a57-7548-8d66-d7a8833c23f0",
+            "code": "rename",
+            "statement": "timeout is renamed to request_timeout",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87c-9a57-7548-8d66-db6b49747669",
+            "code": "version",
+            "statement": "version is set to 2",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87c-9a57-7548-8d66-dcde1f7cd8c1",
+            "code": "preserve",
+            "statement": "All unrelated user-defined keys are preserved recursively",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87c-9a57-7548-8d66-e16926a37c99",
+            "code": "no-mutate",
+            "statement": "The input object is not mutated",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87c-9a57-7548-8d66-e5ec07f478f7",
+            "code": "tests",
+            "statement": "Regression coverage exists for preservation of unknown keys",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d87c-b338-765c-9382-0b9daea0758b",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d87c-a622-717c-a3fd-cfa1b756f618",
+          "repository_id": "repo_01a0d87c-7658-7478-9cf1-e8a6e0e6a2e2",
+          "dispatched_at": "2026-09-25T12:14:06.136Z",
+          "ended": false,
+          "execution_fit": {
+            "decision_id": "dec_01a0d87d-1c38-7119-97bc-16788cf18437",
+            "decided_by": {
+              "kind": "executor",
+              "id": "claude-code"
+            },
+            "decided_at": "2026-09-25T12:14:33.016Z",
+            "assessment": "FIT",
+            "choice": "FIT: small pure-function fix in _v1_to_v2; verifiable with local pytest",
+            "rationale": "criteria: all five clear; capability: yes; hardest: inherited uncommitted diff is unverified (uses copy.deepcopy without importing copy) and nested values must not alias input; evidence: pytest regression tests for top-level and nested unknown keys, non-aliasing, input immutability, plus full suite; not authorised/equipped: no commit, merge, or settle land unless asked; stop if: criteria conflict with existing tests",
+            "supersedes": "dec_01a0d87c-ccfe-7684-b083-40ea931e0799",
+            "concurrent": []
+          }
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d87d-7bfd-74be-a9a8-bf903705003d",
+          "statement": "_v1_to_v2 deep-copies the input, sets version=2, renames timeout->request_timeout, and keeps all other keys; 4 regression tests added (uncommitted)",
+          "evidence_ids": [
+            "evi_01a0d87d-6937-7671-9d7d-f710b71b6997",
+            "evi_01a0d87d-6ae9-76fc-b95e-775f68b129fb"
+          ],
+          "claimed_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "claimed_at": "2026-09-25T12:14:57.533Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d87d-6937-7671-9d7d-f710b71b6997",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T12:14:52.727Z",
+          "note": "14 passed with fix (uncommitted working tree). Inherited diff had failed 4/10 with NameError (missing import copy) before I added the import."
+        },
+        {
+          "evidence_id": "evi_01a0d87d-6ae9-76fc-b95e-775f68b129fb",
+          "kind": "command_run",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T12:14:53.162Z",
+          "note": "New tests against original migrate.py: 3 failed (issue_example_preserves_custom_section, preserves_unknown_keys_recursively, output_does_not_alias_input), 11 passed. test_does_not_mutate_input passes on original too (original never mutated input), so it guards against regressions rather than reproducing the bug."
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d87d-beb8-7173-916f-dc306ff43f3c",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "Full pytest suite 14/14 on the fixed tree; the new tests reproduce the reported bug against HEAD's migrate.py."
+          }
+        }
+      ],
+      "settlement": null,
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": false,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "settle",
+      "next_command": {
+        "command": "tallyback settle --task-id tsk_01a0d87c-8a73-742c-9477-61f9bef0920c --attempt-id att_01a0d87c-b338-765c-9382-0b9daea0758b --decision <accept|retry|abandon|land> --verdict-id ver_01a0d87d-beb8-7173-916f-dc306ff43f3c --rationale <text>",
+        "reason": "Record the decision explicitly. land authorises integration; accept does not.",
+        "requires": [
+          "--decision",
+          "--rationale"
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 0
+  }
+}

@@ -1,0 +1,65 @@
+..........FFF..F                                                         [100%]
+=================================== FAILURES ===================================
+_________________________ test_preserves_custom_fields _________________________
+
+    def test_preserves_custom_fields():
+        """Regression test: custom fields should be preserved during migration."""
+        doc = v1(custom={"owner": "peter"})
+        result = migrate(doc)
+>       assert "custom" in result
+E       AssertionError: assert 'custom' in {'plugins': ['foo'], 'request_timeout': 30, 'version': 2}
+
+tests/test_migrate.py:47: AssertionError
+_____________________ test_preserves_multiple_unknown_keys _____________________
+
+    def test_preserves_multiple_unknown_keys():
+        """Unknown keys at top level should all be preserved."""
+        doc = v1(custom1="value1", custom2={"key": "value2"}, another_key=[1, 2, 3])
+        result = migrate(doc)
+>       assert result["custom1"] == "value1"
+E       KeyError: 'custom1'
+
+tests/test_migrate.py:55: KeyError
+_____________________ test_preserves_nested_custom_fields ______________________
+
+    def test_preserves_nested_custom_fields():
+        """Regression test: nested fields in custom sections should be preserved."""
+        doc = v1(custom={"nested": {"deep": {"value": "preserved"}}})
+        result = migrate(doc)
+>       assert result["custom"]["nested"]["deep"]["value"] == "preserved"
+E       KeyError: 'custom'
+
+tests/test_migrate.py:64: KeyError
+__________ test_does_not_mutate_input_when_already_at_current_version __________
+
+    def test_does_not_mutate_input_when_already_at_current_version():
+        """Input at current version should not be mutated and should return a new object."""
+        doc = {"version": 2, "request_timeout": 5, "plugins": [], "custom": {"owner": "peter"}}
+        original_id = id(doc)
+    
+        result = migrate(doc)
+    
+>       assert id(result) != original_id
+E       AssertionError: assert 140014137111744 != 140014137111744
+E        +  where 140014137111744 = id({'custom': {'owner': 'peter'}, 'plugins': [], 'request_timeout': 5, 'version': 2})
+
+tests/test_migrate.py:96: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_migrate.py::test_sets_current_version
+PASSED tests/test_migrate.py::test_renames_timeout_to_request_timeout
+PASSED tests/test_migrate.py::test_keeps_plugins
+PASSED tests/test_migrate.py::test_missing_plugins_defaults_to_empty_list
+PASSED tests/test_migrate.py::test_current_version_is_returned_as_is
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[None]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[1]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[True]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[0]
+PASSED tests/test_migrate.py::test_rejects_unsupported_versions[3]
+PASSED tests/test_migrate.py::test_does_not_mutate_input_during_migration
+PASSED tests/test_migrate.py::test_returns_different_object
+FAILED tests/test_migrate.py::test_preserves_custom_fields - AssertionError: ...
+FAILED tests/test_migrate.py::test_preserves_multiple_unknown_keys - KeyError...
+FAILED tests/test_migrate.py::test_preserves_nested_custom_fields - KeyError:...
+FAILED tests/test_migrate.py::test_does_not_mutate_input_when_already_at_current_version
+4 failed, 12 passed in 0.04s

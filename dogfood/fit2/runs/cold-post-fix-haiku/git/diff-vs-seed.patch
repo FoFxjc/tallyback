@@ -1,0 +1,96 @@
+diff --git a/cfgmigrate/migrate.py b/cfgmigrate/migrate.py
+index c9b01d4..621dedf 100644
+--- a/cfgmigrate/migrate.py
++++ b/cfgmigrate/migrate.py
+@@ -26,11 +26,13 @@ class UnsupportedVersionError(ValueError):
+ 
+ 
+ def _v1_to_v2(old: Config) -> Config:
+-    return {
+-        "version": 2,
+-        "request_timeout": old["timeout"],
+-        "plugins": old.get("plugins", []),
+-    }
++    result = dict(old)
++    result["version"] = 2
++    if "timeout" in result:
++        result["request_timeout"] = result.pop("timeout")
++    if "plugins" not in result:
++        result["plugins"] = []
++    return result
+ 
+ 
+ _MIGRATIONS: dict[int, Callable[[Config], Config]] = {
+@@ -49,4 +51,6 @@ def migrate(config: Config) -> Config:
+     result = config
+     while result["version"] < CURRENT_VERSION:
+         result = _MIGRATIONS[result["version"]](result)
++    if result is config:
++        result = dict(config)
+     return result
+diff --git a/tests/test_migrate.py b/tests/test_migrate.py
+index b483b98..0cb46b2 100644
+--- a/tests/test_migrate.py
++++ b/tests/test_migrate.py
+@@ -38,3 +38,61 @@ def test_current_version_is_returned_as_is():
+ def test_rejects_unsupported_versions(version):
+     with pytest.raises(UnsupportedVersionError):
+         migrate({"version": version, "timeout": 1})
++
++
++def test_preserves_custom_fields():
++    """Regression test: custom fields should be preserved during migration."""
++    doc = v1(custom={"owner": "peter"})
++    result = migrate(doc)
++    assert "custom" in result
++    assert result["custom"] == {"owner": "peter"}
++
++
++def test_preserves_multiple_unknown_keys():
++    """Unknown keys at top level should all be preserved."""
++    doc = v1(custom1="value1", custom2={"key": "value2"}, another_key=[1, 2, 3])
++    result = migrate(doc)
++    assert result["custom1"] == "value1"
++    assert result["custom2"] == {"key": "value2"}
++    assert result["another_key"] == [1, 2, 3]
++
++
++def test_preserves_nested_custom_fields():
++    """Regression test: nested fields in custom sections should be preserved."""
++    doc = v1(custom={"nested": {"deep": {"value": "preserved"}}})
++    result = migrate(doc)
++    assert result["custom"]["nested"]["deep"]["value"] == "preserved"
++
++
++def test_does_not_mutate_input_during_migration():
++    """Input object should not be mutated during migration."""
++    doc = v1(custom={"owner": "peter"})
++    original_keys = set(doc.keys())
++    original_version = doc["version"]
++    original_timeout = doc.get("timeout")
++
++    migrate(doc)
++
++    assert set(doc.keys()) == original_keys
++    assert doc["version"] == original_version
++    assert doc.get("timeout") == original_timeout
++    assert "request_timeout" not in doc
++
++
++def test_returns_different_object():
++    """Migrate should return a new object, not a reference to the input."""
++    doc = v1(custom={"owner": "peter"})
++    result = migrate(doc)
++    assert id(doc) != id(result)
++
++
++def test_does_not_mutate_input_when_already_at_current_version():
++    """Input at current version should not be mutated and should return a new object."""
++    doc = {"version": 2, "request_timeout": 5, "plugins": [], "custom": {"owner": "peter"}}
++    original_id = id(doc)
++
++    result = migrate(doc)
++
++    assert id(result) != original_id
++    assert result == doc
++    assert result is not doc

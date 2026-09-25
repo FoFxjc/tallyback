@@ -1,0 +1,137 @@
+{
+  "generated_from_revision": 11,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d881-b95e-7176-9148-368ddf93c29c",
+      "title": "Fix config migration bug: preserve unknown keys during v1→v2 migration",
+      "topic_id": "top_01a0d881-a908-77fa-a318-2a87234e23bf",
+      "declaration": {
+        "declaration_id": "dcl_01a0d881-cff8-73de-b7cb-609ab4b9a92c",
+        "objective": "Fix the config migration function to preserve unknown keys during v1→v2 migration",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d881-cff9-710a-a598-60be7f2b2ee6",
+            "code": "rename_timeout",
+            "statement": "Rename timeout to request_timeout",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d881-cff9-710a-a598-66aab2b8f2fa",
+            "code": "set_version",
+            "statement": "Set version to 2",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d881-cff9-710a-a598-6b06698ebfff",
+            "code": "preserve_keys",
+            "statement": "Preserve all unrelated user-defined keys recursively",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d881-cff9-710a-a598-6e639bd36c68",
+            "code": "no_mutation",
+            "statement": "Do not mutate the input object",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d881-cff9-710a-a598-7384d5a00fd5",
+            "code": "test_coverage",
+            "statement": "Add regression coverage for preservation of unknown keys",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d882-0dad-728f-ab06-25ad6c2351ce",
+          "executor": {
+            "kind": "unknown",
+            "id": "unattributed"
+          },
+          "workspace_id": "wsp_01a0d881-e667-768e-ac21-0aa943b8e6cc",
+          "repository_id": "repo_01a0d881-97d8-72ad-ab6e-95385df75d30",
+          "dispatched_at": "2026-09-25T12:19:56.973Z",
+          "ended": false,
+          "execution_fit": {
+            "decision_id": "dec_01a0d882-3947-77dc-a790-c3da2be172bf",
+            "decided_by": {
+              "kind": "unknown",
+              "id": "unattributed"
+            },
+            "decided_at": "2026-09-25T12:20:08.135Z",
+            "assessment": "FIT",
+            "choice": "FIT: Can implement and verify all criteria",
+            "rationale": "Criteria: All 5 acceptance criteria are clearly understood from ISSUE.md. Capability: I can modify migration code, run tests, verify preservation and immutability, and add test coverage. Hardest: Ensuring recursive preservation and immutability; this requires careful implementation. Evidence: Unit tests demonstrating custom key preservation, nested key preservation, and input immutability. Not authorised: I will not commit or merge. Stop if: Tests fail or criteria cannot be met with current approach.",
+            "supersedes": null,
+            "concurrent": []
+          }
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d883-55a8-76dd-8c88-f5d46ae63b66",
+          "statement": "Fixed the migration function to preserve unknown keys and added regression test coverage",
+          "evidence_ids": [
+            "evi_01a0d883-4534-7114-8ef1-0029cd85e826"
+          ],
+          "claimed_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "claimed_at": "2026-09-25T12:21:20.937Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d883-4534-7114-8ef1-0029cd85e826",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "submitted_at": "2026-09-25T12:21:16.724Z",
+          "note": "All 12 tests pass: 5 original tests + 2 new tests for unknown key preservation and input immutability + 5 version rejection tests"
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d883-87a9-70c9-95b4-bc09c427b4a3",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "All criteria verified by test suite: test_renames_timeout_to_request_timeout passes, test_sets_current_version passes, test_preserves_unknown_keys passes (new test), test_does_not_mutate_input passes (new test). All 12 tests pass."
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d883-b305-7249-9811-f1f29ec2392c",
+        "decision": "land",
+        "verification_exception": null,
+        "rationale": "All 5 acceptance criteria supported by comprehensive test suite. Migration function preserves unknown keys via dict(old), renames timeout to request_timeout, sets version to 2, and does not mutate input. Regression tests added for unknown key preservation and input immutability."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": true,
+        "stale": false
+      },
+      "next_action": "settled: land",
+      "next_command": {
+        "command": "tallyback land",
+        "reason": "ready_to_land here is the ledger half only (a land Settlement on positive verification); `tallyback land` checks the Git half: branch, commits ahead, conflicts.",
+        "requires": []
+      }
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 1,
+    "stale": 0,
+    "settled": 1
+  }
+}

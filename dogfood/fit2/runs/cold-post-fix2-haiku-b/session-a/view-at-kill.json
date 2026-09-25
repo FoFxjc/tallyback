@@ -1,0 +1,101 @@
+{
+  "generated_from_revision": 6,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d881-b95e-7176-9148-368ddf93c29c",
+      "title": "Fix config migration bug: preserve unknown keys during v1→v2 migration",
+      "topic_id": "top_01a0d881-a908-77fa-a318-2a87234e23bf",
+      "declaration": {
+        "declaration_id": "dcl_01a0d881-cff8-73de-b7cb-609ab4b9a92c",
+        "objective": "Fix the config migration function to preserve unknown keys during v1→v2 migration",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d881-cff9-710a-a598-60be7f2b2ee6",
+            "code": "rename_timeout",
+            "statement": "Rename timeout to request_timeout",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d881-cff9-710a-a598-66aab2b8f2fa",
+            "code": "set_version",
+            "statement": "Set version to 2",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d881-cff9-710a-a598-6b06698ebfff",
+            "code": "preserve_keys",
+            "statement": "Preserve all unrelated user-defined keys recursively",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d881-cff9-710a-a598-6e639bd36c68",
+            "code": "no_mutation",
+            "statement": "Do not mutate the input object",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d881-cff9-710a-a598-7384d5a00fd5",
+            "code": "test_coverage",
+            "statement": "Add regression coverage for preservation of unknown keys",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d882-0dad-728f-ab06-25ad6c2351ce",
+          "executor": {
+            "kind": "unknown",
+            "id": "unattributed"
+          },
+          "workspace_id": "wsp_01a0d881-e667-768e-ac21-0aa943b8e6cc",
+          "repository_id": "repo_01a0d881-97d8-72ad-ab6e-95385df75d30",
+          "dispatched_at": "2026-09-25T12:19:56.973Z",
+          "ended": false,
+          "execution_fit": {
+            "decision_id": "dec_01a0d882-3947-77dc-a790-c3da2be172bf",
+            "decided_by": {
+              "kind": "unknown",
+              "id": "unattributed"
+            },
+            "decided_at": "2026-09-25T12:20:08.135Z",
+            "assessment": "FIT",
+            "choice": "FIT: Can implement and verify all criteria",
+            "rationale": "Criteria: All 5 acceptance criteria are clearly understood from ISSUE.md. Capability: I can modify migration code, run tests, verify preservation and immutability, and add test coverage. Hardest: Ensuring recursive preservation and immutability; this requires careful implementation. Evidence: Unit tests demonstrating custom key preservation, nested key preservation, and input immutability. Not authorised: I will not commit or merge. Stop if: Tests fail or criteria cannot be met with current approach.",
+            "supersedes": null,
+            "concurrent": []
+          }
+        }
+      ],
+      "claims": [],
+      "evidence": [],
+      "blockers": [],
+      "verification": [],
+      "settlement": null,
+      "status": {
+        "blocked": false,
+        "verified": false,
+        "settled": false,
+        "dispatched": true,
+        "ready_to_land": false,
+        "stale": false
+      },
+      "next_action": "observe (claim)",
+      "next_command": {
+        "command": "tallyback claim --task-id tsk_01a0d881-b95e-7176-9148-368ddf93c29c --attempt-id att_01a0d882-0dad-728f-ab06-25ad6c2351ce --declaration-id dcl_01a0d881-cff8-73de-b7cb-609ab4b9a92c --statement <statement> --evidence <evi_…>",
+        "reason": "Record what the Attempt claims. Record Evidence first (`tallyback evidence --help`) and cite it with --evidence (repeatable).",
+        "requires": [
+          "--statement",
+          "--evidence"
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 0,
+    "stale": 0,
+    "settled": 0
+  }
+}

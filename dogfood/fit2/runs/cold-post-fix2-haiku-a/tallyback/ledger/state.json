@@ -1,0 +1,302 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 11,
+  "included_through": 11,
+  "project": {
+    "project_id": "prj_01a0d881-96ef-75d8-b437-c539e965afea",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d881-96ef-75d8-b437-cb6418013af2",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d881-96ef-75d8-b437-cb6418013af2",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d881-e56d-753d-a9ee-1b3354c2bf85",
+      "repository_id": "repo_01a0d881-96ef-75d8-b437-cb6418013af2",
+      "branch": "main"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d881-a6d6-721f-94e0-de413b422367",
+      "project_id": "prj_01a0d881-96ef-75d8-b437-c539e965afea",
+      "name": "Config Migration Bug Fix",
+      "goal": "",
+      "created_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "created_at": "2026-09-25T12:19:30.646Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d881-b6bf-711d-b54e-1d68981fef4c",
+      "topic_id": "top_01a0d881-a6d6-721f-94e0-de413b422367",
+      "title": "Migrating a v1 config loses user settings"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d881-ceaf-759f-a808-990333d45668",
+      "task_id": "tsk_01a0d881-b6bf-711d-b54e-1d68981fef4c",
+      "declared_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "declared_at": "2026-09-25T12:19:40.847Z",
+      "objective": "Fix the v1 to v2 config migration to preserve all user-defined keys instead of losing custom fields",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d881-ceaf-759f-a808-9c410d782f0b",
+          "code": "timeout_renamed",
+          "statement": "Rename timeout to request_timeout",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d881-ceaf-759f-a808-a2003d8b89b3",
+          "code": "version_set",
+          "statement": "Set version to 2",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d881-ceaf-759f-a808-a689dfb11f18",
+          "code": "preserve_keys",
+          "statement": "Preserve all unrelated user-defined keys recursively",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d881-ceaf-759f-a808-abcc14ca6b5e",
+          "code": "no_mutation",
+          "statement": "Do not mutate the input object",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d881-ceaf-759f-a808-ac1ed5251426",
+          "code": "regression_test",
+          "statement": "Add regression coverage for preservation of unknown keys",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d881-fc00-77ea-ae06-6c3a249c9eec",
+      "task_id": "tsk_01a0d881-b6bf-711d-b54e-1d68981fef4c",
+      "declaration_id": "dcl_01a0d881-ceaf-759f-a808-990333d45668",
+      "repository_id": "repo_01a0d881-96ef-75d8-b437-cb6418013af2",
+      "workspace_id": "wsp_01a0d881-e56d-753d-a9ee-1b3354c2bf85",
+      "executor": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_by": {
+        "kind": "unknown",
+        "id": "unattributed"
+      },
+      "dispatched_at": "2026-09-25T12:19:52.448Z"
+    }
+  ],
+  "attempt_ends": [],
+  "claims": [
+    {
+      "claim_id": "clm_01a0d883-d8a1-74c1-b071-54d305125a57",
+      "task_id": "tsk_01a0d881-b6bf-711d-b54e-1d68981fef4c",
+      "attempt_id": "att_01a0d881-fc00-77ea-ae06-6c3a249c9eec",
+      "declaration_id": "dcl_01a0d881-ceaf-759f-a808-990333d45668",
+      "statement": "Fixed migration code to preserve custom fields, renamed timeout to request_timeout, fixed plugins default, and added deep copying to prevent reference sharing",
+      "evidence_ids": [
+        "evi_01a0d883-c3a2-7310-813c-4c347946007d"
+      ],
+      "claimed_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "claimed_at": "2026-09-25T12:21:54.465Z"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "test_run",
+      "payload": {
+        "exit_code": 0,
+        "command": "python -m pytest tests/test_migrate.py -v"
+      },
+      "submitted_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "note": "All 15 tests pass: 10 existing + 5 new regression tests for custom key preservation and no-mutation guarantee",
+      "evidence_id": "evi_01a0d883-c3a2-7310-813c-4c347946007d",
+      "submitted_at": "2026-09-25T12:21:49.091Z"
+    }
+  ],
+  "reconciliations": [],
+  "check_invocations": [
+    {
+      "check_invocation_id": "chk_01a0d884-0c97-738d-8023-d46a6259c973",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d883-d8a1-74c1-b071-54d305125a57"
+      },
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      },
+      "evaluated_snapshot": {
+        "project_id": "prj_01a0d881-96ef-75d8-b437-c539e965afea",
+        "revision": 8,
+        "digest": {
+          "algorithm": "sha-256",
+          "value": "6b241d64f36821e27c2a2ef52f598b973f712358fe8309d37053fb8a7b7654b7"
+        }
+      },
+      "invoked_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "invoked_at": "2026-09-25T12:22:07.768Z"
+    }
+  ],
+  "check_results": [
+    {
+      "check_result_id": "ckr_01a0d884-0ca9-7770-b63d-b14bedf20778",
+      "check_invocation_id": "chk_01a0d884-0c97-738d-8023-d46a6259c973",
+      "outcome": "verdict_emitted",
+      "produced_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "completed_at": "2026-09-25T12:22:07.785Z",
+      "diagnostics": [],
+      "reconciliation_ids": [],
+      "verdict_id": "ver_01a0d884-0c96-73ff-b28c-1e57a8ee6b15"
+    }
+  ],
+  "verdicts": [
+    {
+      "verdict_id": "ver_01a0d884-0c96-73ff-b28c-1e57a8ee6b15",
+      "subject": {
+        "kind": "claim",
+        "id": "clm_01a0d883-d8a1-74c1-b071-54d305125a57"
+      },
+      "declaration_id": "dcl_01a0d881-ceaf-759f-a808-990333d45668",
+      "scope": {
+        "evaluated_criteria": [
+          "cri_01a0d881-ceaf-759f-a808-9c410d782f0b",
+          "cri_01a0d881-ceaf-759f-a808-a2003d8b89b3",
+          "cri_01a0d881-ceaf-759f-a808-a689dfb11f18",
+          "cri_01a0d881-ceaf-759f-a808-abcc14ca6b5e",
+          "cri_01a0d881-ceaf-759f-a808-ac1ed5251426"
+        ],
+        "unevaluated_criteria": []
+      },
+      "conclusion": "supported",
+      "finality": "final",
+      "basis": {
+        "evidence_ids": [
+          "evi_01a0d883-c3a2-7310-813c-4c347946007d"
+        ],
+        "reconciliation_ids": []
+      },
+      "findings": [
+        {
+          "criterion_id": "cri_01a0d881-ceaf-759f-a808-9c410d782f0b",
+          "assessment": "supported",
+          "summary": "timeout key properly renamed to request_timeout",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d881-ceaf-759f-a808-a2003d8b89b3",
+          "assessment": "supported",
+          "summary": "version set to 2 in migration output",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d881-ceaf-759f-a808-a689dfb11f18",
+          "assessment": "supported",
+          "summary": "Custom fields and arbitrary keys preserved recursively, deep copies prevent reference sharing",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d881-ceaf-759f-a808-abcc14ca6b5e",
+          "assessment": "supported",
+          "summary": "Input object not mutated, nested dicts not shared between input and output",
+          "basis_refs": []
+        },
+        {
+          "criterion_id": "cri_01a0d881-ceaf-759f-a808-ac1ed5251426",
+          "assessment": "supported",
+          "summary": "5 new regression tests added covering custom key preservation and no-mutation",
+          "basis_refs": []
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "All criteria verified through comprehensive testing: timeout renamed to request_timeout, version set to 2, custom fields and arbitrary keys preserved recursively with deep copying to prevent reference sharing, and 5 new regression tests added to prevent regression"
+      },
+      "rationale": "All criteria verified through comprehensive testing: timeout renamed to request_timeout, version set to 2, custom fields and arbitrary keys preserved recursively with deep copying to prevent reference sharing, and 5 new regression tests added to prevent regression",
+      "uncertainty": [],
+      "limitations": [],
+      "issued_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "issued_at": "2026-09-25T12:22:07.766Z",
+      "checker": {
+        "id": "operator-authored",
+        "version": "v1"
+      }
+    }
+  ],
+  "settlements": [
+    {
+      "settlement_id": "set_01a0d884-311e-74b0-b9f9-56c03e366d22",
+      "task_id": "tsk_01a0d881-b6bf-711d-b54e-1d68981fef4c",
+      "attempt_id": "att_01a0d881-fc00-77ea-ae06-6c3a249c9eec",
+      "decision": "land",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "decided_at": "2026-09-25T12:22:17.119Z",
+      "basis": {
+        "verdict_id": "ver_01a0d884-0c96-73ff-b28c-1e57a8ee6b15",
+        "attempt_end_id": null,
+        "blocker_ids": []
+      },
+      "rationale": "All acceptance criteria verified and passing. Ready to land.",
+      "verification_exception": null
+    }
+  ],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": [
+    {
+      "decision_id": "dec_01a0d882-2d13-70a4-9ca4-8e470878abc2",
+      "subject": {
+        "kind": "attempt",
+        "id": "att_01a0d881-fc00-77ea-ae06-6c3a249c9eec"
+      },
+      "role": "execution_choice",
+      "question": "Execution fit",
+      "choice": "FIT: Clear path to implement and verify all criteria",
+      "rationale": "criteria: All 5 acceptance criteria understood; capability: Can modify Python migration code and write tests; hardest: Preserving all keys recursively while not mutating input; evidence: Can read code, run tests, and verify behavior; not authorised/equipped: None; stop if: Tests fail after fix",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "decided_at": "2026-09-25T12:20:05.011Z",
+      "basis": []
+    }
+  ]
+}

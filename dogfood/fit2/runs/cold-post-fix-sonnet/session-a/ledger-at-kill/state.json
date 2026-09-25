@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0.0",
+  "revision": 6,
+  "included_through": 6,
+  "project": {
+    "project_id": "prj_01a0d87c-8667-7385-8efa-80519b8241e2",
+    "repositories": [
+      {
+        "repository_id": "repo_01a0d87c-8668-7027-9603-cd0030d7169b",
+        "alias": "main"
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repository_id": "repo_01a0d87c-8668-7027-9603-cd0030d7169b",
+      "alias": "main"
+    }
+  ],
+  "workspaces": [
+    {
+      "workspace_id": "wsp_01a0d87d-ba72-74f8-b90b-8aee5c2a56fa",
+      "repository_id": "repo_01a0d87c-8668-7027-9603-cd0030d7169b",
+      "branch": "main"
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "top_01a0d87d-3313-74e2-87bd-4b5df09c2724",
+      "project_id": "prj_01a0d87c-8667-7385-8efa-80519b8241e2",
+      "name": "config-migrate",
+      "goal": "Fix v1->v2 config migration losing unknown user keys",
+      "created_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "created_at": "2026-09-25T12:14:38.867Z"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d87d-5608-75b8-b738-175efd24f60b",
+      "topic_id": "top_01a0d87d-3313-74e2-87bd-4b5df09c2724",
+      "title": "Preserve unknown keys during v1->v2 migration",
+      "alias": "T1"
+    }
+  ],
+  "declarations": [
+    {
+      "declaration_id": "dcl_01a0d87d-7daf-715c-969f-38d11607134d",
+      "task_id": "tsk_01a0d87d-5608-75b8-b738-175efd24f60b",
+      "declared_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "declared_at": "2026-09-25T12:14:57.968Z",
+      "objective": "v1->v2 config migration preserves all unrelated user-defined keys and does not mutate input",
+      "criteria": [
+        {
+          "criterion_id": "cri_01a0d87d-7db0-737e-b8a6-279e77f3c723",
+          "code": "rename",
+          "statement": "timeout is renamed to request_timeout",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d87d-7db0-737e-b8a6-2abf86282534",
+          "code": "version",
+          "statement": "version is set to 2",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d87d-7db0-737e-b8a6-2e4ebf216615",
+          "code": "preserve",
+          "statement": "all unrelated user-defined keys are preserved recursively",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d87d-7db0-737e-b8a6-339b5d95e31f",
+          "code": "no_mutate",
+          "statement": "the input config object is not mutated",
+          "required": true
+        },
+        {
+          "criterion_id": "cri_01a0d87d-7db0-737e-b8a6-36bb8163e0b7",
+          "code": "regression_test",
+          "statement": "a regression test covers preservation of unknown keys",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "attempt_id": "att_01a0d87d-c6ec-737f-ab5d-d4d0c2c2b2b4",
+      "task_id": "tsk_01a0d87d-5608-75b8-b738-175efd24f60b",
+      "declaration_id": "dcl_01a0d87d-7daf-715c-969f-38d11607134d",
+      "repository_id": "repo_01a0d87c-8668-7027-9603-cd0030d7169b",
+      "workspace_id": "wsp_01a0d87d-ba72-74f8-b90b-8aee5c2a56fa",
+      "executor": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "dispatched_at": "2026-09-25T12:15:16.717Z"
+    }
+  ],
+  "attempt_ends": [],
+  "claims": [],
+  "evidence": [],
+  "reconciliations": [],
+  "check_invocations": [],
+  "check_results": [],
+  "verdicts": [],
+  "settlements": [],
+  "blockers": [],
+  "blocker_resolutions": [],
+  "decisions": [
+    {
+      "decision_id": "dec_01a0d87d-eb77-7471-9882-55ade984088e",
+      "subject": {
+        "kind": "attempt",
+        "id": "att_01a0d87d-c6ec-737f-ab5d-d4d0c2c2b2b4"
+      },
+      "role": "execution_choice",
+      "question": "Execution fit",
+      "choice": "FIT: can implement and verify the migration fix with the existing pytest suite plus new regression tests",
+      "rationale": "criteria: all 5 understood (rename key, set version=2, recursively preserve unrelated keys, no input mutation, add regression test); capability: straightforward Python dict-handling fix in cfgmigrate/migrate.py; hardest: ensuring deep/nested preservation without mutating the original nested structures (shared list/dict references); evidence: run full pytest suite plus a manual repro of the exact ISSUE.md example and an identity/deepcopy check against the input; not authorised/equipped: will not commit, push, or run tallyback land/settle land without being explicitly asked; stop if: any pytest failure or the manual repro output does not match ISSUE.md's expected YAML",
+      "decided_by": {
+        "kind": "executor",
+        "id": "claude-code"
+      },
+      "decided_at": "2026-09-25T12:15:26.072Z",
+      "basis": []
+    }
+  ]
+}

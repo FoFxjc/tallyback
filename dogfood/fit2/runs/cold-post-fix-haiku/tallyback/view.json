@@ -1,0 +1,137 @@
+{
+  "generated_from_revision": 12,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d87c-d854-77a6-90df-f86a576426c8",
+      "title": "Fix v1 config migration to preserve custom fields",
+      "topic_id": "top_01a0d87c-c6a7-76d3-bfa8-99dbba8b0afa",
+      "declaration": {
+        "declaration_id": "dcl_01a0d87c-efdd-76b9-8be9-ec5527700fa8",
+        "objective": "Migrate v1 config schema to v2 while preserving user-defined custom fields",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d87c-efdd-76b9-8be9-f0b8b31aa53b",
+            "code": "rename_timeout",
+            "statement": "Rename timeout to request_timeout",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87c-efdd-76b9-8be9-f6135bb128c6",
+            "code": "set_version",
+            "statement": "Set version to 2",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87c-efdd-76b9-8be9-f8522f81b1d0",
+            "code": "preserve_custom",
+            "statement": "Preserve all unrelated user-defined keys recursively",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87c-efdd-76b9-8be9-fc4b93c22ebf",
+            "code": "no_mutate",
+            "statement": "Do not mutate the input object",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d87c-efdd-76b9-8bea-028f7ea2a8f8",
+            "code": "test_coverage",
+            "statement": "Add regression coverage for preservation of unknown keys",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d87d-308a-72df-b3ab-1dc0c832dd92",
+          "executor": {
+            "kind": "unknown",
+            "id": "unattributed"
+          },
+          "workspace_id": "wsp_01a0d87d-0eb7-750d-8d99-564fd2fd718d",
+          "repository_id": "repo_01a0d87c-b71e-72dd-9df9-76a353d6d4bb",
+          "dispatched_at": "2026-09-25T12:14:38.218Z",
+          "ended": true,
+          "execution_fit": {
+            "decision_id": "dec_01a0d87d-5584-727a-a959-e6464617c49f",
+            "decided_by": {
+              "kind": "unknown",
+              "id": "unattributed"
+            },
+            "decided_at": "2026-09-25T12:14:47.684Z",
+            "assessment": "FIT",
+            "choice": "FIT: Can implement and verify the criteria with tests",
+            "rationale": "criteria: clearly defined from issue; capability: can write Python code and run tests; hardest: ensuring recursive preservation without mutation; evidence: test execution; authority: feature branch only; stop if: tests fail or mutation detected",
+            "supersedes": null,
+            "concurrent": []
+          }
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d87f-5df8-7607-801c-5f94083b53f1",
+          "statement": "Fixed the migration to ensure input objects are never mutated and added comprehensive regression tests for custom field preservation",
+          "evidence_ids": [
+            "evi_01a0d87f-4e54-731d-be99-e67b87985110"
+          ],
+          "claimed_by": {
+            "kind": "unknown",
+            "id": "unattributed"
+          },
+          "claimed_at": "2026-09-25T12:17:00.921Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d87f-4e54-731d-be99-e67b87985110",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "unknown",
+            "id": "unattributed"
+          },
+          "submitted_at": "2026-09-25T12:16:56.917Z",
+          "note": "All 16 tests pass: 10 original tests + 6 new regression tests for custom field preservation and input mutation prevention"
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d87f-88de-72dd-9e0f-307dc853705a",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "All criteria verified through test execution and code review: 16/16 tests pass including 6 new regression tests"
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d87f-c1f5-76e3-a939-3ffe2723b698",
+        "decision": "land",
+        "verification_exception": null,
+        "rationale": "All 5 acceptance criteria supported by verdicts and test evidence. Migration correctly preserves custom fields, renames timeout, sets version to 2, does not mutate input, and has comprehensive regression test coverage."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": true,
+        "stale": false
+      },
+      "next_action": "settled: land",
+      "next_command": {
+        "command": "tallyback land",
+        "reason": "ready_to_land here is the ledger half only (a land Settlement on positive verification); `tallyback land` checks the Git half: branch, commits ahead, conflicts.",
+        "requires": []
+      }
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 1,
+    "stale": 0,
+    "settled": 1
+  }
+}
