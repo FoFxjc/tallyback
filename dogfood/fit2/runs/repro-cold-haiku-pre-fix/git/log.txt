@@ -1,0 +1,2 @@
+ade36304dca5b1fa3957ce724ca522a1c3a0c2c6 Claude Fix config migration to preserve custom keys and prevent mutation
+4ab1633e217ddeda88eabce487d938f93abd8bda Tallyback Dogfood seed: config-migrate

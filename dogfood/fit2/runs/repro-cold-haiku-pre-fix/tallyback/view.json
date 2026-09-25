@@ -1,0 +1,124 @@
+{
+  "generated_from_revision": 11,
+  "tasks": [
+    {
+      "task_id": "tsk_01a0d875-2c05-742d-ad6a-bfc6960d5a7e",
+      "title": "Fix config migration to preserve custom keys",
+      "topic_id": "top_01a0d875-1b9e-72cd-a0b6-ad3eec452547",
+      "declaration": {
+        "declaration_id": "dcl_01a0d875-41f6-709b-b163-f6be6e541d2a",
+        "objective": "Migrate v1 config to v2 while preserving unknown keys",
+        "criteria": [
+          {
+            "criterion_id": "cri_01a0d875-41f6-709b-b163-f803c3ea9586",
+            "code": "timeout_renamed",
+            "statement": "Rename timeout to request_timeout",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d875-41f6-709b-b163-fde8258b2f3c",
+            "code": "version_set",
+            "statement": "Set version to 2",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d875-41f6-709b-b164-01c173a5c621",
+            "code": "keys_preserved",
+            "statement": "Preserve all unrelated user-defined keys recursively",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d875-41f6-709b-b164-05e7473b707a",
+            "code": "no_mutation",
+            "statement": "Do not mutate the input object",
+            "required": true
+          },
+          {
+            "criterion_id": "cri_01a0d875-41f6-709b-b164-0afe25d55e99",
+            "code": "test_coverage",
+            "statement": "Add regression coverage for preservation of unknown keys",
+            "required": true
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "attempt_id": "att_01a0d875-718e-713b-a3f1-7ff8ad2021da",
+          "executor": {
+            "kind": "executor",
+            "id": "claude-code"
+          },
+          "workspace_id": "wsp_01a0d875-5983-77ce-810c-b96e217d9ea2",
+          "repository_id": "repo_01a0d875-03b4-702c-9187-b806ba99c3c7",
+          "dispatched_at": "2026-09-25T12:06:10.574Z",
+          "ended": false
+        }
+      ],
+      "claims": [
+        {
+          "claim_id": "clm_01a0d877-6c0e-753f-9c82-3befaf0e944c",
+          "statement": "Fixed migration by using copy.deepcopy to preserve nested objects and prevent mutation of input. Added 6 regression tests for unknown key preservation and no-mutation guarantee.",
+          "evidence_ids": [
+            "evi_01a0d877-5080-7512-ba32-1ab943efdf03"
+          ],
+          "claimed_by": {
+            "kind": "unknown",
+            "id": "unattributed"
+          },
+          "claimed_at": "2026-09-25T12:08:20.238Z"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "evi_01a0d877-5080-7512-ba32-1ab943efdf03",
+          "kind": "test_run",
+          "submitted_by": {
+            "kind": "unknown",
+            "id": "unattributed"
+          },
+          "submitted_at": "2026-09-25T12:08:13.185Z",
+          "note": "All 16 tests pass: 10 existing + 6 new regression tests for unknown key preservation and no-mutation"
+        }
+      ],
+      "blockers": [],
+      "verification": [
+        {
+          "verdict_id": "ver_01a0d877-97ec-7430-837f-9adaac142b69",
+          "conclusion": "supported",
+          "finality": "final",
+          "confidence": {
+            "level": "high",
+            "rationale": "All 16 tests pass, including 6 new regression tests verifying the requirements"
+          }
+        }
+      ],
+      "settlement": {
+        "settlement_id": "set_01a0d877-dae4-715c-bffb-b2fe72df30b5",
+        "decision": "land",
+        "verification_exception": null,
+        "rationale": "All 5 acceptance criteria verified with high confidence. Changes committed with proper deep copying to prevent mutation and preserve nested structures."
+      },
+      "status": {
+        "blocked": false,
+        "verified": true,
+        "settled": true,
+        "dispatched": true,
+        "ready_to_land": true,
+        "stale": false
+      },
+      "next_action": "settled: land",
+      "next_command": {
+        "command": "tallyback land",
+        "reason": "ready_to_land here is the ledger half only (a land Settlement on positive verification); `tallyback land` checks the Git half: branch, commits ahead, conflicts.",
+        "requires": []
+      }
+    }
+  ],
+  "summary": {
+    "task_count": 1,
+    "blocked": 0,
+    "ready_to_land": 1,
+    "stale": 0,
+    "settled": 1
+  }
+}

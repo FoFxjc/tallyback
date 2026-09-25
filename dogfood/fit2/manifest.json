@@ -1,0 +1,16 @@
+{
+  "experiment": "execution-fit-2",
+  "tallyback": {
+    "pre_fix": "2f76847d64b4ffc15f8cce53f736d9e8b8b0fdf5",
+    "note": "each run.json records the tallyback_sha it ran against; the boundary benchmark uses one frozen SHA recorded here as boundary_benchmark"
+  },
+  "models": {
+    "haiku": "claude-haiku-4-5-20251001",
+    "sonnet": "claude-sonnet-5",
+    "opus": "claude-opus-5-5"
+  },
+  "prompt": "../prompt.txt (the 3x3 benchmark prompt, verbatim, for every run)",
+  "fixtures": {
+    "config-migrate": { "implementation_file": "cfgmigrate/migrate.py" }
+  }
+}

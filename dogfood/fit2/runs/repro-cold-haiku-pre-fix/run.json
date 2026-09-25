@@ -1,0 +1,12 @@
+{
+  "run_id": "repro-cold-haiku-pre-fix",
+  "tallyback_sha": "2f76847d64b4ffc15f8cce53f736d9e8b8b0fdf5",
+  "fixture": "config-migrate",
+  "model_a": "claude-haiku-4-5-20251001",
+  "model_b": "claude-haiku-4-5-20251001",
+  "seed_sha": "4ab1633e217ddeda88eabce487d938f93abd8bda",
+  "workspace": "/tmp/claude-0/-home-user-tallyback/01b763c0-69a7-5ad2-94c6-b173155321d2/scratchpad/fit/w/esPS0U6t/repo",
+  "termination": "killed: attempt + Fit Decision + implementation edited",
+  "session_a_seconds": 72,
+  "session_b_seconds": 160
+}
